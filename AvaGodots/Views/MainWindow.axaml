@@ -6,7 +6,24 @@
         xmlns:views="using:AvaGodots.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="AvaGodots.Views.MainWindow"
+        ExtendClientAreaToDecorationsHint="False"
         Icon="/Assets/avalonia-logo.ico"
-        Title="AvaGodots">
-  <views:MainView />
+        Title="AvaGodots"
+        TransparencyLevelHint="AcrylicBlur"
+        WindowStartupLocation="CenterScreen">
+  <StackPanel>
+    <!--  桌面毛玻璃效果  -->
+    <ExperimentalAcrylicBorder IsHitTestVisible="False">
+      <ExperimentalAcrylicBorder.Material>
+        <ExperimentalAcrylicMaterial
+        BackgroundSource="Digger"
+        MaterialOpacity="0.6"
+        TintColor="{DynamicResource SystemAltHighColor}"
+        TintOpacity="1" />
+      </ExperimentalAcrylicBorder.Material>
+    </ExperimentalAcrylicBorder>
+
+    <!--  主视图  -->
+    <views:MainView />
+  </StackPanel>
 </Window>
