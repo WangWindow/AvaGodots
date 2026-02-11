@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <!-- <Project Path="AvaGodots.Android/AvaGodots.Android.csproj" />
+  <Project Path="AvaGodots.Browser/AvaGodots.Browser.csproj" /> -->
+  <Project Path="AvaGodots.Desktop/AvaGodots.Desktop.csproj" />
+  <!-- <Project Path="AvaGodots.iOS/AvaGodots.iOS.csproj" /> -->
+  <Project Path="AvaGodots/AvaGodots.csproj" />
+</Solution>
