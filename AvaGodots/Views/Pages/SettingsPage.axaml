@@ -23,7 +23,7 @@
                 HorizontalAlignment="Stretch" Command="{Binding OpenConfigDirectoryCommand}">
           <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
             <ic:SymbolIcon Symbol="Folder" IconVariant="Regular" FontSize="14"/>
-            <TextBlock Text="Settings Folder"/>
+            <TextBlock Text="{DynamicResource Settings.Folder}"/>
           </StackPanel>
         </Button>
 
@@ -32,31 +32,31 @@
           <StackPanel Spacing="2">
 
             <!-- Application 标题 -->
-            <TextBlock Text="Application" FontWeight="Bold" FontSize="13"
+            <TextBlock Text="{DynamicResource Settings.Nav.Application}" FontWeight="Bold" FontSize="13"
                        Foreground="{DynamicResource FontDimBrush}"
                        Margin="12,8,0,4"/>
 
             <Button Classes="settingsNavItem" Classes.selected="{Binding IsConfigVisible}"
                     Command="{Binding SelectCategoryCommand}" CommandParameter="0">
-              <TextBlock Text="Config"/>
+              <TextBlock Text="{DynamicResource Settings.Nav.Config}"/>
             </Button>
             <Button Classes="settingsNavItem" Classes.selected="{Binding IsThemeVisible}"
                     Command="{Binding SelectCategoryCommand}" CommandParameter="1">
-              <TextBlock Text="Theme"/>
+              <TextBlock Text="{DynamicResource Settings.Nav.Theme}"/>
             </Button>
             <Button Classes="settingsNavItem" Classes.selected="{Binding IsAdvancedVisible}"
                     Command="{Binding SelectCategoryCommand}" CommandParameter="2">
-              <TextBlock Text="Advanced"/>
+              <TextBlock Text="{DynamicResource Settings.Nav.Advanced}"/>
             </Button>
 
             <!-- Network 标题 -->
-            <TextBlock Text="Network" FontWeight="Bold" FontSize="13"
+            <TextBlock Text="{DynamicResource Settings.Nav.Network}" FontWeight="Bold" FontSize="13"
                        Foreground="{DynamicResource FontDimBrush}"
                        Margin="12,16,0,4"/>
 
             <Button Classes="settingsNavItem" Classes.selected="{Binding IsProxyVisible}"
                     Command="{Binding SelectCategoryCommand}" CommandParameter="3">
-              <TextBlock Text="Http Proxy"/>
+              <TextBlock Text="{DynamicResource Settings.Nav.HttpProxy}"/>
             </Button>
 
           </StackPanel>
@@ -75,13 +75,13 @@
           <Button Classes="action" Command="{Binding ResetAllToDefaultCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
               <ic:SymbolIcon Symbol="ArrowReset" IconVariant="Regular" FontSize="14"/>
-              <TextBlock Text="Reset All"/>
+              <TextBlock Text="{DynamicResource Settings.ResetAll}"/>
             </StackPanel>
           </Button>
           <Button Classes="accent" Command="{Binding SaveAndCloseCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
               <ic:SymbolIcon Symbol="Checkmark" IconVariant="Regular" FontSize="14"/>
-              <TextBlock Text="Save &amp; Close"/>
+              <TextBlock Text="{DynamicResource Settings.SaveAndClose}"/>
             </StackPanel>
           </Button>
         </StackPanel>
@@ -97,13 +97,13 @@
                   Command="{Binding SaveAndRestartCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
               <ic:SymbolIcon Symbol="ArrowSync" IconVariant="Regular" FontSize="14"/>
-              <TextBlock Text="Save &amp; Restart"/>
+              <TextBlock Text="{DynamicResource Settings.SaveAndRestart}"/>
             </StackPanel>
           </Button>
           <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
             <ic:SymbolIcon Symbol="Warning" IconVariant="Filled" FontSize="16"
                            Foreground="{DynamicResource WarningBrush}"/>
-            <TextBlock Text="某些设置变更需要重启应用才能生效。"
+            <TextBlock Text="{DynamicResource Settings.NeedsRestart}"
                        Foreground="{DynamicResource WarningBrush}" FontSize="13"/>
           </StackPanel>
         </DockPanel>
@@ -115,7 +115,7 @@
 
           <!-- ===== Application > Config ===== -->
           <StackPanel Spacing="16" IsVisible="{Binding IsConfigVisible}">
-            <TextBlock Text="Application / Config" Classes="title" Margin="0,0,0,8"/>
+            <TextBlock Text="{DynamicResource Settings.Config.Title}" Classes="title" Margin="0,0,0,8"/>
 
             <!-- Language -->
             <Grid ColumnDefinitions="*,*">
@@ -184,7 +184,7 @@
 
           <!-- ===== Application > Theme ===== -->
           <StackPanel Spacing="16" IsVisible="{Binding IsThemeVisible}">
-            <TextBlock Text="Application / Theme" Classes="title" Margin="0,0,0,8"/>
+            <TextBlock Text="{DynamicResource Settings.Theme.Title}" Classes="title" Margin="0,0,0,8"/>
 
             <!-- Preset -->
             <Grid ColumnDefinitions="*,*">
@@ -230,7 +230,7 @@
 
           <!-- ===== Application > Advanced ===== -->
           <StackPanel Spacing="16" IsVisible="{Binding IsAdvancedVisible}">
-            <TextBlock Text="Application / Advanced" Classes="title" Margin="0,0,0,8"/>
+            <TextBlock Text="{DynamicResource Settings.Advanced.Title}" Classes="title" Margin="0,0,0,8"/>
 
             <!-- Downloads Path -->
             <Grid ColumnDefinitions="*,2*">
@@ -287,7 +287,7 @@
 
           <!-- ===== Network > Http Proxy ===== -->
           <StackPanel Spacing="16" IsVisible="{Binding IsProxyVisible}">
-            <TextBlock Text="Network / Http Proxy" Classes="title" Margin="0,0,0,8"/>
+            <TextBlock Text="{DynamicResource Settings.Proxy.Title}" Classes="title" Margin="0,0,0,8"/>
 
             <!-- Host -->
             <Grid ColumnDefinitions="*,2*">

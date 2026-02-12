@@ -1,15 +1,35 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AvaGodots.Models;
 using AvaGodots.Services;
+using Avalonia.Data.Converters;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace AvaGodots.ViewModels.Pages;
+
+/// <summary>
+/// 分页页码项 (1-indexed 显示值 + 0-indexed 内部索引)
+/// DisplayNumber == -1 表示省略号占位符
+/// </summary>
+public record PageItem(int DisplayNumber, int PageIndex, bool IsCurrent);
+
+/// <summary>
+/// PageItem 的值转换工具 (用于 AXAML 中控制省略号可见性)
+/// </summary>
+public static class PageItemConverters
+{
+    public static FuncValueConverter<int, bool> IsEllipsis { get; } =
+        new(v => v == -1);
+
+    public static FuncValueConverter<int, bool> IsNotEllipsis { get; } =
+        new(v => v != -1);
+}
 
 /// <summary>
 /// 资源库页面视图模型
@@ -41,13 +61,19 @@ public partial class AssetLibPageViewModel : ViewModelBase
     // ========== 分页 ==========
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanGoPrevious))]
+    [NotifyPropertyChangedFor(nameof(CanGoNext))]
     private int _currentPage;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanGoNext))]
     private int _totalPages;
 
     [ObservableProperty]
     private int _totalItems;
+
+    public bool CanGoPrevious => CurrentPage > 0;
+    public bool CanGoNext => CurrentPage < TotalPages - 1;
 
     // ========== 状态 ==========
 
@@ -64,7 +90,7 @@ public partial class AssetLibPageViewModel : ViewModelBase
 
     public ObservableCollection<AssetLibItem> Assets { get; } = [];
     public ObservableCollection<string> Categories { get; } = ["All"];
-    public ObservableCollection<int> PageNumbers { get; } = [];
+    public ObservableCollection<PageItem> PageNumbers { get; } = [];
 
     public string[] VersionOptions { get; } = ["", "4.6", "4.5", "4.4", "4.3", "4.2", "4.1", "4.0", "3.5", "3.4"];
     public string[] SortOptions { get; } = ["Recently Updated", "Least Recently Updated", "Name (A-Z)", "Name (Z-A)", "License (A-Z)", "License (Z-A)"];
@@ -75,6 +101,16 @@ public partial class AssetLibPageViewModel : ViewModelBase
         _assetLibService = new AssetLibService();
     }
 
+    public AssetLibPageViewModel(DatabaseService db)
+    {
+        _assetLibService = new AssetLibService(db);
+    }
+
+    /// <summary>
+    /// 注入数据库服务（用于缓存）
+    /// </summary>
+    public void SetDatabase(DatabaseService db) => _assetLibService.SetDatabase(db);
+
     // ========== 初始化 ==========
 
     [RelayCommand]
@@ -82,6 +118,13 @@ public partial class AssetLibPageViewModel : ViewModelBase
     {
         await LoadCategoriesAsync();
         await SearchAsync();
+
+        // 后台预缓存前几页（不阻塞UI）
+        _ = Task.Run(async () =>
+        {
+            try { await _assetLibService.PreCacheAsync(3); }
+            catch { /* 预缓存失败不影响主流程 */ }
+        });
     }
 
     private async Task LoadCategoriesAsync()
@@ -182,10 +225,29 @@ public partial class AssetLibPageViewModel : ViewModelBase
     private void UpdatePageNumbers()
     {
         PageNumbers.Clear();
+        if (TotalPages <= 0) return;
+
         var start = Math.Max(0, CurrentPage - 2);
         var end = Math.Min(TotalPages - 1, CurrentPage + 2);
+
+        // 始终显示第一页
+        if (start > 0)
+        {
+            PageNumbers.Add(new PageItem(1, 0, CurrentPage == 0));
+            if (start > 1)
+                PageNumbers.Add(new PageItem(-1, -1, false)); // 省略号占位 (DisplayNumber = -1)
+        }
+
         for (var i = start; i <= end; i++)
-            PageNumbers.Add(i);
+            PageNumbers.Add(new PageItem(i + 1, i, i == CurrentPage));
+
+        // 始终显示最后一页
+        if (end < TotalPages - 1)
+        {
+            if (end < TotalPages - 2)
+                PageNumbers.Add(new PageItem(-1, -1, false)); // 省略号占位
+            PageNumbers.Add(new PageItem(TotalPages, TotalPages - 1, CurrentPage == TotalPages - 1));
+        }
     }
 
     // ========== 分页 ==========

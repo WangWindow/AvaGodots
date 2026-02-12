@@ -168,4 +168,9 @@ public class GithubReleaseAsset
     public string ContentType { get; set; } = string.Empty;
 
     public bool IsZip => Name.EndsWith(".zip", System.StringComparison.OrdinalIgnoreCase);
+
+    public bool IsExportTemplate => Name.EndsWith(".tpz", System.StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>是否为可下载资产 (zip包 或 tpz导出模板)</summary>
+    public bool IsDownloadable => IsZip || IsExportTemplate;
 }

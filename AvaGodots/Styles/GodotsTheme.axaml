@@ -340,4 +340,123 @@ AvaGodots 全局主题样式
     <Setter Property="TextAlignment" Value="Center"/>
     <Setter Property="MaxWidth" Value="400"/>
   </Style>
+
+  <!-- ========== 动画优化 ========== -->
+
+  <!-- 全局按钮悬停过渡 -->
+  <Style Selector="Button">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.15"/>
+        <BrushTransition Property="Foreground" Duration="0:0:0.15"/>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1"/>
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- ToggleButton 悬停过渡 -->
+  <Style Selector="ToggleButton">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.15"/>
+        <BrushTransition Property="Foreground" Duration="0:0:0.15"/>
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- Border 背景过渡 (列表项hover) -->
+  <Style Selector="Border.listItem">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.12"/>
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- 强调色按钮按下缩放效果 -->
+  <Style Selector="Button.accent:pressed">
+    <Setter Property="RenderTransform" Value="scale(0.97)"/>
+  </Style>
+
+  <!-- 操作按钮按下缩放 -->
+  <Style Selector="Button.action:pressed">
+    <Setter Property="RenderTransform" Value="scale(0.98)"/>
+  </Style>
+
+  <!-- hover actions 淡入动画 -->
+  <Style Selector="StackPanel.hoverActions">
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- 对话框叠加层淡入 -->
+  <Style Selector="Border.dialogOverlay">
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- 对话框内容缩放淡入 -->
+  <Style Selector="Border.dialogContent">
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="CubicEaseOut"/>
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- 进度条平滑过渡 -->
+  <Style Selector="ProgressBar">
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Value" Duration="0:0:0.3" Easing="CubicEaseOut"/>
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- TreeView 展开/折叠动画 -->
+  <Style Selector="TreeViewItem">
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- 标签栏选中切换动画 -->
+  <Style Selector="ToggleButton.titleTab">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.2"/>
+        <BrushTransition Property="Foreground" Duration="0:0:0.2"/>
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- TextBox 聚焦边框动画 -->
+  <Style Selector="TextBox">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.15"/>
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- 下载卡片缩放悬停 -->
+  <Style Selector="Border.downloadCard:pointerover">
+    <Setter Property="RenderTransform" Value="scale(1.01)"/>
+  </Style>
+  <Style Selector="Border.downloadCard">
+    <Setter Property="Transitions">
+      <Transitions>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" Easing="CubicEaseOut"/>
+      </Transitions>
+    </Setter>
+  </Style>
 </Styles>

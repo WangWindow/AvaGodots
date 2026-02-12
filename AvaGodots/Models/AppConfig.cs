@@ -37,7 +37,7 @@ public class AppConfig
     /// <summary>
     /// 界面语言
     /// </summary>
-    public string Language { get; set; } = "zh_CN";
+    public string Language { get; set; } = "en";
 
     /// <summary>
     /// 启动项目/编辑器后是否自动关闭

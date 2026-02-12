@@ -53,7 +53,13 @@ public partial class SettingsPageViewModel : ViewModelBase
     // ========== Application > Config ==========
 
     [ObservableProperty]
-    private string _language = "zh_CN";
+    private string _language = "en";
+
+    partial void OnLanguageChanged(string value)
+    {
+        // 运行时切换语言 (不需要重启)
+        LocalizationService.SetLanguage(value);
+    }
 
     [ObservableProperty]
     private bool _autoClose;
@@ -120,17 +126,16 @@ public partial class SettingsPageViewModel : ViewModelBase
 
     // ========== 选项 ==========
 
-    public string[] LanguageOptions { get; } = ["en", "zh_CN", "zh_TW"];
+    public string[] LanguageOptions { get; } = ["en", "zh-CN"];
 
     public string[] ScaleOptions { get; } =
-        ["Auto", "75%", "100%", "125%", "150%", "175%", "200%", "225%"];
+        ["Auto", "100%", "125%", "150%", "175%", "200%"];
 
     public string[] NamingConventionOptions { get; } =
         ["snake_case", "kebab-case", "camelCase", "PascalCase", "Title Case", "None"];
 
     public string[] ThemePresetOptions { get; } =
-        ["Default", "Breeze Dark", "Godot 2", "Godot Dash", "Gray", "Light",
-         "Solarized Dark", "Solarized Light", "Black (OLED)", "Custom"];
+        ["Default", "Dark", "Light", "Custom"];
 
     public SettingsPageViewModel(IConfigService configService, IVsCodeIntegrationService vsCodeService)
     {
@@ -243,7 +248,6 @@ public partial class SettingsPageViewModel : ViewModelBase
 
     // ========== 需要重启标记 ==========
 
-    partial void OnLanguageChanged(string value) => NeedsRestart = true;
     partial void OnScaleChanged(string value) => NeedsRestart = true;
     partial void OnUseSystemTitleBarChanged(bool value) => NeedsRestart = true;
     partial void OnUseNativeFileDialogChanged(bool value) => NeedsRestart = true;

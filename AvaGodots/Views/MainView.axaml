@@ -16,62 +16,56 @@
 
   <Grid RowDefinitions="Auto,*,Auto">
 
-    <!-- ========== 标题栏区域 ========== -->
-    <Border Grid.Row="0" Background="#1C2129" Padding="0" IsHitTestVisible="True">
+    <!-- ========== 标题栏 ========== -->
+    <Border Grid.Row="0" Background="#1C2129" IsHitTestVisible="True">
       <Grid ColumnDefinitions="Auto,*,Auto" Height="40">
 
-        <!-- 左侧窗口控制区域（macOS 风格按钮的占位） -->
         <Panel Grid.Column="0" Width="80" IsHitTestVisible="False"/>
 
-        <!-- 中间标签页切换按钮 -->
+        <!-- 标签页切换 -->
         <StackPanel Grid.Column="1" Orientation="Horizontal"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     Spacing="4">
 
           <ToggleButton Classes="titleTab"
-                        IsChecked="{Binding SelectedTabIndex, Converter={x:Static local:TabIndexConverter.Projects}}"
+                        IsChecked="{Binding SelectedTabIndex, Converter={x:Static local:TabIndexConverter.Projects}, Mode=OneWay}"
                         Command="{Binding NavigateToProjectsCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
               <ic:SymbolIcon Symbol="DocumentBulletList" IconVariant="Regular" FontSize="16"/>
-              <TextBlock Text="Projects" VerticalAlignment="Center"/>
+              <TextBlock Text="{DynamicResource Tab.Projects}" VerticalAlignment="Center"/>
             </StackPanel>
           </ToggleButton>
 
           <ToggleButton Classes="titleTab"
-                        IsChecked="{Binding SelectedTabIndex, Converter={x:Static local:TabIndexConverter.AssetLib}}"
+                        IsChecked="{Binding SelectedTabIndex, Converter={x:Static local:TabIndexConverter.AssetLib}, Mode=OneWay}"
                         Command="{Binding NavigateToAssetLibCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
               <ic:SymbolIcon Symbol="ArrowDownload" IconVariant="Regular" FontSize="16"/>
-              <TextBlock Text="Asset Library" VerticalAlignment="Center"/>
+              <TextBlock Text="{DynamicResource Tab.AssetLib}" VerticalAlignment="Center"/>
             </StackPanel>
           </ToggleButton>
 
           <ToggleButton Classes="titleTab"
-                        IsChecked="{Binding SelectedTabIndex, Converter={x:Static local:TabIndexConverter.Editors}}"
+                        IsChecked="{Binding SelectedTabIndex, Converter={x:Static local:TabIndexConverter.Editors}, Mode=OneWay}"
                         Command="{Binding NavigateToEditorsCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
               <ic:SymbolIcon Symbol="AppGeneric" IconVariant="Regular" FontSize="16"/>
-              <TextBlock Text="Editors" VerticalAlignment="Center"/>
+              <TextBlock Text="{DynamicResource Tab.Editors}" VerticalAlignment="Center"/>
             </StackPanel>
           </ToggleButton>
 
         </StackPanel>
 
-        <!-- 右侧工具按钮 -->
+        <!-- 右侧：版本号 + 设置 -->
         <StackPanel Grid.Column="2" Orientation="Horizontal"
                     HorizontalAlignment="Right" VerticalAlignment="Center"
                     Spacing="4" Margin="0,0,8,0">
-
-          <!-- 版本号 -->
           <TextBlock Text="{Binding VersionText}"
-                     FontSize="11"
-                     Foreground="{DynamicResource FontDimBrush}"
+                     FontSize="11" Foreground="{DynamicResource FontDimBrush}"
                      VerticalAlignment="Center" Margin="0,0,8,0"/>
-
-          <!-- 设置按钮 -->
           <Button Classes="iconAction"
                   Command="{Binding NavigateToSettingsCommand}"
-                  ToolTip.Tip="设置">
+                  ToolTip.Tip="Settings">
             <ic:SymbolIcon Symbol="Settings" IconVariant="Regular" FontSize="18"/>
           </Button>
         </StackPanel>
@@ -80,24 +74,61 @@
     </Border>
 
     <!-- ========== 内容区域 ========== -->
-    <ContentControl Grid.Row="1"
-                    Content="{Binding CurrentPage}"
-                    Margin="0"/>
+    <Panel Grid.Row="1">
+      <TransitioningContentControl Content="{Binding CurrentPage}">
+        <TransitioningContentControl.PageTransition>
+          <CrossFade Duration="0:0:0.2"/>
+        </TransitioningContentControl.PageTransition>
+      </TransitioningContentControl>
+    </Panel>
 
-    <!-- ========== 底部状态栏 ========== -->
-    <Border Grid.Row="2" Background="#1C2129" Padding="12,4" Height="28">
-      <Grid ColumnDefinitions="*,Auto">
-        <TextBlock Grid.Column="0"
-                   Text="{Binding StatusText}"
-                   FontSize="11"
-                   Foreground="{DynamicResource FontDimBrush}"
-                   VerticalAlignment="Center"/>
-        <TextBlock Grid.Column="1"
-                   Text="{Binding VersionText}"
-                   FontSize="11"
-                   Foreground="{DynamicResource FontDimBrush}"
-                   VerticalAlignment="Center"/>
-      </Grid>
+    <!-- ========== 底部状态栏 + 下载进度 ========== -->
+    <Border Grid.Row="2" Background="#1C2129" Padding="0" MinHeight="28">
+      <DockPanel>
+
+        <!-- 下载进度条（底部居中水平滚动区域） -->
+        <ScrollViewer DockPanel.Dock="Top"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Disabled"
+                      IsVisible="{Binding HasActiveDownloads}">
+          <ItemsControl ItemsSource="{Binding Downloads}" Margin="8,4">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="8"/></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Background="{DynamicResource DarkColor2}" CornerRadius="4"
+                        Padding="8,6" MinWidth="240" MaxWidth="300">
+                  <Grid RowDefinitions="Auto,Auto,Auto">
+                    <DockPanel Grid.Row="0">
+                      <Button DockPanel.Dock="Right" Classes="iconAction" Padding="2"
+                              Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).DismissDownloadCommand}"
+                              CommandParameter="{Binding}"
+                              ToolTip.Tip="Dismiss">
+                        <ic:SymbolIcon Symbol="Dismiss" IconVariant="Regular" FontSize="12"/>
+                      </Button>
+                      <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold"
+                                 TextTrimming="CharacterEllipsis"/>
+                    </DockPanel>
+                    <ProgressBar Grid.Row="1" Value="{Binding Progress}" Maximum="{Binding MaxProgress}"
+                                 Height="4" Margin="0,4,0,2"/>
+                    <TextBlock Grid.Row="2" Text="{Binding StatusText}" FontSize="10"
+                               Foreground="{DynamicResource FontDimBrush}"/>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+
+        <!-- 状态文本 -->
+        <Grid Margin="12,4" ColumnDefinitions="*,Auto">
+          <TextBlock Grid.Column="0" Text="{Binding StatusText}" FontSize="11"
+                     Foreground="{DynamicResource FontDimBrush}" VerticalAlignment="Center"/>
+          <TextBlock Grid.Column="1" Text="{Binding VersionText}" FontSize="11"
+                     Foreground="{DynamicResource FontDimBrush}" VerticalAlignment="Center"/>
+        </Grid>
+      </DockPanel>
     </Border>
 
     <!-- ========== 加载叠加层 ========== -->

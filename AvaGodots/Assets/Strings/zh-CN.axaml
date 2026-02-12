@@ -1,0 +1,178 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System">
+
+  <!-- ========== 标签页 ========== -->
+  <x:String x:Key="Tab.Projects">项目</x:String>
+  <x:String x:Key="Tab.AssetLib">资源库</x:String>
+  <x:String x:Key="Tab.Editors">编辑器</x:String>
+  <x:String x:Key="Tab.Settings">设置</x:String>
+
+  <!-- ========== 通用按钮 ========== -->
+  <x:String x:Key="Common.Cancel">取消</x:String>
+  <x:String x:Key="Common.Save">保存</x:String>
+  <x:String x:Key="Common.Close">关闭</x:String>
+  <x:String x:Key="Common.Add">添加</x:String>
+  <x:String x:Key="Common.Remove">移除</x:String>
+  <x:String x:Key="Common.Rename">重命名</x:String>
+  <x:String x:Key="Common.Edit">编辑</x:String>
+  <x:String x:Key="Common.Run">运行</x:String>
+  <x:String x:Key="Common.Browse">浏览</x:String>
+  <x:String x:Key="Common.Import">导入</x:String>
+  <x:String x:Key="Common.Refresh">刷新</x:String>
+  <x:String x:Key="Common.Download">下载</x:String>
+  <x:String x:Key="Common.Dismiss">关闭</x:String>
+  <x:String x:Key="Common.Duplicate">复制</x:String>
+  <x:String x:Key="Common.Bind">绑定</x:String>
+
+  <!-- ========== Projects 页面 ========== -->
+  <x:String x:Key="Projects.New">新建</x:String>
+  <x:String x:Key="Projects.Import">导入</x:String>
+  <x:String x:Key="Projects.Scan">扫描</x:String>
+  <x:String x:Key="Projects.RemoveMissing">移除缺失</x:String>
+  <x:String x:Key="Projects.FilterWatermark">筛选项目 (tag:xxx)</x:String>
+  <x:String x:Key="Projects.Sort.LastEdited">最近编辑</x:String>
+  <x:String x:Key="Projects.Sort.Name">名称</x:String>
+  <x:String x:Key="Projects.Sort.Path">路径</x:String>
+  <x:String x:Key="Projects.Sort.Tags">标签</x:String>
+  <x:String x:Key="Projects.Empty.Title">暂无项目</x:String>
+  <x:String x:Key="Projects.Empty.Desc">点击"新建"创建项目，"导入"添加现有项目，或"扫描"查找已有项目。</x:String>
+
+  <!-- Projects 对话框 -->
+  <x:String x:Key="Projects.Dialog.CreateTitle">创建新项目</x:String>
+  <x:String x:Key="Projects.Dialog.ProjectName">项目名称</x:String>
+  <x:String x:Key="Projects.Dialog.ProjectPath">项目路径</x:String>
+  <x:String x:Key="Projects.Dialog.CreateFolder">创建文件夹</x:String>
+  <x:String x:Key="Projects.Dialog.Editor">编辑器</x:String>
+  <x:String x:Key="Projects.Dialog.Renderer">渲染器</x:String>
+  <x:String x:Key="Projects.Dialog.VersionControl">版本控制</x:String>
+  <x:String x:Key="Projects.Dialog.CreateAndEdit">创建并编辑</x:String>
+  <x:String x:Key="Projects.Dialog.ImportTitle">导入项目</x:String>
+  <x:String x:Key="Projects.Dialog.ImportPath">项目路径 (project.godot)</x:String>
+  <x:String x:Key="Projects.Dialog.EditorOptional">编辑器 (可选)</x:String>
+  <x:String x:Key="Projects.Dialog.ImportAndEdit">导入并编辑</x:String>
+  <x:String x:Key="Projects.Dialog.DuplicateTitle">复制项目</x:String>
+  <x:String x:Key="Projects.Dialog.NewProjectName">新项目名称</x:String>
+  <x:String x:Key="Projects.Dialog.TargetDirectory">目标目录</x:String>
+  <x:String x:Key="Projects.Dialog.RenameTitle">重命名项目</x:String>
+  <x:String x:Key="Projects.Dialog.NewName">新名称</x:String>
+  <x:String x:Key="Projects.Dialog.BindEditorTitle">绑定编辑器</x:String>
+  <x:String x:Key="Projects.Dialog.BindEditorDesc">选择用于此项目的 Godot 编辑器：</x:String>
+  <x:String x:Key="Projects.Dialog.ManageTags">管理标签</x:String>
+  <x:String x:Key="Projects.Dialog.AssignedTags">已分配标签</x:String>
+  <x:String x:Key="Projects.Dialog.AllTags">所有标签</x:String>
+  <x:String x:Key="Projects.Dialog.ConfirmRemove">确认移除</x:String>
+  <x:String x:Key="Projects.Dialog.EditProjectTitle">编辑项目</x:String>
+  <x:String x:Key="Projects.Dialog.EditWarning">即将在 Godot 编辑器中打开此项目。请确保没有其他 Godot 实例正在编辑此项目。</x:String>
+  <x:String x:Key="Projects.Dialog.DontShowAgain">不再显示此警告</x:String>
+
+  <!-- Projects 右键菜单 -->
+  <x:String x:Key="Projects.Menu.BindEditor">绑定编辑器...</x:String>
+  <x:String x:Key="Projects.Menu.ManageTags">管理标签...</x:String>
+  <x:String x:Key="Projects.Menu.Duplicate">复制...</x:String>
+  <x:String x:Key="Projects.Menu.Rename">重命名...</x:String>
+  <x:String x:Key="Projects.Menu.ShowInFileManager">在文件管理器中显示</x:String>
+  <x:String x:Key="Projects.Menu.CopyPath">复制路径</x:String>
+
+  <!-- ========== Editors 页面 ========== -->
+  <x:String x:Key="Editors.Local">本地</x:String>
+  <x:String x:Key="Editors.Remote">远程</x:String>
+  <x:String x:Key="Editors.Scan">扫描</x:String>
+  <x:String x:Key="Editors.RemoveMissing">移除缺失</x:String>
+  <x:String x:Key="Editors.FilterWatermark">筛选编辑器 (tag:xxx)</x:String>
+  <x:String x:Key="Editors.Filter.Mono">Mono</x:String>
+
+  <x:String x:Key="Editors.Filter.AnyPlatform">所有平台</x:String>
+  <x:String x:Key="Editors.Filter.64bit">64 位</x:String>
+  <x:String x:Key="Editors.Filter.4x">4.x</x:String>
+  <x:String x:Key="Editors.Filter.3x">3.x</x:String>
+  <x:String x:Key="Editors.Filter.Other">其他</x:String>
+  <x:String x:Key="Editors.RefreshRemote">刷新远程</x:String>
+  <x:String x:Key="Editors.Empty.Title">未找到编辑器</x:String>
+  <x:String x:Key="Editors.Empty.Desc">使用"扫描"查找系统中的 Godot 编辑器，或切换到"远程"下载一个。</x:String>
+  <x:String x:Key="Editors.Remote.Loading">正在加载远程版本...</x:String>
+  <x:String x:Key="Editors.Remote.Empty.Title">未找到远程版本</x:String>
+  <x:String x:Key="Editors.Remote.Empty.Desc">尝试更改筛选选项或检查网络连接。</x:String>
+
+  <!-- Editors 对话框 -->
+  <x:String x:Key="Editors.Dialog.RenameTitle">重命名编辑器</x:String>
+  <x:String x:Key="Editors.Dialog.Name">名称</x:String>
+  <x:String x:Key="Editors.Dialog.VersionHint">版本提示</x:String>
+  <x:String x:Key="Editors.Dialog.ExtraArgsTitle">额外启动参数</x:String>
+  <x:String x:Key="Editors.Dialog.ExtraArgsDesc">以空格分隔的额外参数列表，在启动编辑器时传入。</x:String>
+  <x:String x:Key="Editors.Dialog.ManageTags">管理标签</x:String>
+  <x:String x:Key="Editors.Dialog.ConfirmRemove">确认移除</x:String>
+  <x:String x:Key="Editors.Dialog.AlsoDeleteFiles">同时从磁盘删除文件</x:String>
+  <x:String x:Key="Editors.Dialog.ReferencesTitle">使用此编辑器的项目</x:String>
+  <x:String x:Key="Editors.Dialog.NoReferences">没有项目引用此编辑器。</x:String>
+
+  <!-- Editors 右键菜单 -->
+  <x:String x:Key="Editors.Menu.Rename">重命名...</x:String>
+  <x:String x:Key="Editors.Menu.ExtraArgs">额外参数...</x:String>
+  <x:String x:Key="Editors.Menu.ManageTags">管理标签...</x:String>
+  <x:String x:Key="Editors.Menu.ViewReferences">查看引用</x:String>
+  <x:String x:Key="Editors.Menu.ShowInFileManager">在文件管理器中显示</x:String>
+  <x:String x:Key="Editors.Menu.CopyPath">复制路径</x:String>
+
+  <!-- ========== Asset Library 页面 ========== -->
+  <x:String x:Key="AssetLib.SearchWatermark">搜索资源...</x:String>
+  <x:String x:Key="AssetLib.Version">版本</x:String>
+  <x:String x:Key="AssetLib.Sort">排序</x:String>
+  <x:String x:Key="AssetLib.Category">分类</x:String>
+  <x:String x:Key="AssetLib.Site">站点</x:String>
+  <x:String x:Key="AssetLib.AssetsFound"> 个资源</x:String>
+  <x:String x:Key="AssetLib.First">首页</x:String>
+  <x:String x:Key="AssetLib.Previous">上一页</x:String>
+  <x:String x:Key="AssetLib.Next">下一页</x:String>
+  <x:String x:Key="AssetLib.Last">末页</x:String>
+  <x:String x:Key="AssetLib.Empty.Title">未找到资源</x:String>
+  <x:String x:Key="AssetLib.Empty.Desc">尝试更改搜索或筛选条件。</x:String>
+
+  <!-- ========== Settings 页面 ========== -->
+  <x:String x:Key="Settings.Folder">设置文件夹</x:String>
+  <x:String x:Key="Settings.ResetAll">重置全部</x:String>
+  <x:String x:Key="Settings.SaveAndClose">保存并关闭</x:String>
+  <x:String x:Key="Settings.SaveAndRestart">保存并重启</x:String>
+  <x:String x:Key="Settings.NeedsRestart">某些设置变更需要重启应用才能生效。</x:String>
+
+  <!-- Settings 分类 -->
+  <x:String x:Key="Settings.Nav.Application">应用程序</x:String>
+  <x:String x:Key="Settings.Nav.Config">配置</x:String>
+  <x:String x:Key="Settings.Nav.Theme">主题</x:String>
+  <x:String x:Key="Settings.Nav.Advanced">高级</x:String>
+  <x:String x:Key="Settings.Nav.Network">网络</x:String>
+  <x:String x:Key="Settings.Nav.HttpProxy">HTTP 代理</x:String>
+
+  <!-- Settings > Config -->
+  <x:String x:Key="Settings.Config.Title">应用程序 / 配置</x:String>
+  <x:String x:Key="Settings.Config.Language">语言</x:String>
+  <x:String x:Key="Settings.Config.AutoClose">自动关闭</x:String>
+  <x:String x:Key="Settings.Config.Scale">缩放</x:String>
+  <x:String x:Key="Settings.Config.DefaultProjectsPath">默认项目路径</x:String>
+  <x:String x:Key="Settings.Config.DirNaming">目录命名规则</x:String>
+  <x:String x:Key="Settings.Config.SystemTitlebar">使用系统标题栏</x:String>
+  <x:String x:Key="Settings.Config.NativeFileDialog">使用原生文件对话框</x:String>
+  <x:String x:Key="Settings.Config.RememberWindowRect">记住窗口位置</x:String>
+
+  <!-- Settings > Theme -->
+  <x:String x:Key="Settings.Theme.Title">应用程序 / 主题</x:String>
+  <x:String x:Key="Settings.Theme.Preset">预设</x:String>
+  <x:String x:Key="Settings.Theme.BaseColor">基础颜色</x:String>
+  <x:String x:Key="Settings.Theme.AccentColor">强调颜色</x:String>
+  <x:String x:Key="Settings.Theme.Contrast">对比度</x:String>
+
+  <!-- Settings > Advanced -->
+  <x:String x:Key="Settings.Advanced.Title">应用程序 / 高级</x:String>
+  <x:String x:Key="Settings.Advanced.DownloadsPath">下载路径</x:String>
+  <x:String x:Key="Settings.Advanced.VersionsPath">版本路径</x:String>
+  <x:String x:Key="Settings.Advanced.OrphanExplorer">显示孤立编辑器浏览器</x:String>
+  <x:String x:Key="Settings.Advanced.AllowNonEmpty">允许安装到非空目录</x:String>
+  <x:String x:Key="Settings.Advanced.StableOnly">仅检查稳定版更新</x:String>
+  <x:String x:Key="Settings.Advanced.VsCodeIntegration">VS Code 集成</x:String>
+
+  <!-- Settings > Http Proxy -->
+  <x:String x:Key="Settings.Proxy.Title">网络 / HTTP 代理</x:String>
+  <x:String x:Key="Settings.Proxy.Host">主机</x:String>
+  <x:String x:Key="Settings.Proxy.Port">端口</x:String>
+
+</ResourceDictionary>

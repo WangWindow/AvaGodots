@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using AvaGodots.Interfaces;
 using AvaGodots.Services;
@@ -19,6 +20,8 @@ public partial class MainViewModel : ViewModelBase
     private readonly IEditorService _editorService;
     private readonly IProjectService _projectService;
     private readonly IVsCodeIntegrationService _vsCodeService;
+    private readonly DatabaseService _db;
+    private readonly DownloadManagerService _downloadManager;
 
     /// <summary>
     /// 当前选中的标签页索引
@@ -37,7 +40,7 @@ public partial class MainViewModel : ViewModelBase
     /// 应用标题
     /// </summary>
     [ObservableProperty]
-    private string _title = "Godots";
+    private string _title = "AvaGodots";
 
     /// <summary>
     /// 应用版本号
@@ -56,6 +59,17 @@ public partial class MainViewModel : ViewModelBase
     /// </summary>
     [ObservableProperty]
     private string _statusText = string.Empty;
+
+    /// <summary>
+    /// 当前活跃下载列表（转发自 DownloadManagerService）
+    /// </summary>
+    public ObservableCollection<DownloadItem> Downloads => _downloadManager.Downloads;
+
+    /// <summary>
+    /// 是否有活跃下载
+    /// </summary>
+    [ObservableProperty]
+    private bool _hasActiveDownloads;
 
     /// <summary>
     /// 页面集合
@@ -89,11 +103,19 @@ public partial class MainViewModel : ViewModelBase
         _vsCodeService = new VsCodeIntegrationService();
         _editorService = new EditorService(_configService);
         _projectService = new ProjectService(_configService, _editorService, _vsCodeService);
+        _db = new DatabaseService();
+        _downloadManager = new DownloadManagerService(_db, _editorService, _configService);
+
+        // 监听下载列表变更以更新 HasActiveDownloads
+        _downloadManager.Downloads.CollectionChanged += (_, _) =>
+        {
+            HasActiveDownloads = _downloadManager.Downloads.Any(d => d.IsDownloading || d.IsCompleted || d.IsFailed);
+        };
 
         // 创建页面视图模型
         ProjectsPage = new ProjectsPageViewModel(_projectService, _editorService, _configService);
-        AssetLibPage = new AssetLibPageViewModel();
-        EditorsPage = new EditorsPageViewModel(_editorService, _configService);
+        AssetLibPage = new AssetLibPageViewModel(_db);
+        EditorsPage = new EditorsPageViewModel(_editorService, _configService, _downloadManager);
         EditorsPage.SetProjectService(_projectService);
         SettingsPage = new SettingsPageViewModel(_configService, _vsCodeService);
 
@@ -131,6 +153,7 @@ public partial class MainViewModel : ViewModelBase
 
         try
         {
+            await _db.InitializeAsync();
             await _configService.LoadAsync();
 
             StatusText = "正在加载编辑器...";
@@ -152,6 +175,19 @@ public partial class MainViewModel : ViewModelBase
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// 移除下载项
+    /// </summary>
+    [RelayCommand]
+    private void DismissDownload(DownloadItem? item)
+    {
+        if (item != null)
+        {
+            _downloadManager.Dismiss(item);
+            HasActiveDownloads = _downloadManager.Downloads.Any(d => d.IsDownloading || d.IsCompleted || d.IsFailed);
         }
     }
 

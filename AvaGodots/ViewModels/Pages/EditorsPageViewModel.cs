@@ -19,6 +19,7 @@ public partial class EditorsPageViewModel : ViewModelBase
     private readonly IEditorService _editorService;
     private readonly IConfigService _configService;
     private readonly RemoteEditorService _remoteEditorService;
+    private readonly DownloadManagerService? _downloadManager;
 
     // ========================= 列表与过滤 =========================
 
@@ -47,12 +48,6 @@ public partial class EditorsPageViewModel : ViewModelBase
     [ObservableProperty] private bool _filter4X = true;
     [ObservableProperty] private bool _filter3X;
     [ObservableProperty] private bool _filterOtherVersions;
-
-    // ========================= 导入编辑器对话框 =========================
-
-    [ObservableProperty] private bool _isImportDialogVisible;
-    [ObservableProperty] private string _importEditorName = string.Empty;
-    [ObservableProperty] private string _importEditorPath = string.Empty;
 
     // ========================= 重命名对话框 =========================
 
@@ -84,21 +79,18 @@ public partial class EditorsPageViewModel : ViewModelBase
     [ObservableProperty] private bool _isReferencesDialogVisible;
     public ObservableCollection<GodotProject> ReferencingProjects { get; } = [];
 
-    // ========================= 侧栏 =========================
-
-    [ObservableProperty] private GodotEditor? _sidebarEditor;
-
     /// <summary>
     /// 项目服务引用（用于查看引用该编辑器的项目）
     /// </summary>
     private IProjectService? _projectService;
 
-    public EditorsPageViewModel() : this(null!, null!) { }
+    public EditorsPageViewModel() : this(null!, null!, null!) { }
 
-    public EditorsPageViewModel(IEditorService editorService, IConfigService configService)
+    public EditorsPageViewModel(IEditorService editorService, IConfigService configService, DownloadManagerService? downloadManager = null)
     {
         _editorService = editorService;
         _configService = configService;
+        _downloadManager = downloadManager;
         _remoteEditorService = new RemoteEditorService();
     }
 
@@ -115,7 +107,6 @@ public partial class EditorsPageViewModel : ViewModelBase
     partial void OnSelectedEditorChanged(GodotEditor? value)
     {
         HasSelection = value != null;
-        SidebarEditor = value;
     }
 
     // ========================= 数据刷新 =========================
@@ -156,41 +147,6 @@ public partial class EditorsPageViewModel : ViewModelBase
 
         IsEmpty = FilteredEditors.Count == 0;
     }
-
-    // ========================= 导入编辑器 =========================
-
-    [RelayCommand]
-    private void ShowImportDialog()
-    {
-        ImportEditorName = string.Empty;
-        ImportEditorPath = string.Empty;
-        IsImportDialogVisible = true;
-    }
-
-    [RelayCommand]
-    private async Task BrowseImportPathAsync()
-    {
-        var file = await FileDialogHelper.PickFileAsync("选择 Godot 编辑器",
-            [FileDialogHelper.GodotEditorFilter, FileDialogHelper.AllFilter]);
-        if (file != null)
-        {
-            ImportEditorPath = file;
-            if (string.IsNullOrWhiteSpace(ImportEditorName))
-                ImportEditorName = System.IO.Path.GetFileNameWithoutExtension(file);
-        }
-    }
-
-    [RelayCommand]
-    private async Task ConfirmImportAsync()
-    {
-        if (string.IsNullOrWhiteSpace(ImportEditorName) || string.IsNullOrWhiteSpace(ImportEditorPath))
-            return;
-        var result = await _editorService.ImportEditorAsync(ImportEditorName, ImportEditorPath);
-        if (result != null) { RefreshEditors(); SelectedEditor = result; }
-        IsImportDialogVisible = false;
-    }
-
-    [RelayCommand] private void CancelImport() => IsImportDialogVisible = false;
 
     // ========================= 扫描目录 =========================
 
@@ -446,18 +402,43 @@ public partial class EditorsPageViewModel : ViewModelBase
                     IsFolder = true
                 };
 
-                // 添加 releases 作为子节点
-                foreach (var release in ver.Releases)
+                // 如果 flavor 是 stable，自动添加 stable 作为子节点
+                if (ver.Flavor == "stable")
                 {
-                    if (!FilterUnstable && release != "stable" && !release.StartsWith("stable"))
-                        continue;
-
                     node.Children.Add(new RemoteVersionNode
                     {
-                        Name = release,
-                        Tag = $"{ver.Name}-{release}",
+                        Name = "stable",
+                        Tag = $"{ver.Name}-stable",
                         IsFolder = true
                     });
+                }
+                // 如果 flavor 不是 stable (例如 rc1, beta1)，将其作为当前版本的子节点
+                else if (!string.IsNullOrEmpty(ver.Flavor))
+                {
+                    if (FilterUnstable)
+                    {
+                        node.Children.Add(new RemoteVersionNode
+                        {
+                            Name = ver.Flavor,
+                            Tag = $"{ver.Name}-{ver.Flavor}",
+                            IsFolder = true
+                        });
+                    }
+                }
+
+                // 添加 releases 作为子节点 (历史预发布版本)
+                if (FilterUnstable)
+                {
+                    foreach (var release in ver.Releases)
+                    {
+                        if (release == "stable" || release == ver.Flavor) continue; // 避免重复
+                        node.Children.Add(new RemoteVersionNode
+                        {
+                            Name = release,
+                            Tag = $"{ver.Name}-{release}",
+                            IsFolder = true
+                        });
+                    }
                 }
 
                 if (node.Children.Count > 0)
@@ -490,7 +471,7 @@ public partial class EditorsPageViewModel : ViewModelBase
         try
         {
             var assets = await _remoteEditorService.GetReleaseAssetsAsync(node.Tag);
-            foreach (var asset in assets.Where(a => a.IsZip))
+            foreach (var asset in assets.Where(a => a.IsDownloadable))
             {
                 // 平台过滤
                 if (!FilterAnyPlatform && !RemoteEditorService.IsForCurrentPlatform(asset.Name))
@@ -521,15 +502,28 @@ public partial class EditorsPageViewModel : ViewModelBase
     private void DownloadRemoteEditor(RemoteVersionNode? node)
     {
         if (node == null || string.IsNullOrEmpty(node.DownloadUrl)) return;
-        try
+
+        if (_downloadManager != null)
         {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = node.DownloadUrl,
-                UseShellExecute = true
-            });
+            // 判断是导出模板还是编辑器
+            if (node.Name.EndsWith(".tpz", StringComparison.OrdinalIgnoreCase))
+                _downloadManager.DownloadExportTemplate(node.DownloadUrl, node.Name, node.Name);
+            else
+                _downloadManager.DownloadEditor(node.DownloadUrl, node.Name, node.Name);
         }
-        catch { }
+        else
+        {
+            // 回退：在浏览器打开
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = node.DownloadUrl,
+                    UseShellExecute = true
+                });
+            }
+            catch { }
+        }
     }
 
     private bool ShouldShowVersion(string name)

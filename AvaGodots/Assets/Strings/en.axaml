@@ -1,0 +1,178 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System">
+
+  <!-- ========== Tabs ========== -->
+  <x:String x:Key="Tab.Projects">Projects</x:String>
+  <x:String x:Key="Tab.AssetLib">Asset Library</x:String>
+  <x:String x:Key="Tab.Editors">Editors</x:String>
+  <x:String x:Key="Tab.Settings">Settings</x:String>
+
+  <!-- ========== Common Buttons ========== -->
+  <x:String x:Key="Common.Cancel">Cancel</x:String>
+  <x:String x:Key="Common.Save">Save</x:String>
+  <x:String x:Key="Common.Close">Close</x:String>
+  <x:String x:Key="Common.Add">Add</x:String>
+  <x:String x:Key="Common.Remove">Remove</x:String>
+  <x:String x:Key="Common.Rename">Rename</x:String>
+  <x:String x:Key="Common.Edit">Edit</x:String>
+  <x:String x:Key="Common.Run">Run</x:String>
+  <x:String x:Key="Common.Browse">Browse</x:String>
+  <x:String x:Key="Common.Import">Import</x:String>
+  <x:String x:Key="Common.Refresh">Refresh</x:String>
+  <x:String x:Key="Common.Download">Download</x:String>
+  <x:String x:Key="Common.Dismiss">Dismiss</x:String>
+  <x:String x:Key="Common.Duplicate">Duplicate</x:String>
+  <x:String x:Key="Common.Bind">Bind</x:String>
+
+  <!-- ========== Projects Page ========== -->
+  <x:String x:Key="Projects.New">New</x:String>
+  <x:String x:Key="Projects.Import">Import</x:String>
+  <x:String x:Key="Projects.Scan">Scan</x:String>
+  <x:String x:Key="Projects.RemoveMissing">Remove Missing</x:String>
+  <x:String x:Key="Projects.FilterWatermark">Filter Projects (tag:xxx)</x:String>
+  <x:String x:Key="Projects.Sort.LastEdited">Last Edited</x:String>
+  <x:String x:Key="Projects.Sort.Name">Name</x:String>
+  <x:String x:Key="Projects.Sort.Path">Path</x:String>
+  <x:String x:Key="Projects.Sort.Tags">Tags</x:String>
+  <x:String x:Key="Projects.Empty.Title">No projects yet</x:String>
+  <x:String x:Key="Projects.Empty.Desc">Click 'New' to create a project, 'Import' to add existing ones, or 'Scan' to find them.</x:String>
+
+  <!-- Projects Dialogs -->
+  <x:String x:Key="Projects.Dialog.CreateTitle">Create New Project</x:String>
+  <x:String x:Key="Projects.Dialog.ProjectName">Project Name</x:String>
+  <x:String x:Key="Projects.Dialog.ProjectPath">Project Path</x:String>
+  <x:String x:Key="Projects.Dialog.CreateFolder">Create Folder</x:String>
+  <x:String x:Key="Projects.Dialog.Editor">Editor</x:String>
+  <x:String x:Key="Projects.Dialog.Renderer">Renderer</x:String>
+  <x:String x:Key="Projects.Dialog.VersionControl">Version Control</x:String>
+  <x:String x:Key="Projects.Dialog.CreateAndEdit">Create &amp; Edit</x:String>
+  <x:String x:Key="Projects.Dialog.ImportTitle">Import Project</x:String>
+  <x:String x:Key="Projects.Dialog.ImportPath">Project Path (project.godot)</x:String>
+  <x:String x:Key="Projects.Dialog.EditorOptional">Editor (optional)</x:String>
+  <x:String x:Key="Projects.Dialog.ImportAndEdit">Import &amp; Edit</x:String>
+  <x:String x:Key="Projects.Dialog.DuplicateTitle">Duplicate Project</x:String>
+  <x:String x:Key="Projects.Dialog.NewProjectName">New Project Name</x:String>
+  <x:String x:Key="Projects.Dialog.TargetDirectory">Target Directory</x:String>
+  <x:String x:Key="Projects.Dialog.RenameTitle">Rename Project</x:String>
+  <x:String x:Key="Projects.Dialog.NewName">New Name</x:String>
+  <x:String x:Key="Projects.Dialog.BindEditorTitle">Bind Editor</x:String>
+  <x:String x:Key="Projects.Dialog.BindEditorDesc">Select the Godot editor to use for this project:</x:String>
+  <x:String x:Key="Projects.Dialog.ManageTags">Manage Tags</x:String>
+  <x:String x:Key="Projects.Dialog.AssignedTags">Assigned Tags</x:String>
+  <x:String x:Key="Projects.Dialog.AllTags">All Tags</x:String>
+  <x:String x:Key="Projects.Dialog.ConfirmRemove">Confirm Remove</x:String>
+  <x:String x:Key="Projects.Dialog.EditProjectTitle">Edit Project</x:String>
+  <x:String x:Key="Projects.Dialog.EditWarning">You are about to open this project in the Godot editor. Make sure no other Godot instance is editing this project.</x:String>
+  <x:String x:Key="Projects.Dialog.DontShowAgain">Don't show this warning again</x:String>
+
+  <!-- Projects Context Menu -->
+  <x:String x:Key="Projects.Menu.BindEditor">Bind Editor...</x:String>
+  <x:String x:Key="Projects.Menu.ManageTags">Manage Tags...</x:String>
+  <x:String x:Key="Projects.Menu.Duplicate">Duplicate...</x:String>
+  <x:String x:Key="Projects.Menu.Rename">Rename...</x:String>
+  <x:String x:Key="Projects.Menu.ShowInFileManager">Show in File Manager</x:String>
+  <x:String x:Key="Projects.Menu.CopyPath">Copy Path</x:String>
+
+  <!-- ========== Editors Page ========== -->
+  <x:String x:Key="Editors.Local">Local</x:String>
+  <x:String x:Key="Editors.Remote">Remote</x:String>
+  <x:String x:Key="Editors.Scan">Scan</x:String>
+  <x:String x:Key="Editors.RemoveMissing">Remove Missing</x:String>
+  <x:String x:Key="Editors.FilterWatermark">Filter Editors (tag:xxx)</x:String>
+  <x:String x:Key="Editors.Filter.Mono">Mono</x:String>
+
+  <x:String x:Key="Editors.Filter.AnyPlatform">Any Platform</x:String>
+  <x:String x:Key="Editors.Filter.64bit">64-bit</x:String>
+  <x:String x:Key="Editors.Filter.4x">4.x</x:String>
+  <x:String x:Key="Editors.Filter.3x">3.x</x:String>
+  <x:String x:Key="Editors.Filter.Other">Other</x:String>
+  <x:String x:Key="Editors.RefreshRemote">Refresh Remote</x:String>
+  <x:String x:Key="Editors.Empty.Title">No editors found</x:String>
+  <x:String x:Key="Editors.Empty.Desc">Use 'Scan' to find Godot editors on your system, or switch to 'Remote' to download one.</x:String>
+  <x:String x:Key="Editors.Remote.Loading">Loading remote versions...</x:String>
+  <x:String x:Key="Editors.Remote.Empty.Title">No remote versions found</x:String>
+  <x:String x:Key="Editors.Remote.Empty.Desc">Try changing filter options or checking your network connection.</x:String>
+
+  <!-- Editors Dialogs -->
+  <x:String x:Key="Editors.Dialog.RenameTitle">Rename Editor</x:String>
+  <x:String x:Key="Editors.Dialog.Name">Name</x:String>
+  <x:String x:Key="Editors.Dialog.VersionHint">Version Hint</x:String>
+  <x:String x:Key="Editors.Dialog.ExtraArgsTitle">Extra Launch Arguments</x:String>
+  <x:String x:Key="Editors.Dialog.ExtraArgsDesc">Space-separated list of additional arguments passed to the editor on launch.</x:String>
+  <x:String x:Key="Editors.Dialog.ManageTags">Manage Tags</x:String>
+  <x:String x:Key="Editors.Dialog.ConfirmRemove">Confirm Remove</x:String>
+  <x:String x:Key="Editors.Dialog.AlsoDeleteFiles">Also delete files from disk</x:String>
+  <x:String x:Key="Editors.Dialog.ReferencesTitle">Projects Using This Editor</x:String>
+  <x:String x:Key="Editors.Dialog.NoReferences">No projects reference this editor.</x:String>
+
+  <!-- Editors Context Menu -->
+  <x:String x:Key="Editors.Menu.Rename">Rename...</x:String>
+  <x:String x:Key="Editors.Menu.ExtraArgs">Extra Arguments...</x:String>
+  <x:String x:Key="Editors.Menu.ManageTags">Manage Tags...</x:String>
+  <x:String x:Key="Editors.Menu.ViewReferences">View References</x:String>
+  <x:String x:Key="Editors.Menu.ShowInFileManager">Show in File Manager</x:String>
+  <x:String x:Key="Editors.Menu.CopyPath">Copy Path</x:String>
+
+  <!-- ========== Asset Library Page ========== -->
+  <x:String x:Key="AssetLib.SearchWatermark">Search assets...</x:String>
+  <x:String x:Key="AssetLib.Version">Version</x:String>
+  <x:String x:Key="AssetLib.Sort">Sort</x:String>
+  <x:String x:Key="AssetLib.Category">Category</x:String>
+  <x:String x:Key="AssetLib.Site">Site</x:String>
+  <x:String x:Key="AssetLib.AssetsFound"> assets found</x:String>
+  <x:String x:Key="AssetLib.First">First</x:String>
+  <x:String x:Key="AssetLib.Previous">Previous</x:String>
+  <x:String x:Key="AssetLib.Next">Next</x:String>
+  <x:String x:Key="AssetLib.Last">Last</x:String>
+  <x:String x:Key="AssetLib.Empty.Title">No assets found</x:String>
+  <x:String x:Key="AssetLib.Empty.Desc">Try changing your search or filter options.</x:String>
+
+  <!-- ========== Settings Page ========== -->
+  <x:String x:Key="Settings.Folder">Settings Folder</x:String>
+  <x:String x:Key="Settings.ResetAll">Reset All</x:String>
+  <x:String x:Key="Settings.SaveAndClose">Save &amp; Close</x:String>
+  <x:String x:Key="Settings.SaveAndRestart">Save &amp; Restart</x:String>
+  <x:String x:Key="Settings.NeedsRestart">Some settings require restarting the application to take effect.</x:String>
+
+  <!-- Settings Categories -->
+  <x:String x:Key="Settings.Nav.Application">Application</x:String>
+  <x:String x:Key="Settings.Nav.Config">Config</x:String>
+  <x:String x:Key="Settings.Nav.Theme">Theme</x:String>
+  <x:String x:Key="Settings.Nav.Advanced">Advanced</x:String>
+  <x:String x:Key="Settings.Nav.Network">Network</x:String>
+  <x:String x:Key="Settings.Nav.HttpProxy">Http Proxy</x:String>
+
+  <!-- Settings > Config -->
+  <x:String x:Key="Settings.Config.Title">Application / Config</x:String>
+  <x:String x:Key="Settings.Config.Language">Language</x:String>
+  <x:String x:Key="Settings.Config.AutoClose">Auto Close</x:String>
+  <x:String x:Key="Settings.Config.Scale">Scale</x:String>
+  <x:String x:Key="Settings.Config.DefaultProjectsPath">Default Projects Path</x:String>
+  <x:String x:Key="Settings.Config.DirNaming">Directory Naming Convention</x:String>
+  <x:String x:Key="Settings.Config.SystemTitlebar">Use System Titlebar</x:String>
+  <x:String x:Key="Settings.Config.NativeFileDialog">Use Native File Dialog</x:String>
+  <x:String x:Key="Settings.Config.RememberWindowRect">Remember Window Rect</x:String>
+
+  <!-- Settings > Theme -->
+  <x:String x:Key="Settings.Theme.Title">Application / Theme</x:String>
+  <x:String x:Key="Settings.Theme.Preset">Preset</x:String>
+  <x:String x:Key="Settings.Theme.BaseColor">Base Color</x:String>
+  <x:String x:Key="Settings.Theme.AccentColor">Accent Color</x:String>
+  <x:String x:Key="Settings.Theme.Contrast">Contrast</x:String>
+
+  <!-- Settings > Advanced -->
+  <x:String x:Key="Settings.Advanced.Title">Application / Advanced</x:String>
+  <x:String x:Key="Settings.Advanced.DownloadsPath">Downloads Path</x:String>
+  <x:String x:Key="Settings.Advanced.VersionsPath">Versions Path</x:String>
+  <x:String x:Key="Settings.Advanced.OrphanExplorer">Show Orphan Editor Explorer</x:String>
+  <x:String x:Key="Settings.Advanced.AllowNonEmpty">Allow Install To Not Empty Dir</x:String>
+  <x:String x:Key="Settings.Advanced.StableOnly">Check Only Stable Updates</x:String>
+  <x:String x:Key="Settings.Advanced.VsCodeIntegration">VS Code Integration</x:String>
+
+  <!-- Settings > Http Proxy -->
+  <x:String x:Key="Settings.Proxy.Title">Network / Http Proxy</x:String>
+  <x:String x:Key="Settings.Proxy.Host">Host</x:String>
+  <x:String x:Key="Settings.Proxy.Port">Port</x:String>
+
+</ResourceDictionary>

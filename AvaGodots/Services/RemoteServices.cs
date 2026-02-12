@@ -19,15 +19,22 @@ public partial class AssetLibService
 {
     private readonly HttpClient _httpClient;
     private List<AssetLibCategory>? _cachedCategories;
+    private DatabaseService? _db;
 
     public string SiteUrl { get; set; } = "https://godotengine.org/asset-library/api";
 
-    public AssetLibService()
+    public AssetLibService(DatabaseService? db = null)
     {
+        _db = db;
         _httpClient = new HttpClient();
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "AvaGodots/1.0");
         _httpClient.Timeout = TimeSpan.FromSeconds(30);
     }
+
+    /// <summary>
+    /// 注入数据库服务（用于缓存）
+    /// </summary>
+    public void SetDatabase(DatabaseService db) => _db = db;
 
     /// <summary>
     /// 获取分类列表（带缓存）
@@ -50,7 +57,7 @@ public partial class AssetLibService
     }
 
     /// <summary>
-    /// 搜索素材
+    /// 搜索素材（带 SQLite 缓存）
     /// </summary>
     public async Task<AssetLibResult> SearchAssetsAsync(
         string filter = "",
@@ -62,26 +69,80 @@ public partial class AssetLibService
         string type = "any",
         CancellationToken ct = default)
     {
+        var url = BuildSearchUrl(filter, godotVersion, sort, category, page, maxResults, type);
+
+        // 尝试从缓存读取
+        if (_db != null)
+        {
+            var cached = await _db.GetHttpCacheAsync(url, TimeSpan.FromMinutes(10));
+            if (cached?.body != null)
+            {
+                try
+                {
+                    var cachedResult = JsonSerializer.Deserialize<AssetLibResult>(cached.Value.body);
+                    if (cachedResult != null) return cachedResult;
+                }
+                catch { /* 缓存损坏,继续网络请求 */ }
+            }
+        }
+
         try
         {
-            var url = $"{SiteUrl}/asset?type={type}&sort={sort}&max_results={maxResults}&page={page}";
+            var json = await _httpClient.GetByteArrayAsync(url, ct);
+            var result = JsonSerializer.Deserialize<AssetLibResult>(json) ?? new AssetLibResult();
 
-            if (!string.IsNullOrWhiteSpace(filter))
-                url += $"&filter={Uri.EscapeDataString(filter)}";
+            // 写入缓存
+            if (_db != null)
+                await _db.SetHttpCacheAsync(url, json, "application/json");
 
-            if (!string.IsNullOrWhiteSpace(godotVersion))
-                url += $"&godot_version={Uri.EscapeDataString(godotVersion)}";
-
-            if (category > 0)
-                url += $"&category={category}";
-
-            var result = await _httpClient.GetFromJsonAsync<AssetLibResult>(url, ct);
-            return result ?? new AssetLibResult();
+            return result;
         }
         catch
         {
             return new AssetLibResult();
         }
+    }
+
+    /// <summary>
+    /// 后台预缓存前几页数据
+    /// </summary>
+    public async Task PreCacheAsync(int pages = 3, CancellationToken ct = default)
+    {
+        for (var i = 0; i < pages; i++)
+        {
+            if (ct.IsCancellationRequested) break;
+            try
+            {
+                var url = BuildSearchUrl("", "", "updated", 0, i, 40, "any");
+                // 检查缓存是否已存在
+                if (_db != null)
+                {
+                    var cached = await _db.GetHttpCacheAsync(url, TimeSpan.FromMinutes(30));
+                    if (cached?.body != null) continue; // 已缓存，跳过
+                }
+
+                var json = await _httpClient.GetByteArrayAsync(url, ct);
+                if (_db != null)
+                    await _db.SetHttpCacheAsync(url, json, "application/json");
+            }
+            catch { break; }
+        }
+    }
+
+    private string BuildSearchUrl(string filter, string godotVersion, string sort, int category, int page, int maxResults, string type)
+    {
+        var url = $"{SiteUrl}/asset?type={type}&sort={sort}&max_results={maxResults}&page={page}";
+
+        if (!string.IsNullOrWhiteSpace(filter))
+            url += $"&filter={Uri.EscapeDataString(filter)}";
+
+        if (!string.IsNullOrWhiteSpace(godotVersion))
+            url += $"&godot_version={Uri.EscapeDataString(godotVersion)}";
+
+        if (category > 0)
+            url += $"&category={category}";
+
+        return url;
     }
 
     /// <summary>
@@ -189,37 +250,84 @@ public class RemoteEditorService
 
     /// <summary>
     /// 解析 Godot 版本 YAML
+    /// YAML 结构:
+    /// - name: "4.6"
+    ///   flavor: "stable"
+    ///   releases:
+    ///     - name: "rc2"    ← 嵌套的 release 子项
+    ///       release_date: "..."
     /// </summary>
     private static List<RemoteGodotVersion> ParseVersionsYml(string yml)
     {
         var versions = new List<RemoteGodotVersion>();
         RemoteGodotVersion? current = null;
+        var inReleases = false;
 
         foreach (var rawLine in yml.Split('\n'))
         {
+            // 使用缩进区分顶层版本和嵌套 release
+            var indent = rawLine.Length - rawLine.TrimStart().Length;
             var line = rawLine.Trim();
 
-            if (line.StartsWith("- name:"))
+            if (string.IsNullOrEmpty(line) || line.StartsWith('#'))
+                continue;
+
+            // 顶层版本条目 (缩进 0-1)
+            if (indent <= 1 && line.StartsWith("- name:"))
             {
                 current = new RemoteGodotVersion
                 {
-                    Name = line.Replace("- name:", "").Trim().Trim('"')
+                    Name = ExtractYamlValue(line, "- name:")
                 };
                 versions.Add(current);
+                inReleases = false;
             }
-            else if (line.StartsWith("flavor:") && current != null)
+            // flavor 字段
+            else if (line.StartsWith("flavor:") && current != null && indent < 4)
             {
-                current.Flavor = line.Replace("flavor:", "").Trim().Trim('"');
+                current.Flavor = ExtractYamlValue(line, "flavor:");
             }
-            else if (line.StartsWith("- ") && current != null && !line.StartsWith("- name:"))
+            // 进入 releases 块
+            else if (line == "releases:" && current != null)
+            {
+                inReleases = true;
+            }
+            // 其他顶层字段 (release_date, release_notes, featured) → 退出 releases
+            else if (indent <= 2 && !line.StartsWith("-") && !inReleases)
+            {
+                // skip other top-level fields
+            }
+            // 嵌套在 releases 下的 - name: "rc1" 条目
+            else if (inReleases && indent >= 4 && line.StartsWith("- name:"))
+            {
+                var releaseName = ExtractYamlValue(line, "- name:");
+                if (!string.IsNullOrEmpty(releaseName))
+                    current?.Releases.Add(releaseName);
+            }
+            // 嵌套在 releases 下的简单 - "value" 条目 (旧格式)
+            else if (inReleases && indent >= 4 && line.StartsWith("- ") && !line.StartsWith("- name:"))
             {
                 var release = line[2..].Trim().Trim('"');
                 if (!string.IsNullOrEmpty(release))
-                    current.Releases.Add(release);
+                    current?.Releases.Add(release);
+            }
+            // 嵌套属性跳过 (release_date, release_notes等)
+            else if (inReleases && indent >= 6)
+            {
+                // skip nested properties of release entries
             }
         }
 
         return versions;
+    }
+
+    /// <summary>
+    /// 从 YAML 行提取值: "key: value" → "value" (去掉引号)
+    /// </summary>
+    private static string ExtractYamlValue(string line, string key)
+    {
+        var val = line.Replace(key, "").Trim().Trim('"');
+        return val;
     }
 }
 

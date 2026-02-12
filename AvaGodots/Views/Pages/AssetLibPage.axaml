@@ -1,7 +1,3 @@
-<!--
-资源库页面 — 对应 godots 的 AssetLib 标签页
-功能：搜索Godot资源库模板/项目/示例、筛选版本/分类/排序、网格卡片展示、分页
--->
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,202 +5,192 @@
              xmlns:vm="using:AvaGodots.ViewModels.Pages"
              xmlns:models="using:AvaGodots.Models"
              xmlns:ic="using:FluentIcons.Avalonia"
+             xmlns:asyncImageLoader="using:AsyncImageLoader"
              mc:Ignorable="d"
              x:Class="AvaGodots.Views.Pages.AssetLibPage"
              x:DataType="vm:AssetLibPageViewModel">
 
-  <DockPanel Margin="8">
+  <UserControl.Styles>
+    <Style Selector="Button.current">
+      <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+  </UserControl.Styles>
 
-    <!-- ========== 顶部：搜索栏 ========== -->
-    <Border DockPanel.Dock="Top" Margin="0,0,0,4">
-      <TextBox Classes="searchBox" Watermark="Search Templates, Projects, and Demos"
-               Text="{Binding SearchText}"/>
-    </Border>
+  <DockPanel>
 
-    <!-- ========== 筛选栏 ========== -->
-    <Border DockPanel.Dock="Top" Margin="0,0,0,8">
-      <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,*" HorizontalAlignment="Stretch">
-        <!-- Version -->
-        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" Margin="0,0,12,0">
-          <TextBlock Text="Version:" VerticalAlignment="Center" FontSize="12"
-                     Foreground="{DynamicResource FontDimBrush}"/>
-          <ComboBox Classes="sortCombo" MinWidth="80"
-                    ItemsSource="{Binding VersionOptions}"
-                    SelectedItem="{Binding SelectedVersion}"/>
-        </StackPanel>
-
-        <!-- Sort -->
-        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" Margin="0,0,12,0">
-          <TextBlock Text="Sort:" VerticalAlignment="Center" FontSize="12"
-                     Foreground="{DynamicResource FontDimBrush}"/>
-          <ComboBox Classes="sortCombo" MinWidth="150"
-                    ItemsSource="{Binding SortOptions}"
-                    SelectedItem="{Binding SelectedSort}"/>
-        </StackPanel>
-
-        <!-- Category -->
-        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" Margin="0,0,12,0">
-          <TextBlock Text="Category:" VerticalAlignment="Center" FontSize="12"
-                     Foreground="{DynamicResource FontDimBrush}"/>
-          <ComboBox Classes="sortCombo" MinWidth="100"
-                    ItemsSource="{Binding Categories}"
-                    SelectedItem="{Binding SelectedCategory}"/>
-        </StackPanel>
-
-        <!-- Site -->
-        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4" Margin="0,0,12,0">
-          <TextBlock Text="Site:" VerticalAlignment="Center" FontSize="12"
-                     Foreground="{DynamicResource FontDimBrush}"/>
-          <ComboBox Classes="sortCombo" MinWidth="180"
-                    ItemsSource="{Binding SiteOptions}"
-                    SelectedItem="{Binding SelectedSite}"/>
-        </StackPanel>
-
-        <!-- Support (placeholder) -->
-        <Button Grid.Column="4" Classes="action" Content="Support" VerticalAlignment="Center"/>
+    <!-- ===== 顶部搜索栏 ===== -->
+    <Border DockPanel.Dock="Top" Padding="8,6">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBox Grid.Column="0" Classes="searchBox"
+                 Watermark="{DynamicResource AssetLib.SearchWatermark}"
+                 Text="{Binding SearchText, Mode=TwoWay}"/>
+        <Button Grid.Column="1" Classes="iconAction" Margin="4,0,0,0"
+                Command="{Binding SearchCommand}" ToolTip.Tip="Search">
+          <ic:SymbolIcon Symbol="Search" IconVariant="Regular" FontSize="16"/>
+        </Button>
       </Grid>
     </Border>
 
-    <!-- ========== 顶部分页 ========== -->
-    <Border DockPanel.Dock="Top" Margin="0,0,0,8"
-            IsVisible="{Binding TotalPages}">
-      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
-        <Button Classes="action" Content="First" Command="{Binding FirstPageCommand}" Padding="8,4"/>
-        <Button Classes="action" Content="Previous" Command="{Binding PreviousPageCommand}" Padding="8,4"/>
-
-        <ItemsControl ItemsSource="{Binding PageNumbers}">
-          <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-              <StackPanel Orientation="Horizontal" Spacing="2"/>
-            </ItemsPanelTemplate>
-          </ItemsControl.ItemsPanel>
-          <ItemsControl.ItemTemplate>
-            <DataTemplate>
-              <Button Classes="action" Padding="8,4" MinWidth="32"
-                      HorizontalContentAlignment="Center">
-                <Button.Content>
-                  <TextBlock Text="{Binding, StringFormat={}{0}}"/>
-                </Button.Content>
-              </Button>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-
-        <Button Classes="action" Content="Next" Command="{Binding NextPageCommand}" Padding="8,4"/>
-        <Button Classes="action" Content="Last" Command="{Binding LastPageCommand}" Padding="8,4"/>
+    <!-- ===== 筛选栏 ===== -->
+    <Border DockPanel.Dock="Top" Padding="8,0,8,6">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <StackPanel Spacing="2">
+          <TextBlock Text="{DynamicResource AssetLib.Version}" FontSize="10" Foreground="{DynamicResource FontDimBrush}"/>
+          <ComboBox ItemsSource="{Binding VersionOptions}" SelectedItem="{Binding SelectedVersion}" MinWidth="80" FontSize="12"/>
+        </StackPanel>
+        <StackPanel Spacing="2">
+          <TextBlock Text="{DynamicResource AssetLib.Sort}" FontSize="10" Foreground="{DynamicResource FontDimBrush}"/>
+          <ComboBox ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort}" MinWidth="160" FontSize="12"/>
+        </StackPanel>
+        <StackPanel Spacing="2">
+          <TextBlock Text="{DynamicResource AssetLib.Category}" FontSize="10" Foreground="{DynamicResource FontDimBrush}"/>
+          <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" MinWidth="130" FontSize="12"/>
+        </StackPanel>
+        <StackPanel Spacing="2">
+          <TextBlock Text="{DynamicResource AssetLib.Site}" FontSize="10" Foreground="{DynamicResource FontDimBrush}"/>
+          <ComboBox ItemsSource="{Binding SiteOptions}" SelectedItem="{Binding SelectedSite}" MinWidth="180" FontSize="12"/>
+        </StackPanel>
       </StackPanel>
     </Border>
 
-    <!-- ========== 底部分页（同上） ========== -->
-    <Border DockPanel.Dock="Bottom" Margin="0,8,0,0"
-            IsVisible="{Binding TotalPages}">
-      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
-        <Button Classes="action" Content="First" Command="{Binding FirstPageCommand}" Padding="8,4"/>
-        <Button Classes="action" Content="Previous" Command="{Binding PreviousPageCommand}" Padding="8,4"/>
+    <!-- ===== 顶部分页 ===== -->
+    <Border DockPanel.Dock="Top" Padding="8,0,8,4">
+      <DockPanel>
+        <TextBlock DockPanel.Dock="Left" FontSize="12"
+                   Foreground="{DynamicResource FontDimBrush}" VerticalAlignment="Center">
+          <Run Text="{Binding TotalItems}"/>
+          <Run Text="{DynamicResource AssetLib.AssetsFound}"/>
+        </TextBlock>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2" HorizontalAlignment="Right">
+          <Button Classes="iconAction" Padding="6,2" FontSize="11"
+                  Content="{DynamicResource AssetLib.First}" Command="{Binding FirstPageCommand}"
+                  IsEnabled="{Binding CanGoPrevious}"/>
+          <Button Classes="iconAction" Padding="6,2" FontSize="11"
+                  Content="{DynamicResource AssetLib.Previous}" Command="{Binding PreviousPageCommand}"
+                  IsEnabled="{Binding CanGoPrevious}"/>
+          <ItemsControl ItemsSource="{Binding PageNumbers}">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="1"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:PageItem">
+                <Panel>
+                  <!-- 省略号 (DisplayNumber == -1) -->
+                  <TextBlock Text="..." FontSize="12" VerticalAlignment="Center" Margin="4,0"
+                             Foreground="{DynamicResource FontDimBrush}"
+                             IsVisible="{Binding DisplayNumber, Converter={x:Static vm:PageItemConverters.IsEllipsis}}"/>
+                  <!-- 页码按钮 -->
+                  <Button Classes="iconAction" Classes.current="{Binding IsCurrent}"
+                          MinWidth="28" Padding="4,2" FontSize="12"
+                          Content="{Binding DisplayNumber}"
+                          Command="{Binding $parent[ItemsControl].((vm:AssetLibPageViewModel)DataContext).GoToPageCommand}"
+                          CommandParameter="{Binding PageIndex}"
+                          IsVisible="{Binding DisplayNumber, Converter={x:Static vm:PageItemConverters.IsNotEllipsis}}"/>
+                </Panel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Button Classes="iconAction" Padding="6,2" FontSize="11"
+                  Content="{DynamicResource AssetLib.Next}" Command="{Binding NextPageCommand}"
+                  IsEnabled="{Binding CanGoNext}"/>
+          <Button Classes="iconAction" Padding="6,2" FontSize="11"
+                  Content="{DynamicResource AssetLib.Last}" Command="{Binding LastPageCommand}"
+                  IsEnabled="{Binding CanGoNext}"/>
+        </StackPanel>
+      </DockPanel>
+    </Border>
 
-        <ItemsControl ItemsSource="{Binding PageNumbers}">
+    <!-- ===== 主内容 ===== -->
+    <Panel>
+
+      <!-- 加载指示器 -->
+      <StackPanel IsVisible="{Binding IsLoading}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+        <ProgressBar IsIndeterminate="True" Width="200"/>
+        <TextBlock Text="{Binding StatusText}" FontSize="12"
+                   Foreground="{DynamicResource FontDimBrush}" HorizontalAlignment="Center"/>
+      </StackPanel>
+
+      <!-- 空状态 -->
+      <StackPanel IsVisible="{Binding IsEmpty}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+        <ic:SymbolIcon Symbol="BranchFork" IconVariant="Regular" FontSize="48"
+                       Foreground="{DynamicResource FontDimBrush}" HorizontalAlignment="Center"/>
+        <TextBlock Text="{DynamicResource AssetLib.Empty.Title}" FontSize="16"
+                   Foreground="{DynamicResource FontDimBrush}" HorizontalAlignment="Center"/>
+        <TextBlock Text="{DynamicResource AssetLib.Empty.Desc}"
+                   FontSize="12" Foreground="{DynamicResource FontDimBrush}" HorizontalAlignment="Center"/>
+      </StackPanel>
+
+      <!-- 资源网格 -->
+      <ScrollViewer IsVisible="{Binding !IsEmpty}"
+                    VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                    AllowAutoHide="True">
+        <ItemsControl ItemsSource="{Binding Assets}" Margin="8,0,8,8">
           <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-              <StackPanel Orientation="Horizontal" Spacing="2"/>
+              <WrapPanel Orientation="Horizontal"/>
             </ItemsPanelTemplate>
           </ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>
-            <DataTemplate>
-              <Button Classes="action" Padding="8,4" MinWidth="32"
-                      HorizontalContentAlignment="Center">
-                <Button.Content>
-                  <TextBlock Text="{Binding, StringFormat={}{0}}"/>
-                </Button.Content>
-              </Button>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
+            <DataTemplate DataType="models:AssetLibItem">
+              <Button Margin="4" Padding="0" CornerRadius="6"
+                      Background="{DynamicResource DarkColor2}" BorderThickness="0"
+                      Cursor="Hand" Width="260"
+                      Command="{Binding $parent[ItemsControl].((vm:AssetLibPageViewModel)DataContext).OpenAssetInBrowserCommand}"
+                      CommandParameter="{Binding}">
+                <Border Padding="10" CornerRadius="6">
+                  <Border.Styles>
+                    <Style Selector="Button:pointerover Border">
+                      <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+                    </Style>
+                  </Border.Styles>
+                  <Grid ColumnDefinitions="Auto,*">
+                    <!-- 图标区 -->
+                    <Border Grid.Column="0" Width="64" Height="64"
+                            CornerRadius="4" ClipToBounds="True"
+                            Background="{DynamicResource DarkColor3}"
+                            Margin="0,0,10,0" VerticalAlignment="Top">
+                      <Panel>
+                        <!-- 异步加载远程图标 -->
+                        <Image asyncImageLoader:ImageLoader.Source="{Binding IconUrl}"
+                               Width="64" Height="64" Stretch="UniformToFill"/>
+                        <!-- 占位图标（图片加载完成前显示） -->
+                        <ic:SymbolIcon Symbol="PuzzlePiece" IconVariant="Regular" FontSize="28"
+                                       Foreground="{DynamicResource FontDimBrush}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       IsVisible="{Binding IconUrl, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+                      </Panel>
+                    </Border>
 
-        <Button Classes="action" Content="Next" Command="{Binding NextPageCommand}" Padding="8,4"/>
-        <Button Classes="action" Content="Last" Command="{Binding LastPageCommand}" Padding="8,4"/>
-      </StackPanel>
-    </Border>
-
-    <!-- ========== 加载状态 ========== -->
-    <Panel IsVisible="{Binding IsLoading}" DockPanel.Dock="Top">
-      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8" Margin="0,40">
-        <ic:SymbolIcon Symbol="ArrowSync" IconVariant="Regular" FontSize="32"
-                       Foreground="{DynamicResource FontDimBrush}"/>
-        <TextBlock Text="Loading..." Classes="emptyHint"/>
-      </StackPanel>
-    </Panel>
-
-    <!-- ========== 空状态 ========== -->
-    <Panel IsVisible="{Binding IsEmpty}" DockPanel.Dock="Top">
-      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8" Margin="0,40">
-        <ic:SymbolIcon Symbol="Search" IconVariant="Regular" FontSize="32"
-                       Foreground="{DynamicResource FontDimBrush}"/>
-        <TextBlock Text="No assets found" Classes="emptyTitle"/>
-        <TextBlock Text="Try adjusting your search filters" Classes="emptyHint"/>
-      </StackPanel>
-    </Panel>
-
-    <!-- ========== 素材网格 ========== -->
-    <ScrollViewer>
-      <ItemsControl ItemsSource="{Binding Assets}">
-        <ItemsControl.ItemsPanel>
-          <ItemsPanelTemplate>
-            <WrapPanel Orientation="Horizontal" ItemWidth="360" ItemHeight="110"/>
-          </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="models:AssetLibItem">
-            <Border Classes="listItem" Margin="4" Padding="8"
-                    Background="{DynamicResource DarkColor2}"
-                    CornerRadius="4" Cursor="Hand">
-              <Border.ContextMenu>
-                <ContextMenu>
-                  <MenuItem Header="Open in Browser"
-                            Command="{Binding $parent[ItemsControl].((vm:AssetLibPageViewModel)DataContext).OpenAssetInBrowserCommand}"
-                            CommandParameter="{Binding}">
-                    <MenuItem.Icon>
-                      <ic:SymbolIcon Symbol="Globe" IconVariant="Regular" FontSize="16"/>
-                    </MenuItem.Icon>
-                  </MenuItem>
-                </ContextMenu>
-              </Border.ContextMenu>
-
-              <Grid ColumnDefinitions="64,*">
-                <!-- 图标区域 -->
-                <Border Grid.Column="0" Width="64" Height="64"
-                        CornerRadius="4" ClipToBounds="True"
-                        Background="{DynamicResource DarkColor3}">
-                  <Panel>
-                    <!-- 默认图标 -->
-                    <ic:SymbolIcon Symbol="Apps" IconVariant="Regular" FontSize="28"
-                                   Foreground="{DynamicResource FontDimBrush}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <!-- 远程图标 (异步加载) -->
-                    <Image Source="{Binding IconUrl}"
-                           Stretch="UniformToFill"
-                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                  </Panel>
+                    <!-- 文字信息 -->
+                    <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Top">
+                      <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold"
+                                 Foreground="{DynamicResource AccentBrush}" TextTrimming="CharacterEllipsis"
+                                 MaxLines="2" TextWrapping="Wrap"/>
+                      <TextBlock Text="{Binding Category}" FontSize="11"
+                                 Foreground="{DynamicResource FontDimBrush}"/>
+                      <StackPanel Orientation="Horizontal" Spacing="4">
+                        <ic:SymbolIcon Symbol="Person" IconVariant="Regular" FontSize="11"
+                                       Foreground="{DynamicResource FontDimBrush}"/>
+                        <TextBlock Text="{Binding Author}" FontSize="11"
+                                   Foreground="{DynamicResource FontDimBrush}" TextTrimming="CharacterEllipsis"/>
+                      </StackPanel>
+                      <StackPanel Orientation="Horizontal" Spacing="4">
+                        <ic:SymbolIcon Symbol="Certificate" IconVariant="Regular" FontSize="11"
+                                       Foreground="{DynamicResource FontDimBrush}"/>
+                        <TextBlock Text="{Binding Cost}" FontSize="11"
+                                   Foreground="{DynamicResource FontDimBrush}"/>
+                      </StackPanel>
+                    </StackPanel>
+                  </Grid>
                 </Border>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
 
-                <!-- 信息区域 -->
-                <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Spacing="2">
-                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13"
-                             TextTrimming="CharacterEllipsis" MaxLines="1"
-                             Foreground="{DynamicResource AccentBrush}"/>
-                  <TextBlock Text="{Binding Category}" FontSize="11"
-                             Foreground="{DynamicResource FontDimBrush}"/>
-                  <TextBlock Text="{Binding Author}" FontSize="11"
-                             Foreground="{DynamicResource FontDimBrush}"/>
-                  <TextBlock Text="{Binding Cost}" FontSize="11"
-                             Foreground="{DynamicResource FontDimBrush}"/>
-                </StackPanel>
-              </Grid>
-            </Border>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-    </ScrollViewer>
-
+    </Panel>
   </DockPanel>
-
 </UserControl>
