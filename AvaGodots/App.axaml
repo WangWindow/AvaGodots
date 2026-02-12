@@ -1,27 +1,10 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="using:AvaGodots"
-             xmlns:pages="using:AvaGodots.ViewModels.Pages"
-             xmlns:views="using:AvaGodots.Views.Pages"
              x:Class="AvaGodots.App"
              RequestedThemeVariant="Dark">
 
   <Application.DataTemplates>
-    <!-- ViewModel→View 显式映射（优先于 ViewLocator） -->
-    <DataTemplate DataType="pages:ProjectsPageViewModel">
-      <views:ProjectsPage/>
-    </DataTemplate>
-    <DataTemplate DataType="pages:AssetLibPageViewModel">
-      <views:AssetLibPage/>
-    </DataTemplate>
-    <DataTemplate DataType="pages:EditorsPageViewModel">
-      <views:EditorsPage/>
-    </DataTemplate>
-    <DataTemplate DataType="pages:SettingsPageViewModel">
-      <views:SettingsPage/>
-    </DataTemplate>
-
-    <!-- 通用 ViewLocator 兜底 -->
     <local:ViewLocator/>
   </Application.DataTemplates>
 
