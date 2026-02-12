@@ -1,0 +1,343 @@
+<!--
+AvaGodots 全局主题样式
+基于 godots 项目的 Godot Editor 主题移植
+使用深色主题，强调色为蓝色
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <Style Selector="Window">
+    <Setter Property="Background" Value="#252B35"/>
+  </Style>
+
+  <!-- ========== 基础颜色资源 ========== -->
+  <Style Selector=":is(Control)">
+    <Style.Resources>
+      <!-- 基础色系（对应 godots base_color） -->
+      <SolidColorBrush x:Key="BaseBrush" Color="#353D4A"/>
+      <SolidColorBrush x:Key="DarkColor1" Color="#2B3240"/>
+      <SolidColorBrush x:Key="DarkColor2" Color="#232935"/>
+      <SolidColorBrush x:Key="DarkColor3" Color="#1C2129"/>
+
+      <!-- 强调色（对应 godots accent_color） -->
+      <SolidColorBrush x:Key="AccentBrush" Color="#70BAFA"/>
+      <SolidColorBrush x:Key="AccentHoverBrush" Color="#8CCAFF"/>
+      <SolidColorBrush x:Key="AccentPressedBrush" Color="#5AABEF"/>
+
+      <!-- 文字色 -->
+      <SolidColorBrush x:Key="FontBrush" Color="#D4D4D4"/>
+      <SolidColorBrush x:Key="FontDimBrush" Color="#808080"/>
+      <SolidColorBrush x:Key="FontDisabledBrush" Color="#555555"/>
+
+      <!-- 分隔线 -->
+      <SolidColorBrush x:Key="SeparatorBrush" Color="#3B4453"/>
+
+      <!-- 选中/高亮 -->
+      <SolidColorBrush x:Key="SelectionBrush" Color="#344966"/>
+      <SolidColorBrush x:Key="HoverBrush" Color="#2D3544"/>
+
+      <!-- 警告/错误 -->
+      <SolidColorBrush x:Key="WarningBrush" Color="#FFD144"/>
+      <SolidColorBrush x:Key="ErrorBrush" Color="#FF5555"/>
+      <SolidColorBrush x:Key="SuccessBrush" Color="#55FF55"/>
+
+      <!-- 标签颜色 -->
+      <SolidColorBrush x:Key="TagBrush" Color="#40556B"/>
+
+      <!-- 圆角 -->
+      <CornerRadius x:Key="SmallCornerRadius">3</CornerRadius>
+      <CornerRadius x:Key="MediumCornerRadius">5</CornerRadius>
+
+      <!-- Godot 品牌色 -->
+      <SolidColorBrush x:Key="GodotBlueBrush" Color="#478CBF"/>
+    </Style.Resources>
+  </Style>
+
+  <!-- ========== 全局文本样式 ========== -->
+  <Style Selector="TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
+    <Setter Property="FontSize" Value="14"/>
+  </Style>
+
+  <Style Selector="TextBlock.title">
+    <Setter Property="FontSize" Value="16"/>
+    <Setter Property="FontWeight" Value="Bold"/>
+  </Style>
+
+  <Style Selector="TextBlock.subtitle">
+    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontDimBrush}"/>
+  </Style>
+
+  <Style Selector="TextBlock.path">
+    <Setter Property="FontSize" Value="11"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontDimBrush}"/>
+    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+  </Style>
+
+  <!-- ========== 标题栏标签按钮 ========== -->
+  <Style Selector="ToggleButton.titleTab">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontDimBrush}"/>
+    <Setter Property="Padding" Value="16,8"/>
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="FontWeight" Value="SemiBold"/>
+    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Cursor" Value="Hand"/>
+  </Style>
+  <Style Selector="ToggleButton.titleTab:pointerover">
+    <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+  </Style>
+  <Style Selector="ToggleButton.titleTab:checked">
+    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
+    <Setter Property="Background" Value="{DynamicResource SelectionBrush}"/>
+  </Style>
+
+  <!-- ========== 操作按钮样式 ========== -->
+  <Style Selector="Button.action">
+    <Setter Property="Background" Value="{DynamicResource DarkColor2}"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource SeparatorBrush}"/>
+    <Setter Property="Padding" Value="12,6"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}"/>
+    <Setter Property="Cursor" Value="Hand"/>
+  </Style>
+  <Style Selector="Button.action:pointerover">
+    <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+  </Style>
+  <Style Selector="Button.action:pressed">
+    <Setter Property="Background" Value="{DynamicResource SelectionBrush}"/>
+  </Style>
+
+  <!-- 图标按钮（内联操作） -->
+  <Style Selector="Button.iconAction">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontDimBrush}"/>
+    <Setter Property="Padding" Value="4"/>
+    <Setter Property="MinWidth" Value="28"/>
+    <Setter Property="MinHeight" Value="28"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="BorderThickness" Value="0"/>
+  </Style>
+  <Style Selector="Button.iconAction:pointerover">
+    <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
+  </Style>
+
+  <!-- 强调色按钮 -->
+  <Style Selector="Button.accent">
+    <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+    <Setter Property="Foreground" Value="#1C2129"/>
+    <Setter Property="FontWeight" Value="SemiBold"/>
+    <Setter Property="Padding" Value="16,8"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="BorderThickness" Value="0"/>
+  </Style>
+  <Style Selector="Button.accent:pointerover">
+    <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
+  </Style>
+
+  <!-- ========== 搜索框样式 ========== -->
+  <Style Selector="TextBox.searchBox">
+    <Setter Property="Background" Value="{DynamicResource DarkColor3}"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource SeparatorBrush}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Padding" Value="8,6"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}"/>
+    <Setter Property="FontSize" Value="13"/>
+  </Style>
+  <Style Selector="TextBox.searchBox:focus">
+    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+  </Style>
+
+  <!-- ========== 列表项样式 ========== -->
+  <Style Selector="Border.listItem">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Padding" Value="8,6"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}"/>
+  </Style>
+  <Style Selector="Border.listItem:pointerover">
+    <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+  </Style>
+  <Style Selector="Border.listItem.selected">
+    <Setter Property="Background" Value="{DynamicResource SelectionBrush}"/>
+  </Style>
+
+  <!-- ========== 标签（Tag）样式 ========== -->
+  <Style Selector="Border.tag">
+    <Setter Property="Background" Value="{DynamicResource TagBrush}"/>
+    <Setter Property="CornerRadius" Value="3"/>
+    <Setter Property="Padding" Value="6,2"/>
+  </Style>
+  <Style Selector="Border.tag > TextBlock">
+    <Setter Property="FontSize" Value="11"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
+  </Style>
+
+  <!-- ========== 侧边栏样式 ========== -->
+  <Style Selector="Border.sidebar">
+    <Setter Property="Background" Value="{DynamicResource DarkColor2}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource SeparatorBrush}"/>
+    <Setter Property="BorderThickness" Value="1,0,0,0"/>
+    <Setter Property="MinWidth" Value="150"/>
+    <Setter Property="Padding" Value="8"/>
+  </Style>
+
+  <!-- ========== 面板容器 ========== -->
+  <Style Selector="Border.panel">
+    <Setter Property="Background" Value="{DynamicResource DarkColor1}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource MediumCornerRadius}"/>
+    <Setter Property="Padding" Value="12"/>
+  </Style>
+
+  <!-- ========== 分隔线 ========== -->
+  <Style Selector="Separator">
+    <Setter Property="Background" Value="{DynamicResource SeparatorBrush}"/>
+    <Setter Property="Height" Value="1"/>
+    <Setter Property="Margin" Value="0,4"/>
+  </Style>
+
+  <!-- ========== 下拉菜单（排序） ========== -->
+  <Style Selector="ComboBox.sortCombo">
+    <Setter Property="Background" Value="{DynamicResource DarkColor3}"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource SeparatorBrush}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Padding" Value="8,4"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}"/>
+    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="MinHeight" Value="30"/>
+  </Style>
+
+  <!-- ========== 收藏按钮 ========== -->
+  <Style Selector="ToggleButton.favorite">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Padding" Value="4"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontDimBrush}"/>
+    <Setter Property="MinWidth" Value="28"/>
+    <Setter Property="MinHeight" Value="28"/>
+  </Style>
+  <Style Selector="ToggleButton.favorite:checked">
+    <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+  </Style>
+
+  <!-- ========== 对话框覆盖层 ========== -->
+  <Style Selector="Border.dialogOverlay">
+    <Setter Property="Background" Value="#80000000"/>
+  </Style>
+
+  <Style Selector="Border.dialogContent">
+    <Setter Property="Background" Value="{DynamicResource DarkColor1}"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Padding" Value="20"/>
+    <Setter Property="BoxShadow" Value="0 8 32 0 #40000000"/>
+  </Style>
+
+  <!-- ========== 标签按钮样式 ========== -->
+  <Style Selector="Button.tagButton">
+    <Setter Property="Background" Value="{DynamicResource TagBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
+    <Setter Property="Padding" Value="6,2"/>
+    <Setter Property="MinHeight" Value="20"/>
+    <Setter Property="FontSize" Value="11"/>
+    <Setter Property="CornerRadius" Value="3"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Cursor" Value="Hand"/>
+  </Style>
+  <Style Selector="Button.tagButton:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource SelectionBrush}"/>
+  </Style>
+
+  <!-- ========== 右键菜单样式 ========== -->
+  <Style Selector="ContextMenu">
+    <Setter Property="Background" Value="{DynamicResource DarkColor1}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource SeparatorBrush}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="Padding" Value="2"/>
+  </Style>
+  <Style Selector="MenuItem">
+    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="Padding" Value="8,4"/>
+  </Style>
+  <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+  </Style>
+
+  <!-- ========== 设置页导航按钮选中指示 ========== -->
+  <Style Selector="Button.settingsNavItem">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    <Setter Property="Padding" Value="24,6,8,6"/>
+    <Setter Property="CornerRadius" Value="3"/>
+    <Setter Property="BorderThickness" Value="3,0,0,0"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="FontSize" Value="13"/>
+  </Style>
+  <Style Selector="Button.settingsNavItem:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+  </Style>
+  <Style Selector="Button.settingsNavItem.selected /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+  </Style>
+  <Style Selector="Button.settingsNavItem.selected">
+    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+  </Style>
+
+  <!-- ========== ToggleSwitch 暗色适配 ========== -->
+  <Style Selector="ToggleSwitch">
+    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
+  </Style>
+
+  <!-- ========== NumericUpDown 暗色适配 ========== -->
+  <Style Selector="NumericUpDown">
+    <Setter Property="Background" Value="{DynamicResource DarkColor3}"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource SeparatorBrush}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}"/>
+  </Style>
+
+  <!-- ========== Slider 暗色适配 ========== -->
+  <Style Selector="Slider">
+    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+  </Style>
+
+  <!-- ========== 徽章样式 ========== -->
+  <Style Selector="Border.badge">
+    <Setter Property="Background" Value="{DynamicResource TagBrush}"/>
+    <Setter Property="CornerRadius" Value="3"/>
+    <Setter Property="Padding" Value="6,1"/>
+  </Style>
+  <Style Selector="Border.badge > TextBlock">
+    <Setter Property="FontSize" Value="10"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
+  </Style>
+
+  <!-- ========== 空状态 ========== -->
+  <Style Selector="TextBlock.emptyTitle">
+    <Setter Property="FontSize" Value="18"/>
+    <Setter Property="FontWeight" Value="SemiBold"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontDimBrush}"/>
+    <Setter Property="HorizontalAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="TextBlock.emptyHint">
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontDimBrush}"/>
+    <Setter Property="HorizontalAlignment" Value="Center"/>
+    <Setter Property="TextWrapping" Value="Wrap"/>
+    <Setter Property="TextAlignment" Value="Center"/>
+    <Setter Property="MaxWidth" Value="400"/>
+  </Style>
+</Styles>

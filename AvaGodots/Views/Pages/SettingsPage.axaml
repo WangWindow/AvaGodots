@@ -1,0 +1,313 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AvaGodots.ViewModels.Pages"
+             xmlns:ic="using:FluentIcons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="580"
+             x:Class="AvaGodots.Views.Pages.SettingsPage"
+             x:DataType="vm:SettingsPageViewModel">
+
+  <Design.DataContext>
+    <vm:SettingsPageViewModel/>
+  </Design.DataContext>
+
+  <Grid ColumnDefinitions="200,*">
+
+    <!-- ========== 左侧分类导航 ========== -->
+    <Border Grid.Column="0" Background="{DynamicResource DarkColor2}"
+            BorderBrush="{DynamicResource SeparatorBrush}" BorderThickness="0,0,1,0">
+      <DockPanel>
+        <!-- 底部 Settings Folder 按钮 -->
+        <Button DockPanel.Dock="Bottom" Classes="action" Margin="8"
+                HorizontalAlignment="Stretch" Command="{Binding OpenConfigDirectoryCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+            <ic:SymbolIcon Symbol="Folder" IconVariant="Regular" FontSize="14"/>
+            <TextBlock Text="Settings Folder"/>
+          </StackPanel>
+        </Button>
+
+        <!-- 分类树 -->
+        <ScrollViewer Padding="4,8">
+          <StackPanel Spacing="2">
+
+            <!-- Application 标题 -->
+            <TextBlock Text="Application" FontWeight="Bold" FontSize="13"
+                       Foreground="{DynamicResource FontDimBrush}"
+                       Margin="12,8,0,4"/>
+
+            <Button Classes="settingsNavItem" Classes.selected="{Binding IsConfigVisible}"
+                    Command="{Binding SelectCategoryCommand}" CommandParameter="0">
+              <TextBlock Text="Config"/>
+            </Button>
+            <Button Classes="settingsNavItem" Classes.selected="{Binding IsThemeVisible}"
+                    Command="{Binding SelectCategoryCommand}" CommandParameter="1">
+              <TextBlock Text="Theme"/>
+            </Button>
+            <Button Classes="settingsNavItem" Classes.selected="{Binding IsAdvancedVisible}"
+                    Command="{Binding SelectCategoryCommand}" CommandParameter="2">
+              <TextBlock Text="Advanced"/>
+            </Button>
+
+            <!-- Network 标题 -->
+            <TextBlock Text="Network" FontWeight="Bold" FontSize="13"
+                       Foreground="{DynamicResource FontDimBrush}"
+                       Margin="12,16,0,4"/>
+
+            <Button Classes="settingsNavItem" Classes.selected="{Binding IsProxyVisible}"
+                    Command="{Binding SelectCategoryCommand}" CommandParameter="3">
+              <TextBlock Text="Http Proxy"/>
+            </Button>
+
+          </StackPanel>
+        </ScrollViewer>
+      </DockPanel>
+    </Border>
+
+    <!-- ========== 右侧内容区域 ========== -->
+    <DockPanel Grid.Column="1" Background="{DynamicResource DarkColor3}">
+
+      <!-- 底部操作栏 -->
+      <Border DockPanel.Dock="Bottom" Background="{DynamicResource DarkColor2}"
+              BorderBrush="{DynamicResource SeparatorBrush}" BorderThickness="0,1,0,0"
+              Padding="12,8" IsVisible="{Binding !NeedsRestart}">
+        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+          <Button Classes="action" Command="{Binding ResetAllToDefaultCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <ic:SymbolIcon Symbol="ArrowReset" IconVariant="Regular" FontSize="14"/>
+              <TextBlock Text="Reset All"/>
+            </StackPanel>
+          </Button>
+          <Button Classes="accent" Command="{Binding SaveAndCloseCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <ic:SymbolIcon Symbol="Checkmark" IconVariant="Regular" FontSize="14"/>
+              <TextBlock Text="Save &amp; Close"/>
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Border>
+
+      <!-- 底部重启提示栏 -->
+      <Border DockPanel.Dock="Bottom" Background="#3A2E1A"
+              BorderBrush="{DynamicResource WarningBrush}" BorderThickness="0,1,0,0"
+              Padding="12,8"
+              IsVisible="{Binding NeedsRestart}">
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Classes="accent" Margin="8,0,0,0"
+                  Command="{Binding SaveAndRestartCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <ic:SymbolIcon Symbol="ArrowSync" IconVariant="Regular" FontSize="14"/>
+              <TextBlock Text="Save &amp; Restart"/>
+            </StackPanel>
+          </Button>
+          <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <ic:SymbolIcon Symbol="Warning" IconVariant="Filled" FontSize="16"
+                           Foreground="{DynamicResource WarningBrush}"/>
+            <TextBlock Text="某些设置变更需要重启应用才能生效。"
+                       Foreground="{DynamicResource WarningBrush}" FontSize="13"/>
+          </StackPanel>
+        </DockPanel>
+      </Border>
+
+      <!-- 设置面板内容 -->
+      <ScrollViewer Padding="20,16">
+        <Panel>
+
+          <!-- ===== Application > Config ===== -->
+          <StackPanel Spacing="16" IsVisible="{Binding IsConfigVisible}">
+            <TextBlock Text="Application / Config" Classes="title" Margin="0,0,0,8"/>
+
+            <!-- Language -->
+            <Grid ColumnDefinitions="*,*">
+              <TextBlock Text="Language" VerticalAlignment="Center" Opacity="0.6"/>
+              <ComboBox Grid.Column="1" Classes="sortCombo" HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding LanguageOptions}"
+                        SelectedItem="{Binding Language}"/>
+            </Grid>
+
+            <!-- Auto Close -->
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="Auto Close" VerticalAlignment="Center" Opacity="0.6"/>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding AutoClose}"
+                            OnContent="" OffContent=""/>
+            </Grid>
+
+            <!-- Scale -->
+            <Grid ColumnDefinitions="*,*">
+              <TextBlock Text="Scale" VerticalAlignment="Center" Opacity="0.6"/>
+              <ComboBox Grid.Column="1" Classes="sortCombo" HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding ScaleOptions}"
+                        SelectedItem="{Binding Scale}"/>
+            </Grid>
+
+            <!-- Default Projects Path -->
+            <Grid ColumnDefinitions="*,2*">
+              <TextBlock Text="Default Projects Path" VerticalAlignment="Center" Opacity="0.6"/>
+              <Grid Grid.Column="1" ColumnDefinitions="*,Auto">
+                <TextBox Text="{Binding DefaultProjectsPath}" Classes="searchBox" IsReadOnly="True"/>
+                <Button Grid.Column="1" Classes="iconAction" Margin="4,0,0,0"
+                        Command="{Binding BrowseDefaultProjectsPathCommand}" ToolTip.Tip="Browse">
+                  <ic:SymbolIcon Symbol="FolderOpen" IconVariant="Regular" FontSize="16"/>
+                </Button>
+              </Grid>
+            </Grid>
+
+            <!-- Directory Naming Convention -->
+            <Grid ColumnDefinitions="*,*">
+              <TextBlock Text="Directory Naming Convention" VerticalAlignment="Center" Opacity="0.6"/>
+              <ComboBox Grid.Column="1" Classes="sortCombo" HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding NamingConventionOptions}"
+                        SelectedItem="{Binding DirectoryNamingConvention}"/>
+            </Grid>
+
+            <!-- Use System Titlebar -->
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="Use System Titlebar" VerticalAlignment="Center" Opacity="0.6"/>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding UseSystemTitleBar}"
+                            OnContent="" OffContent=""/>
+            </Grid>
+
+            <!-- Use Native File Dialog -->
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="Use Native File Dialog" VerticalAlignment="Center" Opacity="0.6"/>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding UseNativeFileDialog}"
+                            OnContent="" OffContent=""/>
+            </Grid>
+
+            <!-- Remember Window Rect -->
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="Remember Window Rect" VerticalAlignment="Center" Opacity="0.6"/>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding RememberWindowSize}"
+                            OnContent="" OffContent=""/>
+            </Grid>
+          </StackPanel>
+
+          <!-- ===== Application > Theme ===== -->
+          <StackPanel Spacing="16" IsVisible="{Binding IsThemeVisible}">
+            <TextBlock Text="Application / Theme" Classes="title" Margin="0,0,0,8"/>
+
+            <!-- Preset -->
+            <Grid ColumnDefinitions="*,*">
+              <TextBlock Text="Preset" VerticalAlignment="Center" Opacity="0.6"/>
+              <ComboBox Grid.Column="1" Classes="sortCombo" HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding ThemePresetOptions}"
+                        SelectedItem="{Binding ThemePreset}"/>
+            </Grid>
+
+            <!-- Base Color -->
+            <Grid ColumnDefinitions="*,*">
+              <TextBlock Text="Base Color" VerticalAlignment="Center" Opacity="0.6"/>
+              <Grid Grid.Column="1" ColumnDefinitions="Auto,*" HorizontalAlignment="Stretch">
+                <Border Width="28" Height="28" CornerRadius="4" Margin="0,0,8,0"
+                        Background="{Binding BaseColor}"/>
+                <TextBox Grid.Column="1" Classes="searchBox" Text="{Binding BaseColor}"/>
+              </Grid>
+            </Grid>
+
+            <!-- Accent Color -->
+            <Grid ColumnDefinitions="*,*">
+              <TextBlock Text="Accent Color" VerticalAlignment="Center" Opacity="0.6"/>
+              <Grid Grid.Column="1" ColumnDefinitions="Auto,*" HorizontalAlignment="Stretch">
+                <Border Width="28" Height="28" CornerRadius="4" Margin="0,0,8,0"
+                        Background="{Binding AccentColor}"/>
+                <TextBox Grid.Column="1" Classes="searchBox" Text="{Binding AccentColor}"/>
+              </Grid>
+            </Grid>
+
+            <!-- Contrast -->
+            <Grid ColumnDefinitions="*,*">
+              <TextBlock Text="Contrast" VerticalAlignment="Center" Opacity="0.6"/>
+              <Grid Grid.Column="1" ColumnDefinitions="Auto,*" HorizontalAlignment="Stretch">
+                <TextBlock Text="{Binding Contrast, StringFormat={}{0:F1}}"
+                           Width="36" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           FontSize="12"/>
+                <Slider Grid.Column="1" Minimum="-1" Maximum="1"
+                        TickFrequency="0.1" IsSnapToTickEnabled="True"
+                        Value="{Binding Contrast}"/>
+              </Grid>
+            </Grid>
+          </StackPanel>
+
+          <!-- ===== Application > Advanced ===== -->
+          <StackPanel Spacing="16" IsVisible="{Binding IsAdvancedVisible}">
+            <TextBlock Text="Application / Advanced" Classes="title" Margin="0,0,0,8"/>
+
+            <!-- Downloads Path -->
+            <Grid ColumnDefinitions="*,2*">
+              <TextBlock Text="Downloads Path" VerticalAlignment="Center" Opacity="0.6"/>
+              <Grid Grid.Column="1" ColumnDefinitions="*,Auto">
+                <TextBox Text="{Binding DownloadsPath}" Classes="searchBox" IsReadOnly="True"/>
+                <Button Grid.Column="1" Classes="iconAction" Margin="4,0,0,0"
+                        Command="{Binding BrowseDownloadsPathCommand}" ToolTip.Tip="Browse">
+                  <ic:SymbolIcon Symbol="FolderOpen" IconVariant="Regular" FontSize="16"/>
+                </Button>
+              </Grid>
+            </Grid>
+
+            <!-- Versions Path -->
+            <Grid ColumnDefinitions="*,2*">
+              <TextBlock Text="Versions Path" VerticalAlignment="Center" Opacity="0.6"/>
+              <Grid Grid.Column="1" ColumnDefinitions="*,Auto">
+                <TextBox Text="{Binding VersionsPath}" Classes="searchBox" IsReadOnly="True"/>
+                <Button Grid.Column="1" Classes="iconAction" Margin="4,0,0,0"
+                        Command="{Binding BrowseVersionsPathCommand}" ToolTip.Tip="Browse">
+                  <ic:SymbolIcon Symbol="FolderOpen" IconVariant="Regular" FontSize="16"/>
+                </Button>
+              </Grid>
+            </Grid>
+
+            <!-- Show Orphan Editor Explorer -->
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="Show Orphan Editor Explorer" VerticalAlignment="Center" Opacity="0.6"/>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding ShowOrphanEditorExplorer}"
+                            OnContent="" OffContent=""/>
+            </Grid>
+
+            <!-- Allow Install To Not Empty Dir -->
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="Allow Install To Not Empty Dir" VerticalAlignment="Center" Opacity="0.6"/>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding AllowInstallToNotEmptyDir}"
+                            OnContent="" OffContent=""/>
+            </Grid>
+
+            <!-- Check Only Stable Updates -->
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="Check Only Stable Updates" VerticalAlignment="Center" Opacity="0.6"/>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding OnlyStableUpdates}"
+                            OnContent="" OffContent=""/>
+            </Grid>
+
+            <!-- VS Code Integration -->
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="VS Code Integration" VerticalAlignment="Center" Opacity="0.6"/>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding EnableVsCodeIntegration}"
+                            OnContent="" OffContent=""/>
+            </Grid>
+          </StackPanel>
+
+          <!-- ===== Network > Http Proxy ===== -->
+          <StackPanel Spacing="16" IsVisible="{Binding IsProxyVisible}">
+            <TextBlock Text="Network / Http Proxy" Classes="title" Margin="0,0,0,8"/>
+
+            <!-- Host -->
+            <Grid ColumnDefinitions="*,2*">
+              <TextBlock Text="Host" VerticalAlignment="Center" Opacity="0.6"/>
+              <TextBox Grid.Column="1" Classes="searchBox" Text="{Binding ProxyHost}"
+                       Watermark="e.g. 127.0.0.1"/>
+            </Grid>
+
+            <!-- Port -->
+            <Grid ColumnDefinitions="*,*">
+              <TextBlock Text="Port" VerticalAlignment="Center" Opacity="0.6"/>
+              <NumericUpDown Grid.Column="1" Minimum="0" Maximum="65535"
+                             Value="{Binding ProxyPort}" FormatString="0"
+                             HorizontalAlignment="Stretch"/>
+            </Grid>
+          </StackPanel>
+
+        </Panel>
+      </ScrollViewer>
+    </DockPanel>
+  </Grid>
+
+</UserControl>

@@ -3,15 +3,115 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:AvaGodots.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:local="using:AvaGodots"
+             xmlns:ic="using:FluentIcons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
              x:Class="AvaGodots.Views.MainView"
              x:DataType="vm:MainViewModel"
-             Background="Transparent">
+             Background="#252B35">
+
   <Design.DataContext>
-    <vm:MainViewModel />
+    <vm:MainViewModel/>
   </Design.DataContext>
 
-  <StackPanel>
+  <Grid RowDefinitions="Auto,*,Auto">
 
-  </StackPanel>
+    <!-- ========== 标题栏区域 ========== -->
+    <Border Grid.Row="0" Background="#1C2129" Padding="0" IsHitTestVisible="True">
+      <Grid ColumnDefinitions="Auto,*,Auto" Height="40">
+
+        <!-- 左侧窗口控制区域（macOS 风格按钮的占位） -->
+        <Panel Grid.Column="0" Width="80" IsHitTestVisible="False"/>
+
+        <!-- 中间标签页切换按钮 -->
+        <StackPanel Grid.Column="1" Orientation="Horizontal"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Spacing="4">
+
+          <ToggleButton Classes="titleTab"
+                        IsChecked="{Binding SelectedTabIndex, Converter={x:Static local:TabIndexConverter.Projects}}"
+                        Command="{Binding NavigateToProjectsCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <ic:SymbolIcon Symbol="DocumentBulletList" IconVariant="Regular" FontSize="16"/>
+              <TextBlock Text="Projects" VerticalAlignment="Center"/>
+            </StackPanel>
+          </ToggleButton>
+
+          <ToggleButton Classes="titleTab"
+                        IsChecked="{Binding SelectedTabIndex, Converter={x:Static local:TabIndexConverter.AssetLib}}"
+                        Command="{Binding NavigateToAssetLibCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <ic:SymbolIcon Symbol="ArrowDownload" IconVariant="Regular" FontSize="16"/>
+              <TextBlock Text="Asset Library" VerticalAlignment="Center"/>
+            </StackPanel>
+          </ToggleButton>
+
+          <ToggleButton Classes="titleTab"
+                        IsChecked="{Binding SelectedTabIndex, Converter={x:Static local:TabIndexConverter.Editors}}"
+                        Command="{Binding NavigateToEditorsCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <ic:SymbolIcon Symbol="AppGeneric" IconVariant="Regular" FontSize="16"/>
+              <TextBlock Text="Editors" VerticalAlignment="Center"/>
+            </StackPanel>
+          </ToggleButton>
+
+        </StackPanel>
+
+        <!-- 右侧工具按钮 -->
+        <StackPanel Grid.Column="2" Orientation="Horizontal"
+                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                    Spacing="4" Margin="0,0,8,0">
+
+          <!-- 版本号 -->
+          <TextBlock Text="{Binding VersionText}"
+                     FontSize="11"
+                     Foreground="{DynamicResource FontDimBrush}"
+                     VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+          <!-- 设置按钮 -->
+          <Button Classes="iconAction"
+                  Command="{Binding NavigateToSettingsCommand}"
+                  ToolTip.Tip="设置">
+            <ic:SymbolIcon Symbol="Settings" IconVariant="Regular" FontSize="18"/>
+          </Button>
+        </StackPanel>
+
+      </Grid>
+    </Border>
+
+    <!-- ========== 内容区域 ========== -->
+    <ContentControl Grid.Row="1"
+                    Content="{Binding CurrentPage}"
+                    Margin="0"/>
+
+    <!-- ========== 底部状态栏 ========== -->
+    <Border Grid.Row="2" Background="#1C2129" Padding="12,4" Height="28">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Grid.Column="0"
+                   Text="{Binding StatusText}"
+                   FontSize="11"
+                   Foreground="{DynamicResource FontDimBrush}"
+                   VerticalAlignment="Center"/>
+        <TextBlock Grid.Column="1"
+                   Text="{Binding VersionText}"
+                   FontSize="11"
+                   Foreground="{DynamicResource FontDimBrush}"
+                   VerticalAlignment="Center"/>
+      </Grid>
+    </Border>
+
+    <!-- ========== 加载叠加层 ========== -->
+    <Border Grid.Row="0" Grid.RowSpan="3"
+            Background="#80000000"
+            IsVisible="{Binding IsLoading}"
+            IsHitTestVisible="{Binding IsLoading}">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+        <ProgressBar IsIndeterminate="True" Width="200"/>
+        <TextBlock Text="{Binding StatusText}"
+                   Foreground="{DynamicResource FontBrush}"
+                   HorizontalAlignment="Center"/>
+      </StackPanel>
+    </Border>
+
+  </Grid>
 </UserControl>

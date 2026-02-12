@@ -1,18 +1,16 @@
-using AvaGodots.ViewModels;
+using AvaGodots.ViewModels.Pages;
 using Avalonia.Controls;
 
-namespace AvaGodots.Views;
+namespace AvaGodots.Views.Pages;
 
-public partial class MainView : UserControl
+public partial class AssetLibPage : UserControl
 {
-    public MainView()
+    public AssetLibPage()
     {
         InitializeComponent();
-
-        // 视图加载完成后初始化数据
         Loaded += async (_, _) =>
         {
-            if (DataContext is MainViewModel vm)
+            if (DataContext is AssetLibPageViewModel vm)
             {
                 await vm.InitializeCommand.ExecuteAsync(null);
             }

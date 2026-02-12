@@ -1,29 +1,20 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:AvaGodots.ViewModels"
+        xmlns:views="using:AvaGodots.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:views="using:AvaGodots.Views"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
         x:Class="AvaGodots.Views.MainWindow"
-        ExtendClientAreaToDecorationsHint="False"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="AvaGodots"
-        TransparencyLevelHint="AcrylicBlur"
-        WindowStartupLocation="CenterScreen">
-  <StackPanel>
-    <!--  桌面毛玻璃效果  -->
-    <ExperimentalAcrylicBorder IsHitTestVisible="False">
-      <ExperimentalAcrylicBorder.Material>
-        <ExperimentalAcrylicMaterial
-        BackgroundSource="Digger"
-        MaterialOpacity="0.6"
-        TintColor="{DynamicResource SystemAltHighColor}"
-        TintOpacity="1" />
-      </ExperimentalAcrylicBorder.Material>
-    </ExperimentalAcrylicBorder>
+        x:DataType="vm:MainViewModel"
+        Title="Godots"
+        MinWidth="700" MinHeight="350"
+        Width="900" Height="600"
+        Background="#252B35"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="40">
 
-    <!--  主视图  -->
-    <views:MainView />
-  </StackPanel>
+  <views:MainView/>
+
 </Window>
