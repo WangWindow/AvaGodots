@@ -202,7 +202,7 @@ public partial class AssetLibPageViewModel : ViewModelBase
     private async Task SearchAsync()
     {
         IsLoading = true;
-        StatusText = "Searching...";
+        StatusText = LocalizationService.GetString("AssetLib.Status.Searching", "Searching...");
 
         try
         {
@@ -246,11 +246,13 @@ public partial class AssetLibPageViewModel : ViewModelBase
             UpdatePageNumbers();
 
             IsEmpty = Assets.Count == 0;
-            StatusText = $"Found {TotalItems} assets";
+            var foundTemplate = LocalizationService.GetString("AssetLib.Status.Found", "Found {0} assets");
+            StatusText = string.Format(foundTemplate, TotalItems);
         }
         catch (Exception ex)
         {
-            StatusText = $"Error: {ex.Message}";
+            var errorTemplate = LocalizationService.GetString("AssetLib.Status.Error", "Error: {0}");
+            StatusText = string.Format(errorTemplate, ex.Message);
             IsEmpty = true;
         }
         finally

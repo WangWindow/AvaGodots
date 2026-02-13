@@ -21,9 +21,24 @@
   <x:String x:Key="Common.Import">Import</x:String>
   <x:String x:Key="Common.Refresh">Refresh</x:String>
   <x:String x:Key="Common.Download">Download</x:String>
+  <x:String x:Key="Common.Search">Search</x:String>
+  <x:String x:Key="Common.Randomize">Randomize</x:String>
   <x:String x:Key="Common.Dismiss">Dismiss</x:String>
   <x:String x:Key="Common.Duplicate">Duplicate</x:String>
   <x:String x:Key="Common.Bind">Bind</x:String>
+
+  <!-- ========== Main / Status ========== -->
+  <x:String x:Key="Main.Tooltip.Settings">Settings</x:String>
+  <x:String x:Key="App.Status.LoadingConfig">Loading configuration...</x:String>
+  <x:String x:Key="App.Status.LoadingEditors">Loading editors...</x:String>
+  <x:String x:Key="App.Status.LoadingProjects">Loading projects...</x:String>
+  <x:String x:Key="App.Status.LoadedSummary">Loaded {0} projects, {1} editors</x:String>
+  <x:String x:Key="App.Status.LoadFailed">Load failed: {0}</x:String>
+
+  <!-- ========== Asset Library Status ========== -->
+  <x:String x:Key="AssetLib.Status.Searching">Searching...</x:String>
+  <x:String x:Key="AssetLib.Status.Found">Found {0} assets</x:String>
+  <x:String x:Key="AssetLib.Status.Error">Error: {0}</x:String>
 
   <!-- ========== Projects Page ========== -->
   <x:String x:Key="Projects.New">New</x:String>
@@ -176,5 +191,11 @@
   <x:String x:Key="Settings.Proxy.Title">Network / Http Proxy</x:String>
   <x:String x:Key="Settings.Proxy.Host">Host</x:String>
   <x:String x:Key="Settings.Proxy.Port">Port</x:String>
+  <x:String x:Key="Settings.Proxy.HostWatermark">e.g. 127.0.0.1</x:String>
+
+  <!-- Settings > Dialogs -->
+  <x:String x:Key="Settings.Dialog.SelectDefaultProjectsPath">Select default projects directory</x:String>
+  <x:String x:Key="Settings.Dialog.SelectDownloadsPath">Select downloads directory</x:String>
+  <x:String x:Key="Settings.Dialog.SelectVersionsPath">Select editor versions directory</x:String>
 
 </ResourceDictionary>

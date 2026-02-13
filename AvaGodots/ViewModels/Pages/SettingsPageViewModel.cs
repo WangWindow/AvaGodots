@@ -18,6 +18,8 @@ public partial class SettingsPageViewModel : ViewModelBase
     private readonly IConfigService _configService;
     private readonly IVsCodeIntegrationService _vsCodeService;
 
+    public event Action? RequestClose;
+
     // ========== 分类导航 ==========
 
     /// <summary>
@@ -263,21 +265,24 @@ public partial class SettingsPageViewModel : ViewModelBase
     [RelayCommand]
     private async Task BrowseDefaultProjectsPathAsync()
     {
-        var folder = await FileDialogHelper.PickFolderAsync("选择默认项目目录");
+        var folder = await FileDialogHelper.PickFolderAsync(
+            LocalizationService.GetString("Settings.Dialog.SelectDefaultProjectsPath", "Select default projects directory"));
         if (folder != null) DefaultProjectsPath = folder;
     }
 
     [RelayCommand]
     private async Task BrowseDownloadsPathAsync()
     {
-        var folder = await FileDialogHelper.PickFolderAsync("选择下载目录");
+        var folder = await FileDialogHelper.PickFolderAsync(
+            LocalizationService.GetString("Settings.Dialog.SelectDownloadsPath", "Select downloads directory"));
         if (folder != null) DownloadsPath = folder;
     }
 
     [RelayCommand]
     private async Task BrowseVersionsPathAsync()
     {
-        var folder = await FileDialogHelper.PickFolderAsync("选择编辑器存储目录");
+        var folder = await FileDialogHelper.PickFolderAsync(
+            LocalizationService.GetString("Settings.Dialog.SelectVersionsPath", "Select editor versions directory"));
         if (folder != null) VersionsPath = folder;
     }
 
@@ -295,7 +300,7 @@ public partial class SettingsPageViewModel : ViewModelBase
     private async Task SaveAndCloseAsync()
     {
         await SaveSettingsAsync();
-        // Navigate back to projects tab via MainViewModel
+        RequestClose?.Invoke();
     }
 
     [RelayCommand]

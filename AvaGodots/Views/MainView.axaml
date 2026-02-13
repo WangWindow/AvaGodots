@@ -28,7 +28,7 @@
                     Spacing="4">
 
           <ToggleButton Classes="titleTab"
-                        IsChecked="{Binding SelectedTabIndex, Converter={x:Static local:TabIndexConverter.Projects}, Mode=OneWay}"
+                        IsChecked="{Binding IsProjectsTabSelected, Mode=OneWay}"
                         Command="{Binding NavigateToProjectsCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
               <ic:SymbolIcon Symbol="DocumentBulletList" IconVariant="Regular" FontSize="16"/>
@@ -37,7 +37,7 @@
           </ToggleButton>
 
           <ToggleButton Classes="titleTab"
-                        IsChecked="{Binding SelectedTabIndex, Converter={x:Static local:TabIndexConverter.AssetLib}, Mode=OneWay}"
+                        IsChecked="{Binding IsAssetLibTabSelected, Mode=OneWay}"
                         Command="{Binding NavigateToAssetLibCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
               <ic:SymbolIcon Symbol="ArrowDownload" IconVariant="Regular" FontSize="16"/>
@@ -46,7 +46,7 @@
           </ToggleButton>
 
           <ToggleButton Classes="titleTab"
-                        IsChecked="{Binding SelectedTabIndex, Converter={x:Static local:TabIndexConverter.Editors}, Mode=OneWay}"
+                        IsChecked="{Binding IsEditorsTabSelected, Mode=OneWay}"
                         Command="{Binding NavigateToEditorsCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
               <ic:SymbolIcon Symbol="AppGeneric" IconVariant="Regular" FontSize="16"/>
@@ -65,7 +65,7 @@
                      VerticalAlignment="Center" Margin="0,0,8,0"/>
           <Button Classes="iconAction"
                   Command="{Binding NavigateToSettingsCommand}"
-                  ToolTip.Tip="Settings">
+                  ToolTip.Tip="{DynamicResource Main.Tooltip.Settings}">
             <ic:SymbolIcon Symbol="Settings" IconVariant="Regular" FontSize="18"/>
           </Button>
         </StackPanel>
@@ -104,7 +104,7 @@
                       <Button DockPanel.Dock="Right" Classes="iconAction" Padding="2"
                               Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).DismissDownloadCommand}"
                               CommandParameter="{Binding}"
-                              ToolTip.Tip="Dismiss">
+                              ToolTip.Tip="{DynamicResource Common.Dismiss}">
                         <ic:SymbolIcon Symbol="Dismiss" IconVariant="Regular" FontSize="12"/>
                       </Button>
                       <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold"

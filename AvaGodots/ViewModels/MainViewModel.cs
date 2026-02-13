@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using AvaGodots.Interfaces;
 using AvaGodots.Services;
@@ -29,6 +30,11 @@ public partial class MainViewModel : ViewModelBase
     /// </summary>
     [ObservableProperty]
     private int _selectedTabIndex;
+
+    public bool IsProjectsTabSelected => SelectedTabIndex == 0;
+    public bool IsAssetLibTabSelected => SelectedTabIndex == 1;
+    public bool IsEditorsTabSelected => SelectedTabIndex == 2;
+    public bool IsSettingsTabSelected => SelectedTabIndex == 3;
 
     /// <summary>
     /// 当前选中的页面内容
@@ -119,6 +125,7 @@ public partial class MainViewModel : ViewModelBase
         EditorsPage.SetProjectService(_projectService);
         EditorsPage.SetDatabase(_db);
         SettingsPage = new SettingsPageViewModel(_configService, _vsCodeService);
+        SettingsPage.RequestClose += OnSettingsPageRequestClose;
 
         Pages.Add(ProjectsPage);
         Pages.Add(AssetLibPage);
@@ -126,6 +133,27 @@ public partial class MainViewModel : ViewModelBase
         Pages.Add(SettingsPage);
 
         CurrentPage = ProjectsPage;
+        VersionText = $"v{ResolveAppVersion()}";
+    }
+
+    private static string ResolveAppVersion()
+    {
+        var informationalVersion = Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+
+        if (!string.IsNullOrWhiteSpace(informationalVersion))
+        {
+            var plusIndex = informationalVersion.IndexOf('+');
+            return plusIndex > 0 ? informationalVersion[..plusIndex] : informationalVersion;
+        }
+
+        var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        return assemblyVersion is null ? "0.0.0" : $"{assemblyVersion.Major}.{assemblyVersion.Minor}.{assemblyVersion.Build}";
+    }
+
+    private void OnSettingsPageRequestClose()
+    {
+        SelectedTabIndex = 0;
     }
 
     /// <summary>
@@ -133,6 +161,11 @@ public partial class MainViewModel : ViewModelBase
     /// </summary>
     partial void OnSelectedTabIndexChanged(int value)
     {
+        OnPropertyChanged(nameof(IsProjectsTabSelected));
+        OnPropertyChanged(nameof(IsAssetLibTabSelected));
+        OnPropertyChanged(nameof(IsEditorsTabSelected));
+        OnPropertyChanged(nameof(IsSettingsTabSelected));
+
         CurrentPage = value switch
         {
             0 => ProjectsPage,
@@ -150,7 +183,7 @@ public partial class MainViewModel : ViewModelBase
     private async Task InitializeAsync()
     {
         IsLoading = true;
-        StatusText = "正在加载配置...";
+        StatusText = LocalizationService.GetString("App.Status.LoadingConfig", "Loading configuration...");
 
         try
         {
@@ -160,22 +193,24 @@ public partial class MainViewModel : ViewModelBase
             await _db.InitializeAsync();
             await _configService.LoadAsync();
 
-            StatusText = "正在加载编辑器...";
+            StatusText = LocalizationService.GetString("App.Status.LoadingEditors", "Loading editors...");
             await _editorService.LoadAsync();
 
-            StatusText = "正在加载项目...";
+            StatusText = LocalizationService.GetString("App.Status.LoadingProjects", "Loading projects...");
             await _projectService.LoadAsync();
 
             ProjectsPage.RefreshProjects();
             EditorsPage.RefreshEditors();
             SettingsPage.LoadSettings();
 
-            StatusText = $"已加载 {_projectService.Projects.Count} 个项目, {_editorService.Editors.Count} 个编辑器";
+            var loadedTemplate = LocalizationService.GetString("App.Status.LoadedSummary", "Loaded {0} projects, {1} editors");
+            StatusText = string.Format(loadedTemplate, _projectService.Projects.Count, _editorService.Editors.Count);
             LoggerService.Instance.Info("App", $"Loaded {_projectService.Projects.Count} projects, {_editorService.Editors.Count} editors");
         }
         catch (Exception ex)
         {
-            StatusText = $"加载失败: {ex.Message}";
+            var failedTemplate = LocalizationService.GetString("App.Status.LoadFailed", "Load failed: {0}");
+            StatusText = string.Format(failedTemplate, ex.Message);
             LoggerService.Instance.Error("App", "Initialization failed", ex);
         }
         finally

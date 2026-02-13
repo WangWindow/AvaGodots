@@ -13,6 +13,12 @@ namespace AvaGodots.Services;
 /// </summary>
 public class VsCodeIntegrationService : IVsCodeIntegrationService
 {
+    private enum ProjectType
+    {
+        GdScript,
+        CSharp
+    }
+
     private const string VsCodeDirName = ".vscode";
     private const string SettingsFileName = "settings.json";
     private const string LaunchFileName = "launch.json";
@@ -31,15 +37,16 @@ public class VsCodeIntegrationService : IVsCodeIntegrationService
     {
         var vscodePath = Path.Combine(projectDir, VsCodeDirName);
         Directory.CreateDirectory(vscodePath);
+        var projectType = DetectProjectType(projectDir, godotEditorPath);
 
         // 创建 settings.json
-        await CreateSettingsAsync(vscodePath, godotEditorPath);
+        await CreateSettingsAsync(vscodePath, godotEditorPath, projectType);
 
-        // 创建 launch.json（用于 GDScript 调试）
-        await CreateLaunchJsonAsync(vscodePath);
+        // 创建 launch.json
+        await CreateLaunchJsonAsync(vscodePath, projectType);
 
         // 创建 tasks.json
-        await CreateTasksJsonAsync(vscodePath);
+        await CreateTasksJsonAsync(vscodePath, projectType);
     }
 
     /// <summary>
@@ -49,6 +56,7 @@ public class VsCodeIntegrationService : IVsCodeIntegrationService
     {
         var vscodePath = Path.Combine(projectDir, VsCodeDirName);
         var settingsPath = Path.Combine(vscodePath, SettingsFileName);
+        var projectType = DetectProjectType(projectDir, godotEditorPath);
 
         if (!Directory.Exists(vscodePath))
         {
@@ -59,7 +67,7 @@ public class VsCodeIntegrationService : IVsCodeIntegrationService
 
         if (!File.Exists(settingsPath))
         {
-            await CreateSettingsAsync(vscodePath, godotEditorPath);
+            await CreateSettingsAsync(vscodePath, godotEditorPath, projectType);
             return;
         }
 
@@ -69,17 +77,31 @@ public class VsCodeIntegrationService : IVsCodeIntegrationService
             var json = await File.ReadAllTextAsync(settingsPath);
             var settingsNode = JsonNode.Parse(json) as JsonObject ?? new JsonObject();
 
-            // 更新 Godot 4 路径
-            settingsNode[GodotPathKey] = godotEditorPath;
+            if (projectType == ProjectType.CSharp)
+            {
+                settingsNode["godot.executable"] = godotEditorPath;
+            }
+            else
+            {
+                settingsNode[GodotPathKey] = godotEditorPath;
+            }
 
             var options = new JsonSerializerOptions { WriteIndented = true };
             var updatedJson = settingsNode.ToJsonString(options);
             await File.WriteAllTextAsync(settingsPath, updatedJson);
+
+            var launchPath = Path.Combine(vscodePath, LaunchFileName);
+            if (!File.Exists(launchPath))
+                await CreateLaunchJsonAsync(vscodePath, projectType);
+
+            var tasksPath = Path.Combine(vscodePath, TasksFileName);
+            if (!File.Exists(tasksPath))
+                await CreateTasksJsonAsync(vscodePath, projectType);
         }
         catch (Exception)
         {
             // JSON 解析失败时重新创建
-            await CreateSettingsAsync(vscodePath, godotEditorPath);
+            await CreateSettingsAsync(vscodePath, godotEditorPath, projectType);
         }
     }
 
@@ -96,35 +118,39 @@ public class VsCodeIntegrationService : IVsCodeIntegrationService
     /// <summary>
     /// 创建 settings.json
     /// </summary>
-    private static async Task CreateSettingsAsync(string vscodePath, string godotEditorPath)
+    private static async Task CreateSettingsAsync(string vscodePath, string godotEditorPath, ProjectType projectType)
     {
-        var settings = new JsonObject
+        JsonObject settings;
+        if (projectType == ProjectType.CSharp)
         {
-            // Godot 编辑器路径配置（godot-tools 扩展使用）
-            [GodotPathKey] = godotEditorPath,
-
-            // 文件关联
-            ["files.associations"] = new JsonObject
+            settings = new JsonObject
             {
-                ["*.gd"] = "gdscript",
-                ["*.tscn"] = "godot-resource",
-                ["*.tres"] = "godot-resource",
-                ["*.godot"] = "ini"
-            },
-
-            // 排除 .godot 缓存目录
-            ["files.exclude"] = new JsonObject
+                ["godot.executable"] = godotEditorPath
+            };
+        }
+        else
+        {
+            settings = new JsonObject
             {
-                ["**/.godot"] = true
-            },
-
-            // 搜索排除
-            ["search.exclude"] = new JsonObject
-            {
-                ["**/.godot"] = true,
-                ["**/addons/**/build"] = true
-            }
-        };
+                [GodotPathKey] = godotEditorPath,
+                ["files.associations"] = new JsonObject
+                {
+                    ["*.gd"] = "gdscript",
+                    ["*.tscn"] = "godot-resource",
+                    ["*.tres"] = "godot-resource",
+                    ["*.godot"] = "ini"
+                },
+                ["files.exclude"] = new JsonObject
+                {
+                    ["**/.godot"] = true
+                },
+                ["search.exclude"] = new JsonObject
+                {
+                    ["**/.godot"] = true,
+                    ["**/addons/**/build"] = true
+                }
+            };
+        }
 
         var options = new JsonSerializerOptions { WriteIndented = true };
         var json = settings.ToJsonString(options);
@@ -132,26 +158,46 @@ public class VsCodeIntegrationService : IVsCodeIntegrationService
     }
 
     /// <summary>
-    /// 创建 launch.json（GDScript 调试配置）
+    /// 创建 launch.json
     /// </summary>
-    private static async Task CreateLaunchJsonAsync(string vscodePath)
+    private static async Task CreateLaunchJsonAsync(string vscodePath, ProjectType projectType)
     {
-        var launch = new JsonObject
+        JsonObject launch;
+        if (projectType == ProjectType.CSharp)
         {
-            ["version"] = "0.2.0",
-            ["configurations"] = new JsonArray
+            launch = new JsonObject
             {
-                new JsonObject
-                {
-                    ["name"] = "GDScript Godot",
-                    ["type"] = "godot",
-                    ["request"] = "launch",
-                    ["project"] = "${workspaceFolder}",
-                    ["port"] = 6007,
-                    ["debugServer"] = 6006
-                }
-            }
-        };
+                ["version"] = "0.2.0",
+                ["configurations"] = new JsonArray(
+                    new JsonObject
+                    {
+                        ["name"] = "Play",
+                        ["type"] = "coreclr",
+                        ["request"] = "launch",
+                        ["preLaunchTask"] = "build",
+                        ["program"] = "${config:godot.executable}",
+                        ["args"] = new JsonArray(),
+                        ["cwd"] = "${workspaceFolder}"
+                    })
+            };
+        }
+        else
+        {
+            launch = new JsonObject
+            {
+                ["version"] = "0.2.0",
+                ["configurations"] = new JsonArray(
+                    new JsonObject
+                    {
+                        ["name"] = "GDScript Godot",
+                        ["type"] = "godot",
+                        ["request"] = "launch",
+                        ["project"] = "${workspaceFolder}",
+                        ["port"] = 6007,
+                        ["debugServer"] = 6006
+                    })
+            };
+        }
 
         var options = new JsonSerializerOptions { WriteIndented = true };
         var json = launch.ToJsonString(options);
@@ -161,31 +207,88 @@ public class VsCodeIntegrationService : IVsCodeIntegrationService
     /// <summary>
     /// 创建 tasks.json
     /// </summary>
-    private static async Task CreateTasksJsonAsync(string vscodePath)
+    private static async Task CreateTasksJsonAsync(string vscodePath, ProjectType projectType)
     {
-        var tasks = new JsonObject
+        JsonObject tasks;
+        if (projectType == ProjectType.CSharp)
         {
-            ["version"] = "2.0.0",
-            ["tasks"] = new JsonArray
+            tasks = new JsonObject
             {
-                new JsonObject
-                {
-                    ["label"] = "godot-run",
-                    ["type"] = "shell",
-                    ["command"] = "${config:godotTools.editorPath.godot4}",
-                    ["args"] = new JsonArray { "--path", "${workspaceFolder}" },
-                    ["problemMatcher"] = new JsonArray(),
-                    ["group"] = new JsonObject
+                ["version"] = "2.0.0",
+                ["tasks"] = new JsonArray(
+                    new JsonObject
                     {
-                        ["kind"] = "build",
-                        ["isDefault"] = true
-                    }
-                }
-            }
-        };
+                        ["label"] = "build",
+                        ["command"] = "dotnet",
+                        ["type"] = "process",
+                        ["args"] = new JsonArray(JsonValue.Create("build")),
+                        ["problemMatcher"] = "$msCompile"
+                    })
+            };
+        }
+        else
+        {
+            tasks = new JsonObject
+            {
+                ["version"] = "2.0.0",
+                ["tasks"] = new JsonArray(
+                    new JsonObject
+                    {
+                        ["label"] = "godot-run",
+                        ["type"] = "shell",
+                        ["command"] = "${config:godotTools.editorPath.godot4}",
+                        ["args"] = new JsonArray(JsonValue.Create("--path"), JsonValue.Create("${workspaceFolder}")),
+                        ["problemMatcher"] = new JsonArray(),
+                        ["group"] = new JsonObject
+                        {
+                            ["kind"] = "build",
+                            ["isDefault"] = true
+                        }
+                    })
+            };
+        }
 
         var options = new JsonSerializerOptions { WriteIndented = true };
         var json = tasks.ToJsonString(options);
         await File.WriteAllTextAsync(Path.Combine(vscodePath, TasksFileName), json);
+    }
+
+    private static ProjectType DetectProjectType(string projectDir, string godotEditorPath)
+    {
+        if (!string.IsNullOrWhiteSpace(projectDir) && Directory.Exists(projectDir))
+        {
+            if (Directory.GetFiles(projectDir, "*.csproj", SearchOption.TopDirectoryOnly).Length > 0 ||
+                Directory.GetFiles(projectDir, "*.sln", SearchOption.TopDirectoryOnly).Length > 0 ||
+                Directory.GetFiles(projectDir, "*.slnx", SearchOption.TopDirectoryOnly).Length > 0)
+            {
+                return ProjectType.CSharp;
+            }
+
+            var projectFile = Path.Combine(projectDir, "project.godot");
+            if (File.Exists(projectFile))
+            {
+                try
+                {
+                    var text = File.ReadAllText(projectFile);
+                    if (text.Contains("[dotnet]", StringComparison.OrdinalIgnoreCase) ||
+                        text.Contains("dotnet/project/assembly_name", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return ProjectType.CSharp;
+                    }
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(godotEditorPath) &&
+            (godotEditorPath.Contains("mono", StringComparison.OrdinalIgnoreCase) ||
+             godotEditorPath.Contains("dotnet", StringComparison.OrdinalIgnoreCase)))
+        {
+            return ProjectType.CSharp;
+        }
+
+        return ProjectType.GdScript;
     }
 }

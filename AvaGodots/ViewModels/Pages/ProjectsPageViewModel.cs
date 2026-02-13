@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AvaGodots.Interfaces;
 using AvaGodots.Models;
 using AvaGodots.Services;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -46,6 +47,11 @@ public partial class ProjectsPageViewModel : ViewModelBase
     [ObservableProperty] private string _newProjectStatus = string.Empty;
     [ObservableProperty] private bool _newProjectStatusIsValid = true;
 
+    private static readonly IBrush ValidStatusBrush = new SolidColorBrush(Color.Parse("#8BC34A"));
+    private static readonly IBrush ErrorStatusBrush = new SolidColorBrush(Color.Parse("#FF5252"));
+
+    public IBrush NewProjectStatusBrush => NewProjectStatusIsValid ? ValidStatusBrush : ErrorStatusBrush;
+
     /// <summary>
     /// 计算完整项目路径（含自动创建的文件夹名）
     /// </summary>
@@ -56,6 +62,7 @@ public partial class ProjectsPageViewModel : ViewModelBase
 
     partial void OnNewProjectNameChanged(string value) => UpdateNewProjectValidation();
     partial void OnNewProjectDirectoryChanged(string value) => UpdateNewProjectValidation();
+    partial void OnNewProjectStatusIsValidChanged(bool value) => OnPropertyChanged(nameof(NewProjectStatusBrush));
     partial void OnCreateFolderChanged(bool value)
     {
         OnPropertyChanged(nameof(ComputedProjectPath));

@@ -6,7 +6,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AvaGodots.Interfaces;
@@ -20,13 +19,6 @@ namespace AvaGodots.Services;
 /// </summary>
 public partial class EditorService : IEditorService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters = { new JsonStringEnumConverter() }
-    };
-
     private readonly IConfigService _configService;
     private readonly List<GodotEditor> _editors = [];
 
@@ -53,15 +45,27 @@ public partial class EditorService : IEditorService
         try
         {
             var json = await File.ReadAllTextAsync(configPath);
-            var editors = JsonSerializer.Deserialize<List<GodotEditor>>(json, JsonOptions);
-            if (editors != null)
+            var savedEditors = JsonSerializer.Deserialize(json, AppJsonSerializerContext.Default.ListSavedEditorData);
+            if (savedEditors != null)
             {
-                _editors.AddRange(editors);
+                foreach (var saved in savedEditors)
+                {
+                    _editors.Add(new GodotEditor
+                    {
+                        Path = saved.Path,
+                        Name = saved.Name,
+                        IsFavorite = saved.IsFavorite,
+                        Tags = saved.Tags ?? [],
+                        ExtraArguments = saved.ExtraArguments ?? [],
+                        VersionHint = saved.VersionHint,
+                        CustomCommands = saved.CustomCommands ?? []
+                    });
+                }
             }
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"加载编辑器列表失败: {ex.Message}");
+            LoggerService.Instance.Error("EditorService", $"加载编辑器列表失败: {ex.Message}", ex);
         }
     }
 
@@ -71,7 +75,17 @@ public partial class EditorService : IEditorService
     public async Task SaveAsync()
     {
         var configPath = _configService.Config.EditorsConfigPath;
-        var json = JsonSerializer.Serialize(_editors, JsonOptions);
+        var savedEditors = _editors.Select(e => new SavedEditorData
+        {
+            Path = e.Path,
+            Name = e.Name,
+            IsFavorite = e.IsFavorite,
+            Tags = e.Tags,
+            ExtraArguments = e.ExtraArguments,
+            VersionHint = e.VersionHint,
+            CustomCommands = e.CustomCommands
+        }).ToList();
+        var json = JsonSerializer.Serialize(savedEditors, AppJsonSerializerContext.Default.ListSavedEditorData);
         var dir = Path.GetDirectoryName(configPath);
         if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
         await File.WriteAllTextAsync(configPath, json);

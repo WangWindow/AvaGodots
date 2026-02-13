@@ -12,7 +12,7 @@
     <vm:SettingsPageViewModel/>
   </Design.DataContext>
 
-  <Grid ColumnDefinitions="200,*">
+  <Grid ColumnDefinitions="220,*">
 
     <!-- ========== 左侧分类导航 ========== -->
     <Border Grid.Column="0" Background="{DynamicResource DarkColor2}"
@@ -88,7 +88,7 @@
       </Border>
 
       <!-- 底部重启提示栏 -->
-      <Border DockPanel.Dock="Bottom" Background="#3A2E1A"
+      <Border DockPanel.Dock="Bottom" Background="{DynamicResource DarkColor2}"
               BorderBrush="{DynamicResource WarningBrush}" BorderThickness="0,1,0,0"
               Padding="12,8"
               IsVisible="{Binding NeedsRestart}">
@@ -110,7 +110,7 @@
       </Border>
 
       <!-- 设置面板内容 -->
-      <ScrollViewer Padding="20,16">
+      <ScrollViewer Padding="24,18">
         <Panel>
 
           <!-- ===== Application > Config ===== -->
@@ -118,65 +118,65 @@
             <TextBlock Text="{DynamicResource Settings.Config.Title}" Classes="title" Margin="0,0,0,8"/>
 
             <!-- Language -->
-            <Grid ColumnDefinitions="*,*">
-              <TextBlock Text="Language" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,*">
+              <TextBlock Text="{DynamicResource Settings.Config.Language}" VerticalAlignment="Center" Opacity="0.6"/>
               <ComboBox Grid.Column="1" Classes="sortCombo" HorizontalAlignment="Stretch"
                         ItemsSource="{Binding LanguageOptions}"
                         SelectedItem="{Binding Language}"/>
             </Grid>
 
             <!-- Auto Close -->
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Text="Auto Close" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,Auto">
+              <TextBlock Text="{DynamicResource Settings.Config.AutoClose}" VerticalAlignment="Center" Opacity="0.6"/>
               <ToggleSwitch Grid.Column="1" IsChecked="{Binding AutoClose}"
                             OnContent="" OffContent=""/>
             </Grid>
 
             <!-- Scale -->
-            <Grid ColumnDefinitions="*,*">
-              <TextBlock Text="Scale" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,*">
+              <TextBlock Text="{DynamicResource Settings.Config.Scale}" VerticalAlignment="Center" Opacity="0.6"/>
               <ComboBox Grid.Column="1" Classes="sortCombo" HorizontalAlignment="Stretch"
                         ItemsSource="{Binding ScaleOptions}"
                         SelectedItem="{Binding Scale}"/>
             </Grid>
 
             <!-- Default Projects Path -->
-            <Grid ColumnDefinitions="*,2*">
-              <TextBlock Text="Default Projects Path" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,*">
+              <TextBlock Text="{DynamicResource Settings.Config.DefaultProjectsPath}" VerticalAlignment="Center" Opacity="0.6"/>
               <Grid Grid.Column="1" ColumnDefinitions="*,Auto">
                 <TextBox Text="{Binding DefaultProjectsPath}" Classes="searchBox" IsReadOnly="True"/>
                 <Button Grid.Column="1" Classes="iconAction" Margin="4,0,0,0"
-                        Command="{Binding BrowseDefaultProjectsPathCommand}" ToolTip.Tip="Browse">
+                        Command="{Binding BrowseDefaultProjectsPathCommand}" ToolTip.Tip="{DynamicResource Common.Browse}">
                   <ic:SymbolIcon Symbol="FolderOpen" IconVariant="Regular" FontSize="16"/>
                 </Button>
               </Grid>
             </Grid>
 
             <!-- Directory Naming Convention -->
-            <Grid ColumnDefinitions="*,*">
-              <TextBlock Text="Directory Naming Convention" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,*">
+              <TextBlock Text="{DynamicResource Settings.Config.DirNaming}" VerticalAlignment="Center" Opacity="0.6"/>
               <ComboBox Grid.Column="1" Classes="sortCombo" HorizontalAlignment="Stretch"
                         ItemsSource="{Binding NamingConventionOptions}"
                         SelectedItem="{Binding DirectoryNamingConvention}"/>
             </Grid>
 
             <!-- Use System Titlebar -->
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Text="Use System Titlebar" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,Auto">
+              <TextBlock Text="{DynamicResource Settings.Config.SystemTitlebar}" VerticalAlignment="Center" Opacity="0.6"/>
               <ToggleSwitch Grid.Column="1" IsChecked="{Binding UseSystemTitleBar}"
                             OnContent="" OffContent=""/>
             </Grid>
 
             <!-- Use Native File Dialog -->
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Text="Use Native File Dialog" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,Auto">
+              <TextBlock Text="{DynamicResource Settings.Config.NativeFileDialog}" VerticalAlignment="Center" Opacity="0.6"/>
               <ToggleSwitch Grid.Column="1" IsChecked="{Binding UseNativeFileDialog}"
                             OnContent="" OffContent=""/>
             </Grid>
 
             <!-- Remember Window Rect -->
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Text="Remember Window Rect" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,Auto">
+              <TextBlock Text="{DynamicResource Settings.Config.RememberWindowRect}" VerticalAlignment="Center" Opacity="0.6"/>
               <ToggleSwitch Grid.Column="1" IsChecked="{Binding RememberWindowSize}"
                             OnContent="" OffContent=""/>
             </Grid>
@@ -187,16 +187,16 @@
             <TextBlock Text="{DynamicResource Settings.Theme.Title}" Classes="title" Margin="0,0,0,8"/>
 
             <!-- Preset -->
-            <Grid ColumnDefinitions="*,*">
-              <TextBlock Text="Preset" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,*">
+              <TextBlock Text="{DynamicResource Settings.Theme.Preset}" VerticalAlignment="Center" Opacity="0.6"/>
               <ComboBox Grid.Column="1" Classes="sortCombo" HorizontalAlignment="Stretch"
                         ItemsSource="{Binding ThemePresetOptions}"
                         SelectedItem="{Binding ThemePreset}"/>
             </Grid>
 
             <!-- Base Color -->
-            <Grid ColumnDefinitions="*,*">
-              <TextBlock Text="Base Color" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,*">
+              <TextBlock Text="{DynamicResource Settings.Theme.BaseColor}" VerticalAlignment="Center" Opacity="0.6"/>
               <Grid Grid.Column="1" ColumnDefinitions="Auto,*" HorizontalAlignment="Stretch">
                 <Border Width="28" Height="28" CornerRadius="4" Margin="0,0,8,0"
                         Background="{Binding BaseColor}"/>
@@ -205,8 +205,8 @@
             </Grid>
 
             <!-- Accent Color -->
-            <Grid ColumnDefinitions="*,*">
-              <TextBlock Text="Accent Color" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,*">
+              <TextBlock Text="{DynamicResource Settings.Theme.AccentColor}" VerticalAlignment="Center" Opacity="0.6"/>
               <Grid Grid.Column="1" ColumnDefinitions="Auto,*" HorizontalAlignment="Stretch">
                 <Border Width="28" Height="28" CornerRadius="4" Margin="0,0,8,0"
                         Background="{Binding AccentColor}"/>
@@ -215,8 +215,8 @@
             </Grid>
 
             <!-- Contrast -->
-            <Grid ColumnDefinitions="*,*">
-              <TextBlock Text="Contrast" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,*">
+              <TextBlock Text="{DynamicResource Settings.Theme.Contrast}" VerticalAlignment="Center" Opacity="0.6"/>
               <Grid Grid.Column="1" ColumnDefinitions="Auto,*" HorizontalAlignment="Stretch">
                 <TextBlock Text="{Binding Contrast, StringFormat={}{0:F1}}"
                            Width="36" VerticalAlignment="Center" HorizontalAlignment="Center"
@@ -233,53 +233,53 @@
             <TextBlock Text="{DynamicResource Settings.Advanced.Title}" Classes="title" Margin="0,0,0,8"/>
 
             <!-- Downloads Path -->
-            <Grid ColumnDefinitions="*,2*">
-              <TextBlock Text="Downloads Path" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,*">
+              <TextBlock Text="{DynamicResource Settings.Advanced.DownloadsPath}" VerticalAlignment="Center" Opacity="0.6"/>
               <Grid Grid.Column="1" ColumnDefinitions="*,Auto">
                 <TextBox Text="{Binding DownloadsPath}" Classes="searchBox" IsReadOnly="True"/>
                 <Button Grid.Column="1" Classes="iconAction" Margin="4,0,0,0"
-                        Command="{Binding BrowseDownloadsPathCommand}" ToolTip.Tip="Browse">
+                        Command="{Binding BrowseDownloadsPathCommand}" ToolTip.Tip="{DynamicResource Common.Browse}">
                   <ic:SymbolIcon Symbol="FolderOpen" IconVariant="Regular" FontSize="16"/>
                 </Button>
               </Grid>
             </Grid>
 
             <!-- Versions Path -->
-            <Grid ColumnDefinitions="*,2*">
-              <TextBlock Text="Versions Path" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,*">
+              <TextBlock Text="{DynamicResource Settings.Advanced.VersionsPath}" VerticalAlignment="Center" Opacity="0.6"/>
               <Grid Grid.Column="1" ColumnDefinitions="*,Auto">
                 <TextBox Text="{Binding VersionsPath}" Classes="searchBox" IsReadOnly="True"/>
                 <Button Grid.Column="1" Classes="iconAction" Margin="4,0,0,0"
-                        Command="{Binding BrowseVersionsPathCommand}" ToolTip.Tip="Browse">
+                        Command="{Binding BrowseVersionsPathCommand}" ToolTip.Tip="{DynamicResource Common.Browse}">
                   <ic:SymbolIcon Symbol="FolderOpen" IconVariant="Regular" FontSize="16"/>
                 </Button>
               </Grid>
             </Grid>
 
             <!-- Show Orphan Editor Explorer -->
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Text="Show Orphan Editor Explorer" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,Auto">
+              <TextBlock Text="{DynamicResource Settings.Advanced.OrphanExplorer}" VerticalAlignment="Center" Opacity="0.6"/>
               <ToggleSwitch Grid.Column="1" IsChecked="{Binding ShowOrphanEditorExplorer}"
                             OnContent="" OffContent=""/>
             </Grid>
 
             <!-- Allow Install To Not Empty Dir -->
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Text="Allow Install To Not Empty Dir" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,Auto">
+              <TextBlock Text="{DynamicResource Settings.Advanced.AllowNonEmpty}" VerticalAlignment="Center" Opacity="0.6"/>
               <ToggleSwitch Grid.Column="1" IsChecked="{Binding AllowInstallToNotEmptyDir}"
                             OnContent="" OffContent=""/>
             </Grid>
 
             <!-- Check Only Stable Updates -->
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Text="Check Only Stable Updates" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,Auto">
+              <TextBlock Text="{DynamicResource Settings.Advanced.StableOnly}" VerticalAlignment="Center" Opacity="0.6"/>
               <ToggleSwitch Grid.Column="1" IsChecked="{Binding OnlyStableUpdates}"
                             OnContent="" OffContent=""/>
             </Grid>
 
             <!-- VS Code Integration -->
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Text="VS Code Integration" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,Auto">
+              <TextBlock Text="{DynamicResource Settings.Advanced.VsCodeIntegration}" VerticalAlignment="Center" Opacity="0.6"/>
               <ToggleSwitch Grid.Column="1" IsChecked="{Binding EnableVsCodeIntegration}"
                             OnContent="" OffContent=""/>
             </Grid>
@@ -290,15 +290,15 @@
             <TextBlock Text="{DynamicResource Settings.Proxy.Title}" Classes="title" Margin="0,0,0,8"/>
 
             <!-- Host -->
-            <Grid ColumnDefinitions="*,2*">
-              <TextBlock Text="Host" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,*">
+              <TextBlock Text="{DynamicResource Settings.Proxy.Host}" VerticalAlignment="Center" Opacity="0.6"/>
               <TextBox Grid.Column="1" Classes="searchBox" Text="{Binding ProxyHost}"
-                       Watermark="e.g. 127.0.0.1"/>
+                       Watermark="{DynamicResource Settings.Proxy.HostWatermark}"/>
             </Grid>
 
             <!-- Port -->
-            <Grid ColumnDefinitions="*,*">
-              <TextBlock Text="Port" VerticalAlignment="Center" Opacity="0.6"/>
+            <Grid ColumnDefinitions="220,*">
+              <TextBlock Text="{DynamicResource Settings.Proxy.Port}" VerticalAlignment="Center" Opacity="0.6"/>
               <NumericUpDown Grid.Column="1" Minimum="0" Maximum="65535"
                              Value="{Binding ProxyPort}" FormatString="0"
                              HorizontalAlignment="Stretch"/>

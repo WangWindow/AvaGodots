@@ -11,6 +11,7 @@
         MinWidth="700" MinHeight="350"
         Width="900" Height="600"
         Background="#252B35"
+        Icon="/Assets/icon.ico"
         WindowStartupLocation="CenterScreen"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="40">

@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AvaGodots.Interfaces;
@@ -19,13 +18,6 @@ namespace AvaGodots.Services;
 /// </summary>
 public partial class ProjectService : IProjectService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters = { new JsonStringEnumConverter() }
-    };
-
     private readonly IConfigService _configService;
     private readonly IEditorService _editorService;
     private readonly IVsCodeIntegrationService _vsCodeService;
@@ -56,7 +48,7 @@ public partial class ProjectService : IProjectService
         try
         {
             var json = await File.ReadAllTextAsync(configPath);
-            var savedProjects = JsonSerializer.Deserialize<List<SavedProjectData>>(json, JsonOptions);
+            var savedProjects = JsonSerializer.Deserialize(json, AppJsonSerializerContext.Default.ListSavedProjectData);
 
             if (savedProjects != null)
             {
@@ -106,7 +98,7 @@ public partial class ProjectService : IProjectService
             CustomCommands = p.CustomCommands
         }).ToList();
 
-        var json = JsonSerializer.Serialize(savedProjects, JsonOptions);
+        var json = JsonSerializer.Serialize(savedProjects, AppJsonSerializerContext.Default.ListSavedProjectData);
         var dir = Path.GetDirectoryName(configPath);
         if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
         await File.WriteAllTextAsync(configPath, json);
@@ -491,15 +483,4 @@ public partial class ProjectService : IProjectService
         }
     }
 
-    /// <summary>
-    /// 持久化存储的项目数据
-    /// </summary>
-    private class SavedProjectData
-    {
-        public string Path { get; set; } = string.Empty;
-        public string? EditorPath { get; set; }
-        public bool IsFavorite { get; set; }
-        public bool ShowEditWarning { get; set; } = true;
-        public List<CustomCommand>? CustomCommands { get; set; }
-    }
 }

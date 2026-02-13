@@ -21,9 +21,24 @@
   <x:String x:Key="Common.Import">导入</x:String>
   <x:String x:Key="Common.Refresh">刷新</x:String>
   <x:String x:Key="Common.Download">下载</x:String>
+  <x:String x:Key="Common.Search">搜索</x:String>
+  <x:String x:Key="Common.Randomize">随机</x:String>
   <x:String x:Key="Common.Dismiss">关闭</x:String>
   <x:String x:Key="Common.Duplicate">复制</x:String>
   <x:String x:Key="Common.Bind">绑定</x:String>
+
+  <!-- ========== Main / Status ========== -->
+  <x:String x:Key="Main.Tooltip.Settings">设置</x:String>
+  <x:String x:Key="App.Status.LoadingConfig">正在加载配置...</x:String>
+  <x:String x:Key="App.Status.LoadingEditors">正在加载编辑器...</x:String>
+  <x:String x:Key="App.Status.LoadingProjects">正在加载项目...</x:String>
+  <x:String x:Key="App.Status.LoadedSummary">已加载 {0} 个项目，{1} 个编辑器</x:String>
+  <x:String x:Key="App.Status.LoadFailed">加载失败：{0}</x:String>
+
+  <!-- ========== Asset Library Status ========== -->
+  <x:String x:Key="AssetLib.Status.Searching">正在搜索...</x:String>
+  <x:String x:Key="AssetLib.Status.Found">找到 {0} 个资源</x:String>
+  <x:String x:Key="AssetLib.Status.Error">错误：{0}</x:String>
 
   <!-- ========== Projects 页面 ========== -->
   <x:String x:Key="Projects.New">新建</x:String>
@@ -176,5 +191,11 @@
   <x:String x:Key="Settings.Proxy.Title">网络 / HTTP 代理</x:String>
   <x:String x:Key="Settings.Proxy.Host">主机</x:String>
   <x:String x:Key="Settings.Proxy.Port">端口</x:String>
+  <x:String x:Key="Settings.Proxy.HostWatermark">例如 127.0.0.1</x:String>
+
+  <!-- Settings > 对话框 -->
+  <x:String x:Key="Settings.Dialog.SelectDefaultProjectsPath">选择默认项目目录</x:String>
+  <x:String x:Key="Settings.Dialog.SelectDownloadsPath">选择下载目录</x:String>
+  <x:String x:Key="Settings.Dialog.SelectVersionsPath">选择编辑器存储目录</x:String>
 
 </ResourceDictionary>

@@ -1,0 +1,30 @@
+<Project>
+  <!-- Centralized app versioning for all projects in this repo -->
+  <PropertyGroup>
+    <!-- Bump these to change the app version globally -->
+    <VersionMajor>0</VersionMajor>
+    <VersionMinor>1</VersionMinor>
+    <VersionPatch>0</VersionPatch>
+
+    <!-- Optional pre-release label like alpha, beta, rc. Leave empty for stable -->
+    <PreReleaseLabel></PreReleaseLabel>
+
+    <!-- Compose standard MSBuild version properties -->
+    <VersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</VersionPrefix>
+    <VersionSuffix Condition="'$(PreReleaseLabel)' != ''">-$(PreReleaseLabel)</VersionSuffix>
+    <Version>$(VersionPrefix)$(VersionSuffix)</Version>
+
+    <!-- Assembly/file versions (keep AssemblyVersion stable for binding compatibility) -->
+    <AssemblyVersion>$(VersionMajor).$(VersionMinor).0.0</AssemblyVersion>
+    <FileVersion>$(VersionPrefix).0</FileVersion>
+    <InformationalVersion>$(Version)</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+
+    <!-- Android version code (integer). Simple concat: MajorMinorPatch, e.g., 050 -> 50 -->
+    <AndroidVersionCode>$(VersionMajor)$(VersionMinor)$(VersionPatch)</AndroidVersionCode>
+
+    <!-- Expose Version properties to projects that don't import them automatically -->
+    <AssemblyVersionPrefix>$(AssemblyVersion)</AssemblyVersionPrefix>
+    <AssemblyFileVersion>$(FileVersion)</AssemblyFileVersion>
+  </PropertyGroup>
+</Project>

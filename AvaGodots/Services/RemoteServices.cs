@@ -46,7 +46,7 @@ public partial class AssetLibService
         try
         {
             var url = $"{SiteUrl}/configure?type=project";
-            var config = await _httpClient.GetFromJsonAsync<AssetLibConfig>(url, ct);
+            var config = await _httpClient.GetFromJsonAsync(url, AppJsonSerializerContext.Default.AssetLibConfig, ct);
             _cachedCategories = config?.Categories ?? [];
             return _cachedCategories;
         }
@@ -79,7 +79,7 @@ public partial class AssetLibService
             {
                 try
                 {
-                    var cachedResult = JsonSerializer.Deserialize<AssetLibResult>(cached.Value.body);
+                    var cachedResult = JsonSerializer.Deserialize(cached.Value.body, AppJsonSerializerContext.Default.AssetLibResult);
                     if (cachedResult != null) return cachedResult;
                 }
                 catch { /* 缓存损坏,继续网络请求 */ }
@@ -89,7 +89,7 @@ public partial class AssetLibService
         try
         {
             var json = await _httpClient.GetByteArrayAsync(url, ct);
-            var result = JsonSerializer.Deserialize<AssetLibResult>(json) ?? new AssetLibResult();
+            var result = JsonSerializer.Deserialize(json, AppJsonSerializerContext.Default.AssetLibResult) ?? new AssetLibResult();
 
             // 写入缓存
             if (_db != null)
@@ -153,7 +153,7 @@ public partial class AssetLibService
         try
         {
             var url = $"{SiteUrl}/asset/{assetId}";
-            return await _httpClient.GetFromJsonAsync<AssetLibItem>(url, ct);
+            return await _httpClient.GetFromJsonAsync(url, AppJsonSerializerContext.Default.AssetLibItem, ct);
         }
         catch
         {
@@ -218,7 +218,7 @@ public class RemoteEditorService
             {
                 try
                 {
-                    var list = JsonSerializer.Deserialize<List<GithubReleaseAsset>>(hit.Value.body);
+                    var list = JsonSerializer.Deserialize(hit.Value.body, AppJsonSerializerContext.Default.ListGithubReleaseAsset);
                     if (list is { Count: > 0 }) { _assetsCache[tag] = list; return list; }
                 }
                 catch { /* corrupt cache */ }
@@ -230,13 +230,13 @@ public class RemoteEditorService
             try
             {
                 var url = $"https://api.github.com/repos/{repo}/releases/tags/{tag}";
-                var release = await _httpClient.GetFromJsonAsync<GithubRelease>(url, ct);
+                var release = await _httpClient.GetFromJsonAsync(url, AppJsonSerializerContext.Default.GithubRelease, ct);
                 if (release?.Assets is { Count: > 0 })
                 {
                     _assetsCache[tag] = release.Assets;
                     if (_db != null)
                     {
-                        var json = JsonSerializer.SerializeToUtf8Bytes(release.Assets);
+                        var json = JsonSerializer.SerializeToUtf8Bytes(release.Assets, AppJsonSerializerContext.Default.ListGithubReleaseAsset);
                         await _db.SetHttpCacheAsync($"assets:{tag}", json, "application/json");
                     }
                     return release.Assets;

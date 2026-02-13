@@ -10,6 +10,14 @@
 
   <Application.Styles>
     <FluentTheme/>
-    <StyleInclude Source="avares://AvaGodots/Styles/GodotsTheme.axaml"/>
+    <StyleInclude Source="avares://AvaGodots/Resources/GodotsTheme.axaml"/>
   </Application.Styles>
+
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceInclude x:Key="L10N.en" Source="avares://AvaGodots/Resources/en.axaml"/>
+      <ResourceInclude x:Key="L10N.zh-CN" Source="avares://AvaGodots/Resources/zh-CN.axaml"/>
+    </ResourceDictionary>
+  </Application.Resources>
+
 </Application>

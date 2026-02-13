@@ -2,18 +2,15 @@ using System;
 using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml.Styling;
 
 namespace AvaGodots.Services;
 
 /// <summary>
 /// i18n 国际化服务
-/// 通过切换 Avalonia MergedDictionaries 中的 ResourceInclude 实现运行时语言切换
+/// 通过切换 Avalonia MergedDictionaries 中的强类型 ResourceDictionary 实现运行时语言切换
 /// </summary>
 public static class LocalizationService
 {
-    private const string StringsBasePath = "avares://AvaGodots/Assets/Strings";
-
     /// <summary>
     /// 当前语言代码 (e.g. "en", "zh-CN")
     /// </summary>
@@ -34,9 +31,9 @@ public static class LocalizationService
     };
 
     /// <summary>
-    /// 已挂载的 ResourceInclude (用于卸载旧语言)
+    /// 已挂载的语言资源（用于卸载旧语言）
     /// </summary>
-    private static ResourceInclude? _currentResource;
+    private static IResourceProvider? _currentResource;
 
     /// <summary>
     /// 初始化语言系统，将默认语言资源加载到 Application.Resources
@@ -54,15 +51,26 @@ public static class LocalizationService
     {
         if (Application.Current is null) return;
 
+        if (!LanguageDisplayNames.ContainsKey(language))
+            language = "en";
+
         // 移除旧资源
         if (_currentResource is not null)
         {
             Application.Current.Resources.MergedDictionaries.Remove(_currentResource);
         }
 
-        // 加载新语言资源
-        var uri = new Uri($"{StringsBasePath}/{language}.axaml");
-        _currentResource = new ResourceInclude(uri) { Source = uri };
+        var resourceKey = $"L10N.{language}";
+        if (!Application.Current.TryFindResource(resourceKey, out var resource) || resource is not IResourceProvider provider)
+        {
+            if (!Application.Current.TryFindResource("L10N.en", out resource) || resource is not IResourceProvider fallback)
+                return;
+
+            provider = fallback;
+            language = "en";
+        }
+
+        _currentResource = provider;
 
         Application.Current.Resources.MergedDictionaries.Add(_currentResource);
         CurrentLanguage = language;

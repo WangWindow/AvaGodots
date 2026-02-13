@@ -27,7 +27,7 @@
                  Watermark="{DynamicResource AssetLib.SearchWatermark}"
                  Text="{Binding SearchText, Mode=TwoWay}"/>
         <Button Grid.Column="1" Classes="iconAction" Margin="4,0,0,0"
-                Command="{Binding SearchCommand}" ToolTip.Tip="Search">
+                Command="{Binding SearchCommand}" ToolTip.Tip="{DynamicResource Common.Search}">
           <ic:SymbolIcon Symbol="Search" IconVariant="Regular" FontSize="16"/>
         </Button>
       </Grid>

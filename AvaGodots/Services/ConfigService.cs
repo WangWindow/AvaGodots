@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using AvaGodots.Interfaces;
 using AvaGodots.Models;
@@ -14,13 +13,6 @@ namespace AvaGodots.Services;
 /// </summary>
 public class ConfigService : IConfigService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters = { new JsonStringEnumConverter() }
-    };
-
     private const string ConfigFileName = "godots.json";
 
     /// <summary>
@@ -51,7 +43,7 @@ public class ConfigService : IConfigService
             try
             {
                 var json = await File.ReadAllTextAsync(configPath);
-                Config = JsonSerializer.Deserialize<AppConfig>(json, JsonOptions) ?? new AppConfig();
+                Config = JsonSerializer.Deserialize(json, AppJsonSerializerContext.Default.AppConfig) ?? new AppConfig();
             }
             catch (Exception)
             {
@@ -73,7 +65,7 @@ public class ConfigService : IConfigService
     public async Task SaveAsync()
     {
         var configPath = Path.Combine(GetAppDataPath(), ConfigFileName);
-        var json = JsonSerializer.Serialize(Config, JsonOptions);
+        var json = JsonSerializer.Serialize(Config, AppJsonSerializerContext.Default.AppConfig);
         await File.WriteAllTextAsync(configPath, json);
     }
 

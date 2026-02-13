@@ -99,6 +99,8 @@ public partial class GodotProject : ObservableObject
     /// </summary>
     public bool IsMissing => !System.IO.File.Exists(Path);
 
+    public double ListOpacity => IsMissing ? 0.5 : 1.0;
+
     /// <summary>
     /// 绑定的编辑器是否有效
     /// </summary>

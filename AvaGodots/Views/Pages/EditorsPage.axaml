@@ -110,12 +110,12 @@
                       <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
                     </Style>
                     <Style Selector="Border#editorItem StackPanel.hoverActions">
-                      <Setter Property="IsVisible" Value="False"/>
                       <Setter Property="Opacity" Value="0"/>
+                      <Setter Property="IsHitTestVisible" Value="False"/>
                     </Style>
                     <Style Selector="Border#editorItem:pointerover StackPanel.hoverActions">
-                      <Setter Property="IsVisible" Value="True"/>
                       <Setter Property="Opacity" Value="1"/>
+                      <Setter Property="IsHitTestVisible" Value="True"/>
                     </Style>
                   </Border.Styles>
 
