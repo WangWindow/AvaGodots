@@ -74,6 +74,9 @@ public partial class AssetLibPageViewModel : ViewModelBase
     private string _selectedCategory = "All";
 
     [ObservableProperty]
+    private string _selectedType = "All";
+
+    [ObservableProperty]
     private string _selectedSite = "godotengine.org (Official)";
 
     // ========== 分页 ==========
@@ -115,6 +118,7 @@ public partial class AssetLibPageViewModel : ViewModelBase
 
     public ObservableCollection<string> VersionOptions { get; } = [""];
     public string[] SortOptions { get; } = ["Recently Updated", "Least Recently Updated", "Name (A-Z)", "Name (Z-A)", "License (A-Z)", "License (Z-A)"];
+    public string[] TypeOptions { get; } = ["All", "Addons", "Projects"];
     public string[] SiteOptions { get; } = ["godotengine.org (Official)"];
 
     // ========== 素材详情（窗口方式） ==========
@@ -210,6 +214,7 @@ public partial class AssetLibPageViewModel : ViewModelBase
     partial void OnSelectedVersionChanged(string value) => _ = SearchAsync();
     partial void OnSelectedSortChanged(string value) => _ = SearchAsync();
     partial void OnSelectedCategoryChanged(string value) => _ = SearchAsync();
+    partial void OnSelectedTypeChanged(string value) => _ = SearchAsync();
 
     private async Task DebouncedSearchAsync()
     {
@@ -257,7 +262,13 @@ public partial class AssetLibPageViewModel : ViewModelBase
                 sort: sortApi,
                 category: categoryId,
                 page: CurrentPage,
-                maxResults: 40
+                maxResults: 40,
+                type: SelectedType switch
+                {
+                    "Addons" => "addon",
+                    "Projects" => "project",
+                    _ => "any"
+                }
             );
 
             Assets.Clear();

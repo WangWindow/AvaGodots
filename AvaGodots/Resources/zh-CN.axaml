@@ -136,6 +136,7 @@
   <x:String x:Key="AssetLib.SearchWatermark">搜索资源...</x:String>
   <x:String x:Key="AssetLib.Version">版本</x:String>
   <x:String x:Key="AssetLib.Sort">排序</x:String>
+  <x:String x:Key="AssetLib.Type">类型</x:String>
   <x:String x:Key="AssetLib.Category">分类</x:String>
   <x:String x:Key="AssetLib.Site">站点</x:String>
   <x:String x:Key="AssetLib.AssetsFound"> 个资源</x:String>

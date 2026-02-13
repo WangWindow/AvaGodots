@@ -136,6 +136,7 @@
   <x:String x:Key="AssetLib.SearchWatermark">Search assets...</x:String>
   <x:String x:Key="AssetLib.Version">Version</x:String>
   <x:String x:Key="AssetLib.Sort">Sort</x:String>
+  <x:String x:Key="AssetLib.Type">Type</x:String>
   <x:String x:Key="AssetLib.Category">Category</x:String>
   <x:String x:Key="AssetLib.Site">Site</x:String>
   <x:String x:Key="AssetLib.AssetsFound"> assets found</x:String>

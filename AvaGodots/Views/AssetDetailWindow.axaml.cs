@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AsyncImageLoader;
 using AvaGodots.Models;
@@ -60,19 +61,19 @@ public partial class AssetDetailWindow : Window
                 CategoryText.Text = detail.Category;
                 AuthorText.Text = detail.Author;
                 LicenseText.Text = detail.Cost;
-                DescriptionText.Text = StripBbCode(detail.Description ?? string.Empty);
+                DescriptionMarkdown.Markdown = BbCodeToMarkdown(detail.Description ?? string.Empty);
 
                 // 加载预览图
                 LoadPreviews(detail.Previews);
             }
             else
             {
-                DescriptionText.Text = StripBbCode(item.Description ?? string.Empty);
+                DescriptionMarkdown.Markdown = BbCodeToMarkdown(item.Description ?? string.Empty);
             }
         }
         catch
         {
-            DescriptionText.Text = StripBbCode(item.Description ?? string.Empty);
+            DescriptionMarkdown.Markdown = BbCodeToMarkdown(item.Description ?? string.Empty);
         }
         finally
         {
@@ -201,12 +202,44 @@ public partial class AssetDetailWindow : Window
     }
 
     /// <summary>
-    /// 简单去除 BBCode 标签（asset library description 常包含 [url][/url] 等标记）
+    /// 将 BBCode 转换为 Markdown（Godot Asset Library 描述使用 BBCode 格式）
     /// </summary>
-    private static string StripBbCode(string text)
+    private static string BbCodeToMarkdown(string text)
     {
-        // 移除 [tag]...[/tag] 和 [tag=...] 标记
-        return System.Text.RegularExpressions.Regex.Replace(text, @"\[/?[a-zA-Z_][a-zA-Z0-9_=]*\]", "").Trim();
+        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+
+        var result = text;
+
+        // [b]...[/b] → **...**
+        result = Regex.Replace(result, @"\[b\](.*?)\[/b\]", "**$1**", RegexOptions.Singleline);
+        // [i]...[/i] → *...*
+        result = Regex.Replace(result, @"\[i\](.*?)\[/i\]", "*$1*", RegexOptions.Singleline);
+        // [u]...[/u] → **...** (markdown doesn't have underline, use bold)
+        result = Regex.Replace(result, @"\[u\](.*?)\[/u\]", "**$1**", RegexOptions.Singleline);
+        // [s]...[/s] → ~~...~~
+        result = Regex.Replace(result, @"\[s\](.*?)\[/s\]", "~~$1~~", RegexOptions.Singleline);
+        // [code]...[/code] → `...`
+        result = Regex.Replace(result, @"\[code\](.*?)\[/code\]", "`$1`", RegexOptions.Singleline);
+        // [codeblock]...[/codeblock] → ```...```
+        result = Regex.Replace(result, @"\[codeblock\](.*?)\[/codeblock\]", "```\n$1\n```", RegexOptions.Singleline);
+        // [url=...]...[/url] → [text](url)
+        result = Regex.Replace(result, @"\[url=([^\]]*)\](.*?)\[/url\]", "[$2]($1)", RegexOptions.Singleline);
+        // [url]...[/url] → <url>
+        result = Regex.Replace(result, @"\[url\](.*?)\[/url\]", "<$1>", RegexOptions.Singleline);
+        // [img]...[/img] → ![image](url)
+        result = Regex.Replace(result, @"\[img\](.*?)\[/img\]", "![]($1)", RegexOptions.Singleline);
+        // [color=...]...[/color] → just the content
+        result = Regex.Replace(result, @"\[color=[^\]]*\](.*?)\[/color\]", "$1", RegexOptions.Singleline);
+        // [center]...[/center] → just the content
+        result = Regex.Replace(result, @"\[center\](.*?)\[/center\]", "$1", RegexOptions.Singleline);
+        // [list] items
+        result = Regex.Replace(result, @"\[list\]", "");
+        result = Regex.Replace(result, @"\[/list\]", "");
+        result = Regex.Replace(result, @"\[\*\]", "- ");
+        // Strip any remaining BBCode tags
+        result = Regex.Replace(result, @"\[/?[a-zA-Z_][a-zA-Z0-9_=]*\]", "");
+
+        return result.Trim();
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

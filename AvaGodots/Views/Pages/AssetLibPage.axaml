@@ -48,8 +48,8 @@
                       HorizontalAlignment="Stretch" FontSize="12"/>
           </StackPanel>
           <StackPanel Grid.Column="2" Spacing="2" Margin="4,0">
-            <TextBlock Text="{DynamicResource AssetLib.Category}" FontSize="10" Foreground="{DynamicResource FontDimBrush}"/>
-            <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}"
+            <TextBlock Text="{DynamicResource AssetLib.Type}" FontSize="10" Foreground="{DynamicResource FontDimBrush}"/>
+            <ComboBox ItemsSource="{Binding TypeOptions}" SelectedItem="{Binding SelectedType}"
                       HorizontalAlignment="Stretch" FontSize="12"/>
           </StackPanel>
           <StackPanel Grid.Column="3" Spacing="2" Margin="4,0,0,0">
