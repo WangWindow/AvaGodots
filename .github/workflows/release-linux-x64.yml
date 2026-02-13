@@ -1,0 +1,175 @@
+name: release-linux-x64
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release-linux-x64:
+    runs-on: ubuntu-24.04
+
+    env:
+      PROJECT_PATH: AvaGodots.Desktop/AvaGodots.Desktop.csproj
+      RUNTIME_ID: linux-x64
+      PUBLISH_DIR: Temp/linux-x64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install packaging dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y ruby ruby-dev build-essential curl
+          sudo gem install --no-document fpm
+
+      - name: Restore
+        run: dotnet restore ${{ env.PROJECT_PATH }}
+
+      - name: Publish Linux x64
+        run: |
+          dotnet publish ${{ env.PROJECT_PATH }} \
+            -c Release \
+            -r ${{ env.RUNTIME_ID }} \
+            -o ./${{ env.PUBLISH_DIR }}
+
+      - name: Remove debug symbol files
+        run: |
+          find ./${{ env.PUBLISH_DIR }} -type f \( -name "*.dbg" -o -name "*.pdb" \) -delete
+
+      - name: Prepare package metadata
+        id: meta
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          VERSION="${TAG_NAME#v}"
+          echo "tag_name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare shared package root
+        run: |
+          rm -rf ./Temp/pkgroot
+          mkdir -p ./Temp/pkgroot/opt/AvaGodots
+          mkdir -p ./Temp/pkgroot/usr/share/applications
+          mkdir -p ./Temp/pkgroot/usr/share/icons/hicolor/scalable/apps
+
+          cp -a ./${{ env.PUBLISH_DIR }}/. ./Temp/pkgroot/opt/AvaGodots/
+          chmod +x ./Temp/pkgroot/opt/AvaGodots/AvaGodots.Desktop
+          cp ./AvaGodots/Assets/icon.svg ./Temp/pkgroot/usr/share/icons/hicolor/scalable/apps/avagodots.svg
+
+          cat > ./Temp/pkgroot/usr/share/applications/avagodots.desktop << 'EOF'
+          [Desktop Entry]
+          Name=AvaGodots
+          Comment=Lightweight cross-platform Godot editor manager
+          Exec=/opt/AvaGodots/AvaGodots.Desktop
+          Icon=avagodots
+          Terminal=false
+          Type=Application
+          Categories=Development;Utility;
+          StartupWMClass=AvaGodots
+          EOF
+
+      - name: Pack tar.gz
+        id: pack
+        run: |
+          PACKAGE_NAME="AvaGodots-${{ steps.meta.outputs.tag_name }}-${{ env.RUNTIME_ID }}.tar.gz"
+          tar -C ./Temp -czf "${PACKAGE_NAME}" linux-x64
+          echo "package_name=${PACKAGE_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Build AppImage
+        id: appimage
+        run: |
+          APPDIR=./Temp/AppDir
+          rm -rf "$APPDIR"
+          mkdir -p "$APPDIR/usr/bin"
+          mkdir -p "$APPDIR/usr/share/applications"
+          mkdir -p "$APPDIR/usr/share/icons/hicolor/scalable/apps"
+
+          cp -a ./${{ env.PUBLISH_DIR }}/. "$APPDIR/usr/bin/"
+          chmod +x "$APPDIR/usr/bin/AvaGodots.Desktop"
+
+          cp ./Temp/pkgroot/usr/share/applications/avagodots.desktop "$APPDIR/usr/share/applications/"
+          cp ./AvaGodots/Assets/icon.svg "$APPDIR/usr/share/icons/hicolor/scalable/apps/avagodots.svg"
+          cp ./Temp/pkgroot/usr/share/applications/avagodots.desktop "$APPDIR/avagodots.desktop"
+          cp ./AvaGodots/Assets/icon.svg "$APPDIR/avagodots.svg"
+
+          cat > "$APPDIR/AppRun" << 'EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          THIS_DIR="$(cd "$(dirname "$0")" && pwd)"
+          exec "$THIS_DIR/usr/bin/AvaGodots.Desktop" "$@"
+          EOF
+          chmod +x "$APPDIR/AppRun"
+
+          APPIMAGE_TOOL=appimagetool-x86_64.AppImage
+          curl -L -o "$APPIMAGE_TOOL" "https://github.com/AppImage/appimagetool/releases/latest/download/appimagetool-x86_64.AppImage"
+          chmod +x "$APPIMAGE_TOOL"
+
+          APPIMAGE_NAME="AvaGodots-${{ steps.meta.outputs.tag_name }}-${{ env.RUNTIME_ID }}.AppImage"
+          ARCH=x86_64 ./$APPIMAGE_TOOL --appimage-extract-and-run "$APPDIR" "$APPIMAGE_NAME"
+          echo "appimage_name=${APPIMAGE_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Debian package
+        id: deb
+        run: |
+          DEB_NAME="AvaGodots_${{ steps.meta.outputs.version }}_amd64.deb"
+          fpm -s dir -t deb \
+            -n avagodots \
+            -v "${{ steps.meta.outputs.version }}" \
+            --architecture amd64 \
+            --description "Lightweight cross-platform Godot editor manager" \
+            --url "https://github.com/WangWindow/AvaGodots" \
+            --license "MIT" \
+            --maintainer "WangWindow" \
+            --deb-no-default-config-files \
+            -C ./Temp/pkgroot \
+            -p "$DEB_NAME" \
+            opt usr
+          echo "deb_name=${DEB_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Arch Linux package
+        id: archpkg
+        run: |
+          ARCH_NAME="avagodots-${{ steps.meta.outputs.version }}-1-x86_64.pkg.tar.zst"
+          fpm -s dir -t pacman \
+            -n avagodots \
+            -v "${{ steps.meta.outputs.version }}" \
+            --iteration 1 \
+            --architecture x86_64 \
+            --description "Lightweight cross-platform Godot editor manager" \
+            --url "https://github.com/WangWindow/AvaGodots" \
+            --license "MIT" \
+            --maintainer "WangWindow" \
+            -C ./Temp/pkgroot \
+            -p "$ARCH_NAME" \
+            opt usr
+          echo "arch_name=${ARCH_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate SHA256
+        run: |
+          sha256sum \
+            "${{ steps.pack.outputs.package_name }}" \
+            "${{ steps.appimage.outputs.appimage_name }}" \
+            "${{ steps.deb.outputs.deb_name }}" \
+            "${{ steps.archpkg.outputs.arch_name }}" \
+            > "AvaGodots-${{ steps.meta.outputs.tag_name }}-checksums.sha256"
+
+      - name: Create GitHub Release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ steps.pack.outputs.package_name }}
+            ${{ steps.appimage.outputs.appimage_name }}
+            ${{ steps.deb.outputs.deb_name }}
+            ${{ steps.archpkg.outputs.arch_name }}
+            AvaGodots-${{ steps.meta.outputs.tag_name }}-checksums.sha256
+          generate_release_notes: true
