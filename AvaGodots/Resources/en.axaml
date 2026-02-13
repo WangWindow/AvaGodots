@@ -140,6 +140,7 @@
   <x:String x:Key="AssetLib.Category">Category</x:String>
   <x:String x:Key="AssetLib.Site">Site</x:String>
   <x:String x:Key="AssetLib.AssetsFound"> assets found</x:String>
+  <x:String x:Key="Main.Tooltip.OpenRepository">Open repository</x:String>
   <x:String x:Key="AssetLib.First">First</x:String>
   <x:String x:Key="AssetLib.Previous">Previous</x:String>
   <x:String x:Key="AssetLib.Next">Next</x:String>

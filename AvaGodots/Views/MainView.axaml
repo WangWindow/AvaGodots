@@ -122,8 +122,10 @@
         <Grid Margin="12,4" ColumnDefinitions="*,Auto">
           <TextBlock Grid.Column="0" Text="{Binding StatusText}" FontSize="11"
                      Foreground="{DynamicResource FontDimBrush}" VerticalAlignment="Center"/>
-          <TextBlock Grid.Column="1" Text="{Binding VersionText}" FontSize="11"
-                     Foreground="{DynamicResource FontDimBrush}" VerticalAlignment="Center"/>
+          <Button Grid.Column="1" Classes="hyperlink" Command="{Binding OpenRepositoryCommand}"
+                  Content="{Binding VersionText}" FontSize="11" Padding="0" Margin="0"
+                  Foreground="{DynamicResource FontDimBrush}" VerticalAlignment="Center"
+                  ToolTip.Tip="{DynamicResource Main.Tooltip.OpenRepository}"/>
         </Grid>
       </DockPanel>
     </Border>

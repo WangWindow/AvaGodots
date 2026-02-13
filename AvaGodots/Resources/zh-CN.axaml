@@ -140,6 +140,7 @@
   <x:String x:Key="AssetLib.Category">分类</x:String>
   <x:String x:Key="AssetLib.Site">站点</x:String>
   <x:String x:Key="AssetLib.AssetsFound"> 个资源</x:String>
+  <x:String x:Key="Main.Tooltip.OpenRepository">打开仓库</x:String>
   <x:String x:Key="AssetLib.First">首页</x:String>
   <x:String x:Key="AssetLib.Previous">上一页</x:String>
   <x:String x:Key="AssetLib.Next">下一页</x:String>

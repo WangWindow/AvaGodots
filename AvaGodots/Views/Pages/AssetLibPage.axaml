@@ -98,6 +98,8 @@
                     <!-- 页码按钮 -->
                     <Button Classes="iconAction" Classes.current="{Binding IsCurrent}"
                             MinWidth="28" Padding="4,2" FontSize="12"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
                             Content="{Binding DisplayNumber}"
                             Command="{Binding $parent[ItemsControl].((vm:AssetLibPageViewModel)DataContext).GoToPageCommand}"
                             CommandParameter="{Binding PageIndex}"

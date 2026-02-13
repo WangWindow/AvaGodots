@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -259,6 +260,23 @@ public partial class MainViewModel : ViewModelBase
     /// </summary>
     [RelayCommand]
     private void NavigateToSettings() => SelectedTabIndex = 3;
+
+    /// <summary>
+    /// 在默认浏览器中打开项目的 GitHub 仓库
+    /// </summary>
+    [RelayCommand]
+    private void OpenRepository()
+    {
+        try
+        {
+            var repo = "https://github.com/WangWindow/AvaGodots";
+            Process.Start(new ProcessStartInfo { FileName = repo, UseShellExecute = true });
+        }
+        catch
+        {
+            LoggerService.Instance.Warning("App", "Failed to open repository URL");
+        }
+    }
 
     /// <summary>
     /// 更新状态栏文本（反映当前项目和编辑器数量）
