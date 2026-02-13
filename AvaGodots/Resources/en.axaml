@@ -77,6 +77,7 @@
   <x:String x:Key="Projects.Dialog.AssignedTags">Assigned Tags</x:String>
   <x:String x:Key="Projects.Dialog.AllTags">All Tags</x:String>
   <x:String x:Key="Projects.Dialog.ConfirmRemove">Confirm Remove</x:String>
+  <x:String x:Key="Projects.Dialog.ConfirmRemoveMessage">Remove project "{0}" from the list?\n(Project files will NOT be deleted)</x:String>
   <x:String x:Key="Projects.Dialog.EditProjectTitle">Edit Project</x:String>
   <x:String x:Key="Projects.Dialog.EditWarning">You are about to open this project in the Godot editor. Make sure no other Godot instance is editing this project.</x:String>
   <x:String x:Key="Projects.Dialog.DontShowAgain">Don't show this warning again</x:String>
@@ -117,6 +118,7 @@
   <x:String x:Key="Editors.Dialog.ExtraArgsDesc">Space-separated list of additional arguments passed to the editor on launch.</x:String>
   <x:String x:Key="Editors.Dialog.ManageTags">Manage Tags</x:String>
   <x:String x:Key="Editors.Dialog.ConfirmRemove">Confirm Remove</x:String>
+  <x:String x:Key="Editors.Dialog.ConfirmRemoveMessage">Remove editor "{0}"?</x:String>
   <x:String x:Key="Editors.Dialog.AlsoDeleteFiles">Also delete files from disk</x:String>
   <x:String x:Key="Editors.Dialog.ReferencesTitle">Projects Using This Editor</x:String>
   <x:String x:Key="Editors.Dialog.NoReferences">No projects reference this editor.</x:String>
@@ -144,6 +146,21 @@
   <x:String x:Key="AssetLib.Empty.Title">No assets found</x:String>
   <x:String x:Key="AssetLib.Empty.Desc">Try changing your search or filter options.</x:String>
   <x:String x:Key="AssetLib.NoEditorHint">No editors installed. Go to Editors → Remote to download one for version filtering.</x:String>
+  <x:String x:Key="AssetLib.Detail.Version">Version:</x:String>
+  <x:String x:Key="AssetLib.Detail.GodotVersion">Godot:</x:String>
+  <x:String x:Key="AssetLib.Detail.Support">Support:</x:String>
+  <x:String x:Key="AssetLib.Detail.Contents">Contents:</x:String>
+  <x:String x:Key="AssetLib.Detail.ViewFiles">View Files</x:String>
+  <x:String x:Key="AssetLib.Detail.Description">Description:</x:String>
+  <x:String x:Key="AssetLib.Detail.ViewInBrowser">View in Browser</x:String>
+  <x:String x:Key="AssetLib.Detail.DownloadInstall">Download &amp; Install</x:String>
+  <x:String x:Key="AssetLib.Toast.ReadyToInstall">Ready to install</x:String>
+  <x:String x:Key="AssetLib.Toast.Install">Install...</x:String>
+  <x:String x:Key="AssetLib.Status.Downloading">Downloading...</x:String>
+  <x:String x:Key="AssetLib.Status.Verifying">Verifying hash...</x:String>
+  <x:String x:Key="AssetLib.Status.HashFailed">SHA-256 hash check failed!</x:String>
+  <x:String x:Key="AssetLib.Status.Installing">Installing...</x:String>
+  <x:String x:Key="AssetLib.Status.Installed">Installed successfully!</x:String>
 
   <!-- ========== Settings Page ========== -->
   <x:String x:Key="Settings.Folder">Settings Folder</x:String>
@@ -197,5 +214,9 @@
   <x:String x:Key="Settings.Dialog.SelectDefaultProjectsPath">Select default projects directory</x:String>
   <x:String x:Key="Settings.Dialog.SelectDownloadsPath">Select downloads directory</x:String>
   <x:String x:Key="Settings.Dialog.SelectVersionsPath">Select editor versions directory</x:String>
+  <x:String x:Key="Dialog.SelectProjectDir">Select project directory</x:String>
+  <x:String x:Key="Dialog.SelectProjectGodot">Select project.godot</x:String>
+  <x:String x:Key="Dialog.SelectScanDir">Select directory to scan</x:String>
+  <x:String x:Key="Dialog.SelectTargetDir">Select target directory</x:String>
 
 </ResourceDictionary>

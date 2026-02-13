@@ -55,7 +55,8 @@ public interface IProjectService
     /// <param name="directory">项目目录</param>
     /// <param name="editorPath">编辑器路径</param>
     /// <param name="godotVersion">Godot 版本（3 或 4）</param>
-    Task<GodotProject?> CreateProjectAsync(string name, string directory, string editorPath, int godotVersion = 4, string renderer = "Forward+", string versionControl = "Git");
+    /// <param name="editorVersionHint">编辑器版本提示（如 "v4.6-stable"），用于生成 project.godot 中的版本号</param>
+    Task<GodotProject?> CreateProjectAsync(string name, string directory, string editorPath, int godotVersion = 4, string renderer = "Forward+", string versionControl = "Git", string editorVersionHint = "");
 
     /// <summary>
     /// 用编辑器打开项目

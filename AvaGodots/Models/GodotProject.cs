@@ -95,19 +95,31 @@ public partial class GodotProject : ObservableObject
     private bool _hasMono;
 
     /// <summary>
-    /// 项目文件是否存在
+    /// 项目文件是否存在（缓存值，调用 RefreshFileStatus() 更新）
     /// </summary>
-    public bool IsMissing => !System.IO.File.Exists(Path);
+    [ObservableProperty]
+    private bool _isMissing;
 
     public double ListOpacity => IsMissing ? 0.5 : 1.0;
 
     /// <summary>
-    /// 绑定的编辑器是否有效
+    /// 绑定的编辑器是否有效（缓存值，调用 RefreshFileStatus() 更新）
     /// </summary>
-    public bool HasInvalidEditor => !string.IsNullOrEmpty(EditorPath) && !System.IO.File.Exists(EditorPath);
+    [ObservableProperty]
+    private bool _hasInvalidEditor;
 
     /// <summary>
     /// 项目目录路径
     /// </summary>
     public string DirectoryPath => System.IO.Path.GetDirectoryName(Path) ?? string.Empty;
+
+    /// <summary>
+    /// 刷新文件系统相关的缓存状态
+    /// </summary>
+    public void RefreshFileStatus()
+    {
+        IsMissing = !System.IO.File.Exists(Path);
+        HasInvalidEditor = !string.IsNullOrEmpty(EditorPath) && !System.IO.File.Exists(EditorPath);
+        OnPropertyChanged(nameof(ListOpacity));
+    }
 }

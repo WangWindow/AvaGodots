@@ -10,6 +10,25 @@ AvaGodots 全局主题样式
     <Setter Property="Background" Value="#252B35"/>
   </Style>
 
+  <!-- ========== ListBox 透明化（用于虚拟化列表时不引入默认背景/边框） ========== -->
+  <Style Selector="ListBox.transparent">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Padding" Value="0"/>
+  </Style>
+  <Style Selector="ListBox.transparent ListBoxItem">
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="MinHeight" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/>
+  </Style>
+  <Style Selector="ListBox.transparent ListBoxItem:selected /template/ ContentPresenter">
+    <Setter Property="Background" Value="Transparent"/>
+  </Style>
+  <Style Selector="ListBox.transparent ListBoxItem:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="Transparent"/>
+  </Style>
+
   <!-- ========== 基础颜色资源 ========== -->
   <Style Selector=":is(Control)">
     <Style.Resources>
@@ -112,6 +131,16 @@ AvaGodots 全局主题样式
   </Style>
   <Style Selector="Button.action:pressed">
     <Setter Property="Background" Value="{DynamicResource SelectionBrush}"/>
+  </Style>
+
+  <!-- 超链接按钮 -->
+  <Style Selector="Button.hyperlink">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="MinWidth" Value="0"/>
+    <Setter Property="MinHeight" Value="0"/>
+    <Setter Property="Cursor" Value="Hand"/>
   </Style>
 
   <!-- 图标按钮（内联操作） -->

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AvaGodots.Interfaces;
 using AvaGodots.Models;
@@ -19,7 +20,14 @@ public partial class EditorsPageViewModel : ViewModelBase
     private readonly IEditorService _editorService;
     private readonly IConfigService _configService;
     private readonly RemoteEditorService _remoteEditorService;
-    private readonly DownloadManagerService? _downloadManager;
+    private readonly IDownloadManagerService? _downloadManager;
+
+    /// <summary>
+    /// 编辑器数据变更事件（增删改后触发，用于通知父级更新状态栏）
+    /// </summary>
+    public event Action? EditorsChanged;
+
+    private CancellationTokenSource? _searchDebounce;
 
     // ========================= 列表与过滤 =========================
 
@@ -86,12 +94,27 @@ public partial class EditorsPageViewModel : ViewModelBase
 
     public EditorsPageViewModel() : this(null!, null!, null!) { }
 
-    public EditorsPageViewModel(IEditorService editorService, IConfigService configService, DownloadManagerService? downloadManager = null)
+    public EditorsPageViewModel(IEditorService editorService, IConfigService configService, IDownloadManagerService? downloadManager = null)
     {
         _editorService = editorService;
         _configService = configService;
         _downloadManager = downloadManager;
         _remoteEditorService = new RemoteEditorService();
+
+        // 监听编辑器安装完成事件，自动刷新本地列表
+        if (_downloadManager != null)
+        {
+            _downloadManager.EditorInstalled += OnEditorInstalled;
+        }
+    }
+
+    /// <summary>
+    /// 下载安装完成后自动刷新本地编辑器列表
+    /// </summary>
+    private async void OnEditorInstalled()
+    {
+        await _editorService.LoadAsync();
+        RefreshEditors();
     }
 
     /// <summary>
@@ -102,12 +125,24 @@ public partial class EditorsPageViewModel : ViewModelBase
     /// <summary>
     /// 注入数据库服务（从 MainViewModel 调用）
     /// </summary>
-    public void SetDatabase(DatabaseService db) => _remoteEditorService.SetDatabase(db);
+    public void SetDatabase(IDatabaseService db) => _remoteEditorService.SetDatabase(db);
 
     // ========================= 属性变更回调 =========================
 
-    partial void OnSearchTextChanged(string value) => RefreshEditors();
+    partial void OnSearchTextChanged(string value) => DebounceRefreshEditors();
     partial void OnSortIndexChanged(int value) => RefreshEditors();
+
+    private async void DebounceRefreshEditors()
+    {
+        _searchDebounce?.Cancel();
+        var cts = _searchDebounce = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(200, cts.Token);
+            RefreshEditors();
+        }
+        catch (TaskCanceledException) { /* debounced */ }
+    }
 
     partial void OnSelectedEditorChanged(GodotEditor? value)
     {
@@ -118,7 +153,6 @@ public partial class EditorsPageViewModel : ViewModelBase
 
     public void RefreshEditors()
     {
-        FilteredEditors.Clear();
         var editors = _editorService.Editors.AsEnumerable();
 
         var search = SearchText?.Trim() ?? string.Empty;
@@ -147,10 +181,46 @@ public partial class EditorsPageViewModel : ViewModelBase
             _ => editors
         };
 
-        foreach (var editor in editors)
-            FilteredEditors.Add(editor);
+        var newList = editors.ToList();
+        SyncCollection(FilteredEditors, newList);
 
         IsEmpty = FilteredEditors.Count == 0;
+        EditorsChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// 同步 ObservableCollection 与目标列表，最小化 UI 变更通知
+    /// </summary>
+    private static void SyncCollection<T>(ObservableCollection<T> target, System.Collections.Generic.List<T> source)
+    {
+        // 如果内容相同则跳过
+        if (target.Count == source.Count && target.SequenceEqual(source)) return;
+
+        // 小规模列表直接重建更高效
+        if (source.Count <= 50 || Math.Abs(target.Count - source.Count) > target.Count / 2)
+        {
+            target.Clear();
+            foreach (var item in source) target.Add(item);
+            return;
+        }
+
+        // 中等规模：移除多余、插入缺少、更新位置
+        for (var i = target.Count - 1; i >= 0; i--)
+        {
+            if (!source.Contains(target[i]))
+                target.RemoveAt(i);
+        }
+        for (var i = 0; i < source.Count; i++)
+        {
+            if (i >= target.Count)
+                target.Add(source[i]);
+            else if (!Equals(target[i], source[i]))
+            {
+                var idx = target.IndexOf(source[i]);
+                if (idx >= 0) target.Move(idx, i);
+                else target.Insert(i, source[i]);
+            }
+        }
     }
 
     // ========================= 扫描目录 =========================
@@ -158,7 +228,7 @@ public partial class EditorsPageViewModel : ViewModelBase
     [RelayCommand]
     private async Task ScanDirectoryAsync()
     {
-        var folder = await FileDialogHelper.PickFolderAsync("选择扫描目录");
+        var folder = await FileDialogHelper.PickFolderAsync(LocalizationService.GetString("Dialog.SelectScanDir", "Select directory to scan"));
         if (string.IsNullOrWhiteSpace(folder)) return;
         var found = await _editorService.ScanDirectoryAsync(folder);
         foreach (var path in found)
@@ -291,7 +361,9 @@ public partial class EditorsPageViewModel : ViewModelBase
         LoggerService.Instance.Debug("Editors", $"ShowDeleteConfirm: {editor.Name}");
         _pendingDeleteEditor = editor;
         DeleteAlsoFromDisk = false;
-        DeleteConfirmMessage = $"确定要移除编辑器 \"{editor.Name}\" 吗？";
+        DeleteConfirmMessage = string.Format(
+            LocalizationService.GetString("Editors.Dialog.ConfirmRemoveMessage", "Remove editor \"{0}\"?"),
+            editor.Name);
         IsDeleteConfirmVisible = true;
     }
 

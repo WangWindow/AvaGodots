@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net.Http;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using AvaGodots.Interfaces;
@@ -39,9 +42,22 @@ public static class PageItemConverters
 /// </summary>
 public partial class AssetLibPageViewModel : ViewModelBase
 {
-    private readonly AssetLibService _assetLibService;
+    private readonly IAssetLibService _assetLibService;
     private readonly IEditorService? _editorService;
+    private readonly IProjectService? _projectService;
+    private readonly IConfigService? _configService;
     private CancellationTokenSource? _searchCts;
+    private static readonly HttpClient DownloadClient = new();
+
+    /// <summary>
+    /// 资产安装完成事件（通知 ProjectsPage 刷新）
+    /// </summary>
+    public event Action? AssetInstalled;
+
+    /// <summary>
+    /// 请求显示素材详情窗口事件（由 View 订阅并打开窗口）
+    /// </summary>
+    public event Action<AssetLibItem>? ShowDetailWindowRequested;
 
     // ========== 搜索/筛选 ==========
 
@@ -101,21 +117,30 @@ public partial class AssetLibPageViewModel : ViewModelBase
     public string[] SortOptions { get; } = ["Recently Updated", "Least Recently Updated", "Name (A-Z)", "Name (Z-A)", "License (A-Z)", "License (Z-A)"];
     public string[] SiteOptions { get; } = ["godotengine.org (Official)"];
 
+    // ========== 素材详情（窗口方式） ==========
+
+    [ObservableProperty] private AssetLibItem? _detailItem;
+
+    // (下载进度由窗口通过 IProgress 回调处理)
+
     public AssetLibPageViewModel()
     {
         _assetLibService = new AssetLibService();
     }
 
-    public AssetLibPageViewModel(DatabaseService db, IEditorService? editorService = null)
+    public AssetLibPageViewModel(IDatabaseService db, IEditorService? editorService = null,
+        IProjectService? projectService = null, IConfigService? configService = null)
     {
         _assetLibService = new AssetLibService(db);
         _editorService = editorService;
+        _projectService = projectService;
+        _configService = configService;
     }
 
     /// <summary>
     /// 注入数据库服务（用于缓存）
     /// </summary>
-    public void SetDatabase(DatabaseService db) => _assetLibService.SetDatabase(db);
+    public void SetDatabase(IDatabaseService db) => _assetLibService.SetDatabase(db);
 
     // ========== 初始化 ==========
 
@@ -314,6 +339,24 @@ public partial class AssetLibPageViewModel : ViewModelBase
     // ========== 素材操作 ==========
 
     [RelayCommand]
+    private void ShowAssetDetail(AssetLibItem? item)
+    {
+        if (item == null) return;
+        DetailItem = item;
+        ShowDetailWindowRequested?.Invoke(item);
+    }
+
+    /// <summary>
+    /// 获取素材完整详情（供窗口调用）
+    /// </summary>
+    public async Task<AssetLibItem?> GetAssetDetailAsync(AssetLibItem item)
+    {
+        var detail = await _assetLibService.GetAssetDetailAsync(item.Id);
+        if (detail != null) DetailItem = detail;
+        return detail;
+    }
+
+    [RelayCommand]
     private void OpenAssetInBrowser(AssetLibItem? item)
     {
         if (item == null || string.IsNullOrEmpty(item.BrowseUrl)) return;
@@ -326,5 +369,125 @@ public partial class AssetLibPageViewModel : ViewModelBase
             });
         }
         catch { }
+    }
+
+    [RelayCommand]
+    private void OpenDetailInBrowser()
+    {
+        if (DetailItem != null) OpenAssetInBrowser(DetailItem);
+    }
+
+    [RelayCommand]
+    private async Task DownloadAndInstallAsync() => await DownloadAndInstallWithProgressAsync(null);
+
+    /// <summary>
+    /// 下载并安装素材，带进度回调（供窗口使用）
+    /// 返回 true 表示安装成功
+    /// </summary>
+    public async Task<bool> DownloadAndInstallWithProgressAsync(IProgress<(double percent, string status)>? progress)
+    {
+        if (DetailItem == null || string.IsNullOrEmpty(DetailItem.DownloadUrl)) return false;
+        if (_projectService == null || _configService == null) return false;
+
+        void Report(double pct, string msg) => progress?.Report((pct, msg));
+
+        Report(0, LocalizationService.GetString("AssetLib.Status.Downloading", "Downloading..."));
+
+        try
+        {
+            // 1. 下载 zip
+            var downloadsPath = _configService.Config.DownloadsPath;
+            Directory.CreateDirectory(downloadsPath);
+            var zipFileName = $"asset_{DetailItem.Id}_{Guid.NewGuid():N8}.zip";
+            var zipPath = Path.Combine(downloadsPath, zipFileName);
+
+            using var response = await DownloadClient.GetAsync(DetailItem.DownloadUrl, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+
+            var totalBytes = response.Content.Headers.ContentLength ?? -1;
+            await using var contentStream = await response.Content.ReadAsStreamAsync();
+            await using var fileStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
+
+            var buffer = new byte[8192];
+            long totalRead = 0;
+            int bytesRead;
+
+            while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
+            {
+                await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
+                totalRead += bytesRead;
+                if (totalBytes > 0)
+                {
+                    var pct = (double)totalRead / totalBytes * 100;
+                    Report(pct, $"{LocalizationService.GetString("AssetLib.Status.Downloading", "Downloading...")} {totalRead / 1024 / 1024}MB / {totalBytes / 1024 / 1024}MB");
+                }
+            }
+
+            // 2. 验证 hash（如果有）
+            if (!string.IsNullOrEmpty(DetailItem.DownloadHash))
+            {
+                Report(100, LocalizationService.GetString("AssetLib.Status.Verifying", "Verifying..."));
+                var hash = await ComputeSha256Async(zipPath);
+                if (!hash.Equals(DetailItem.DownloadHash, StringComparison.OrdinalIgnoreCase))
+                {
+                    Report(100, LocalizationService.GetString("AssetLib.Status.HashFailed", "SHA-256 hash check failed!"));
+                    File.Delete(zipPath);
+                    return false;
+                }
+            }
+
+            // 3. 解压到项目目录
+            Report(100, LocalizationService.GetString("AssetLib.Status.Installing", "Installing..."));
+            var projectDir = Path.Combine(_configService.Config.ProjectsPath, SanitizeDirName(DetailItem.Title));
+            if (Directory.Exists(projectDir))
+                projectDir += $"_{Guid.NewGuid().ToString("N")[..6]}";
+
+            Directory.CreateDirectory(projectDir);
+            ZipFile.ExtractToDirectory(zipPath, projectDir, true);
+
+            // 某些 asset zip 内有顶级目录，将内容提升
+            var subDirs = Directory.GetDirectories(projectDir);
+            if (subDirs.Length == 1 && File.Exists(Path.Combine(subDirs[0], "project.godot")))
+            {
+                var innerDir = subDirs[0];
+                foreach (var file in Directory.GetFiles(innerDir))
+                    File.Move(file, Path.Combine(projectDir, Path.GetFileName(file)), true);
+                foreach (var dir in Directory.GetDirectories(innerDir))
+                    Directory.Move(dir, Path.Combine(projectDir, Path.GetFileName(dir)));
+                Directory.Delete(innerDir, true);
+            }
+
+            // 4. 添加到项目列表
+            var projectGodotPath = Path.Combine(projectDir, "project.godot");
+            if (File.Exists(projectGodotPath))
+            {
+                await _projectService.AddProjectAsync(projectGodotPath);
+                AssetInstalled?.Invoke();
+            }
+
+            // 清理 zip
+            File.Delete(zipPath);
+
+            Report(100, LocalizationService.GetString("AssetLib.Status.Installed", "Installed successfully!"));
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Report(0, $"{LocalizationService.GetString("AssetLib.Status.Error", "Error: {0}")}".Replace("{0}", ex.Message));
+            return false;
+        }
+    }
+
+    private static string SanitizeDirName(string name)
+    {
+        var invalid = Path.GetInvalidFileNameChars();
+        return string.Concat(name.Select(c => invalid.Contains(c) ? '_' : c)).Trim();
+    }
+
+    private static async Task<string> ComputeSha256Async(string filePath)
+    {
+        await using var stream = File.OpenRead(filePath);
+        var hash = await SHA256.HashDataAsync(stream);
+        return Convert.ToHexString(hash).ToLowerInvariant();
     }
 }

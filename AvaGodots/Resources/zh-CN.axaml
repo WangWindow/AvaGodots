@@ -77,6 +77,7 @@
   <x:String x:Key="Projects.Dialog.AssignedTags">已分配标签</x:String>
   <x:String x:Key="Projects.Dialog.AllTags">所有标签</x:String>
   <x:String x:Key="Projects.Dialog.ConfirmRemove">确认移除</x:String>
+  <x:String x:Key="Projects.Dialog.ConfirmRemoveMessage">确定要从列表中移除项目 "{0}" 吗？\n（项目文件不会被删除）</x:String>
   <x:String x:Key="Projects.Dialog.EditProjectTitle">编辑项目</x:String>
   <x:String x:Key="Projects.Dialog.EditWarning">即将在 Godot 编辑器中打开此项目。请确保没有其他 Godot 实例正在编辑此项目。</x:String>
   <x:String x:Key="Projects.Dialog.DontShowAgain">不再显示此警告</x:String>
@@ -117,6 +118,7 @@
   <x:String x:Key="Editors.Dialog.ExtraArgsDesc">以空格分隔的额外参数列表，在启动编辑器时传入。</x:String>
   <x:String x:Key="Editors.Dialog.ManageTags">管理标签</x:String>
   <x:String x:Key="Editors.Dialog.ConfirmRemove">确认移除</x:String>
+  <x:String x:Key="Editors.Dialog.ConfirmRemoveMessage">确定要移除编辑器 "{0}" 吗？</x:String>
   <x:String x:Key="Editors.Dialog.AlsoDeleteFiles">同时从磁盘删除文件</x:String>
   <x:String x:Key="Editors.Dialog.ReferencesTitle">使用此编辑器的项目</x:String>
   <x:String x:Key="Editors.Dialog.NoReferences">没有项目引用此编辑器。</x:String>
@@ -144,6 +146,21 @@
   <x:String x:Key="AssetLib.Empty.Title">未找到资源</x:String>
   <x:String x:Key="AssetLib.Empty.Desc">尝试更改搜索或筛选条件。</x:String>
   <x:String x:Key="AssetLib.NoEditorHint">未安装任何编辑器。请前往 编辑器 → 远程 下载一个以启用版本筛选。</x:String>
+  <x:String x:Key="AssetLib.Detail.Version">版本：</x:String>
+  <x:String x:Key="AssetLib.Detail.GodotVersion">Godot：</x:String>
+  <x:String x:Key="AssetLib.Detail.Support">支持级别：</x:String>
+  <x:String x:Key="AssetLib.Detail.Contents">内容：</x:String>
+  <x:String x:Key="AssetLib.Detail.ViewFiles">查看文件</x:String>
+  <x:String x:Key="AssetLib.Detail.Description">描述：</x:String>
+  <x:String x:Key="AssetLib.Detail.ViewInBrowser">在浏览器中查看</x:String>
+  <x:String x:Key="AssetLib.Detail.DownloadInstall">下载并安装</x:String>
+  <x:String x:Key="AssetLib.Toast.ReadyToInstall">安装已就绪</x:String>
+  <x:String x:Key="AssetLib.Toast.Install">安装...</x:String>
+  <x:String x:Key="AssetLib.Status.Downloading">下载中...</x:String>
+  <x:String x:Key="AssetLib.Status.Verifying">验证哈希值中...</x:String>
+  <x:String x:Key="AssetLib.Status.HashFailed">SHA-256 哈希检查失败！</x:String>
+  <x:String x:Key="AssetLib.Status.Installing">安装中...</x:String>
+  <x:String x:Key="AssetLib.Status.Installed">安装成功！</x:String>
 
   <!-- ========== Settings 页面 ========== -->
   <x:String x:Key="Settings.Folder">设置文件夹</x:String>
@@ -197,5 +214,9 @@
   <x:String x:Key="Settings.Dialog.SelectDefaultProjectsPath">选择默认项目目录</x:String>
   <x:String x:Key="Settings.Dialog.SelectDownloadsPath">选择下载目录</x:String>
   <x:String x:Key="Settings.Dialog.SelectVersionsPath">选择编辑器存储目录</x:String>
+  <x:String x:Key="Dialog.SelectProjectDir">选择项目目录</x:String>
+  <x:String x:Key="Dialog.SelectProjectGodot">选择 project.godot</x:String>
+  <x:String x:Key="Dialog.SelectScanDir">选择扫描目录</x:String>
+  <x:String x:Key="Dialog.SelectTargetDir">选择目标目录</x:String>
 
 </ResourceDictionary>

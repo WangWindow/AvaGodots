@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using AvaGodots.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AvaGodots.Services;
@@ -47,10 +48,10 @@ public partial class DownloadItem : ObservableObject
 /// <summary>
 /// 下载管理器 — 管理编辑器和资源的下载、解压、安装
 /// </summary>
-public sealed class DownloadManagerService
+public sealed class DownloadManagerService : IDownloadManagerService
 {
     private readonly HttpClient _httpClient;
-    private readonly DatabaseService _db;
+    private readonly Interfaces.IDatabaseService _db;
     private readonly Interfaces.IEditorService _editorService;
     private readonly Interfaces.IConfigService _configService;
 
@@ -59,8 +60,11 @@ public sealed class DownloadManagerService
     /// <summary>是否有活跃下载</summary>
     public bool HasActiveDownloads => Downloads.Any(d => d.IsDownloading);
 
+    /// <summary>编辑器安装完成事件（下载并解压成功后触发）</summary>
+    public event Action? EditorInstalled;
+
     public DownloadManagerService(
-        DatabaseService db,
+        Interfaces.IDatabaseService db,
         Interfaces.IEditorService editorService,
         Interfaces.IConfigService configService)
     {
@@ -335,6 +339,7 @@ public sealed class DownloadManagerService
 
             item.StatusText = "Installed successfully";
             item.RaiseCompleted();
+            EditorInstalled?.Invoke();
             LoggerService.Instance.Info("Download", $"Editor installed: {editorName}", extractDir);
 
             // 清理 zip 文件

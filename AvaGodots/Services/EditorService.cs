@@ -50,7 +50,7 @@ public partial class EditorService : IEditorService
             {
                 foreach (var saved in savedEditors)
                 {
-                    _editors.Add(new GodotEditor
+                    var editor = new GodotEditor
                     {
                         Path = saved.Path,
                         Name = saved.Name,
@@ -59,7 +59,9 @@ public partial class EditorService : IEditorService
                         ExtraArguments = saved.ExtraArguments ?? [],
                         VersionHint = saved.VersionHint,
                         CustomCommands = saved.CustomCommands ?? []
-                    });
+                    };
+                    editor.RefreshFileStatus();
+                    _editors.Add(editor);
                 }
             }
         }
@@ -116,6 +118,7 @@ public partial class EditorService : IEditorService
         }
 
         _editors.Add(editor);
+        editor.RefreshFileStatus();
         await SaveAsync();
         return editor;
     }

@@ -52,9 +52,10 @@ public partial class GodotEditor : ObservableObject
     private List<CustomCommand> _customCommands = [];
 
     /// <summary>
-    /// 编辑器文件是否存在
+    /// 编辑器文件是否存在（缓存值，调用 RefreshFileStatus() 更新）
     /// </summary>
-    public bool IsValid => System.IO.File.Exists(Path);
+    [ObservableProperty]
+    private bool _isValid;
 
     /// <summary>
     /// 编辑器目录路径
@@ -62,17 +63,21 @@ public partial class GodotEditor : ObservableObject
     public string DirectoryPath => System.IO.Path.GetDirectoryName(Path) ?? string.Empty;
 
     /// <summary>
-    /// 是否为 Self-Contained 模式（编辑器目录包含 ._sc_ 或 _sc_ 文件）
+    /// 是否为 Self-Contained 模式（缓存值，调用 RefreshFileStatus() 更新）
     /// </summary>
-    public bool IsSelfContained
+    [ObservableProperty]
+    private bool _isSelfContained;
+
+    /// <summary>
+    /// 刷新文件系统相关的缓存状态
+    /// </summary>
+    public void RefreshFileStatus()
     {
-        get
-        {
-            var dir = DirectoryPath;
-            if (string.IsNullOrEmpty(dir)) return false;
-            return System.IO.File.Exists(System.IO.Path.Combine(dir, "._sc_")) ||
-                   System.IO.File.Exists(System.IO.Path.Combine(dir, "_sc_"));
-        }
+        IsValid = System.IO.File.Exists(Path);
+        var dir = DirectoryPath;
+        IsSelfContained = !string.IsNullOrEmpty(dir) &&
+            (System.IO.File.Exists(System.IO.Path.Combine(dir, "._sc_")) ||
+             System.IO.File.Exists(System.IO.Path.Combine(dir, "_sc_")));
     }
 
     /// <summary>

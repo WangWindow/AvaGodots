@@ -74,6 +74,7 @@ public partial class ProjectService : IProjectService
                     }
 
                     _projects.Add(project);
+                    project.RefreshFileStatus();
                 }
             }
         }
@@ -131,6 +132,7 @@ public partial class ProjectService : IProjectService
         }
 
         _projects.Add(project);
+        project.RefreshFileStatus();
         await SaveAsync();
         return project;
     }
@@ -186,17 +188,20 @@ public partial class ProjectService : IProjectService
     /// <summary>
     /// 创建新项目
     /// </summary>
-    public async Task<GodotProject?> CreateProjectAsync(string name, string directory, string editorPath, int godotVersion = 4, string renderer = "Forward+", string versionControl = "Git")
+    public async Task<GodotProject?> CreateProjectAsync(string name, string directory, string editorPath, int godotVersion = 4, string renderer = "Forward+", string versionControl = "Git", string editorVersionHint = "")
     {
         try
         {
             // 创建项目目录
             Directory.CreateDirectory(directory);
 
+            // 从编辑器 VersionHint 提取实际版本号（如 "v4.6-stable" → "4.6"）
+            var engineVersion = ExtractEngineVersion(editorVersionHint, godotVersion);
+
             // 创建 project.godot 文件
             var projectGodotPath = Path.Combine(directory, "project.godot");
             var content = godotVersion >= 4
-                ? GenerateGodot4ProjectFile(name, renderer)
+                ? GenerateGodot4ProjectFile(name, renderer, engineVersion)
                 : GenerateGodot3ProjectFile(name);
 
             await File.WriteAllTextAsync(projectGodotPath, content);
@@ -376,7 +381,23 @@ public partial class ProjectService : IProjectService
     /// <summary>
     /// 生成 Godot 4 项目文件内容
     /// </summary>
-    private static string GenerateGodot4ProjectFile(string name, string renderer = "Forward+")
+    /// <summary>
+    /// 从编辑器 VersionHint 中提取引擎版本号（如 "v4.6-stable" → "4.6", "v4.3-stable-mono" → "4.3"）
+    /// </summary>
+    private static string ExtractEngineVersion(string versionHint, int godotMajor)
+    {
+        if (string.IsNullOrWhiteSpace(versionHint))
+            return godotMajor >= 4 ? "4.3" : "3.6";
+
+        // 去掉前缀 v，取到第一个 '-' 之前的部分
+        var ver = versionHint.TrimStart('v').Split('-')[0].Trim();
+        if (!string.IsNullOrEmpty(ver) && char.IsDigit(ver[0]))
+            return ver;
+
+        return godotMajor >= 4 ? "4.3" : "3.6";
+    }
+
+    private static string GenerateGodot4ProjectFile(string name, string renderer = "Forward+", string engineVersion = "4.3")
     {
         var renderMethod = renderer switch
         {
@@ -410,7 +431,7 @@ public partial class ProjectService : IProjectService
             [application]
 
             config/name="{{name}}"
-            config/features=PackedStringArray("4.3", "{{featureLabel}}")
+            config/features=PackedStringArray("{{engineVersion}}", "{{featureLabel}}")
             config/icon="res://icon.svg"
 
             [rendering]

@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using AvaGodots.Interfaces;
 using AvaGodots.Models;
 
 namespace AvaGodots.Services;
@@ -15,15 +16,15 @@ namespace AvaGodots.Services;
 /// Godot 资源库 API 服务
 /// 调用 godotengine.org/asset-library/api
 /// </summary>
-public partial class AssetLibService
+public partial class AssetLibService : IAssetLibService
 {
     private readonly HttpClient _httpClient;
     private List<AssetLibCategory>? _cachedCategories;
-    private DatabaseService? _db;
+    private Interfaces.IDatabaseService? _db;
 
     public string SiteUrl { get; set; } = "https://godotengine.org/asset-library/api";
 
-    public AssetLibService(DatabaseService? db = null)
+    public AssetLibService(Interfaces.IDatabaseService? db = null)
     {
         _db = db;
         _httpClient = new HttpClient();
@@ -34,7 +35,7 @@ public partial class AssetLibService
     /// <summary>
     /// 注入数据库服务（用于缓存）
     /// </summary>
-    public void SetDatabase(DatabaseService db) => _db = db;
+    public void SetDatabase(Interfaces.IDatabaseService db) => _db = db;
 
     /// <summary>
     /// 获取分类列表（带缓存）
@@ -165,10 +166,10 @@ public partial class AssetLibService
 /// <summary>
 /// 远程编辑器版本源 — 从 GitHub 获取 Godot 版本列表和发布资产
 /// </summary>
-public class RemoteEditorService
+public class RemoteEditorService : Interfaces.IRemoteEditorService
 {
     private readonly HttpClient _httpClient;
-    private DatabaseService? _db;
+    private Interfaces.IDatabaseService? _db;
     private List<RemoteGodotVersion>? _cachedVersions;
     private readonly Dictionary<string, List<GithubReleaseAsset>> _assetsCache = new();
     private static readonly string[] Repos = ["godotengine/godot", "godotengine/godot-builds"];
@@ -182,7 +183,7 @@ public class RemoteEditorService
     }
 
     /// <summary>注入数据库服务（用于持久化缓存）</summary>
-    public void SetDatabase(DatabaseService db) => _db = db;
+    public void SetDatabase(Interfaces.IDatabaseService db) => _db = db;
 
     /// <summary>获取所有远程 Godot 版本（优先使用缓存）</summary>
     public async Task<List<RemoteGodotVersion>> GetVersionsAsync(CancellationToken ct = default)

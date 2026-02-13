@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AvaGodots.Interfaces;
 using AvaGodots.Models;
@@ -21,6 +22,13 @@ public partial class ProjectsPageViewModel : ViewModelBase
     private readonly IProjectService _projectService;
     private readonly IEditorService _editorService;
     private readonly IConfigService _configService;
+
+    /// <summary>
+    /// 项目数据变更事件（增删改后触发，用于通知父级更新状态栏）
+    /// </summary>
+    public event Action? ProjectsChanged;
+
+    private CancellationTokenSource? _searchDebounce;
 
     // ========================= 列表与过滤 =========================
 
@@ -165,8 +173,20 @@ public partial class ProjectsPageViewModel : ViewModelBase
 
     // ========================= 属性变更回调 =========================
 
-    partial void OnSearchTextChanged(string value) => RefreshProjects();
+    partial void OnSearchTextChanged(string value) => DebounceRefreshProjects();
     partial void OnSortIndexChanged(int value) => RefreshProjects();
+
+    private async void DebounceRefreshProjects()
+    {
+        _searchDebounce?.Cancel();
+        var cts = _searchDebounce = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(200, cts.Token);
+            RefreshProjects();
+        }
+        catch (TaskCanceledException) { /* debounced */ }
+    }
 
     partial void OnSelectedProjectChanged(GodotProject? value)
     {
@@ -183,7 +203,6 @@ public partial class ProjectsPageViewModel : ViewModelBase
     /// </summary>
     public void RefreshProjects()
     {
-        FilteredProjects.Clear();
         var projects = _projectService.Projects.AsEnumerable();
 
         // tag: 语法过滤
@@ -214,14 +233,47 @@ public partial class ProjectsPageViewModel : ViewModelBase
             _ => projects
         };
 
-        foreach (var project in projects)
-            FilteredProjects.Add(project);
+        var newList = projects.ToList();
+        SyncCollection(FilteredProjects, newList);
 
         IsEmpty = FilteredProjects.Count == 0;
 
-        AvailableEditors.Clear();
-        foreach (var editor in _editorService.Editors)
-            AvailableEditors.Add(editor);
+        var newEditors = _editorService.Editors.ToList();
+        SyncCollection(AvailableEditors, newEditors);
+
+        ProjectsChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// 同步 ObservableCollection 与目标列表，最小化 UI 变更通知
+    /// </summary>
+    private static void SyncCollection<T>(ObservableCollection<T> target, System.Collections.Generic.List<T> source)
+    {
+        if (target.Count == source.Count && target.SequenceEqual(source)) return;
+
+        if (source.Count <= 50 || Math.Abs(target.Count - source.Count) > target.Count / 2)
+        {
+            target.Clear();
+            foreach (var item in source) target.Add(item);
+            return;
+        }
+
+        for (var i = target.Count - 1; i >= 0; i--)
+        {
+            if (!source.Contains(target[i]))
+                target.RemoveAt(i);
+        }
+        for (var i = 0; i < source.Count; i++)
+        {
+            if (i >= target.Count)
+                target.Add(source[i]);
+            else if (!Equals(target[i], source[i]))
+            {
+                var idx = target.IndexOf(source[i]);
+                if (idx >= 0) target.Move(idx, i);
+                else target.Insert(i, source[i]);
+            }
+        }
     }
 
     // ========================= 新建项目 =========================
@@ -254,7 +306,7 @@ public partial class ProjectsPageViewModel : ViewModelBase
     [RelayCommand]
     private async Task BrowseNewProjectDirectoryAsync()
     {
-        var folder = await FileDialogHelper.PickFolderAsync("选择项目目录");
+        var folder = await FileDialogHelper.PickFolderAsync(LocalizationService.GetString("Dialog.SelectProjectDir", "Select project directory"));
         if (folder != null) NewProjectDirectory = folder;
     }
 
@@ -268,7 +320,8 @@ public partial class ProjectsPageViewModel : ViewModelBase
 
         var result = await _projectService.CreateProjectAsync(
             NewProjectName, projectDir, NewProjectEditor?.Path ?? string.Empty,
-            NewProjectGodotVersion, SelectedRenderer, SelectedVersionControl);
+            NewProjectGodotVersion, SelectedRenderer, SelectedVersionControl,
+            NewProjectEditor?.VersionHint ?? string.Empty);
 
         if (result != null) { RefreshProjects(); SelectedProject = result; }
         IsNewProjectDialogVisible = false;
@@ -294,7 +347,7 @@ public partial class ProjectsPageViewModel : ViewModelBase
     [RelayCommand]
     private async Task BrowseImportPathAsync()
     {
-        var file = await FileDialogHelper.PickFileAsync("选择 project.godot",
+        var file = await FileDialogHelper.PickFileAsync(LocalizationService.GetString("Dialog.SelectProjectGodot", "Select project.godot"),
             [FileDialogHelper.GodotProjectFilter, FileDialogHelper.AllFilter]);
         if (file != null) ImportProjectPath = file;
     }
@@ -324,7 +377,7 @@ public partial class ProjectsPageViewModel : ViewModelBase
     [RelayCommand]
     private async Task ScanDirectoryAsync()
     {
-        var folder = await FileDialogHelper.PickFolderAsync("选择扫描目录");
+        var folder = await FileDialogHelper.PickFolderAsync(LocalizationService.GetString("Dialog.SelectScanDir", "Select directory to scan"));
         if (string.IsNullOrWhiteSpace(folder)) return;
         var found = await _projectService.ScanDirectoryAsync(folder);
         foreach (var path in found)
@@ -392,7 +445,7 @@ public partial class ProjectsPageViewModel : ViewModelBase
     [RelayCommand]
     private async Task BrowseDuplicateDirectoryAsync()
     {
-        var folder = await FileDialogHelper.PickFolderAsync("选择目标目录");
+        var folder = await FileDialogHelper.PickFolderAsync(LocalizationService.GetString("Dialog.SelectTargetDir", "Select target directory"));
         if (folder != null) DuplicateProjectDirectory = folder;
     }
 
@@ -528,7 +581,9 @@ public partial class ProjectsPageViewModel : ViewModelBase
         project ??= SelectedProject;
         if (project == null) return;
         _pendingDeleteProject = project;
-        DeleteConfirmMessage = $"确定要从列表中移除项目 \"{project.Name}\" 吗？\n（项目文件不会被删除）";
+        DeleteConfirmMessage = string.Format(
+            LocalizationService.GetString("Projects.Dialog.ConfirmRemoveMessage", "Remove project \"{0}\" from the list?\n(Project files will NOT be deleted)"),
+            project.Name);
         IsDeleteConfirmVisible = true;
     }
 

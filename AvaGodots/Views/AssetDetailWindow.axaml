@@ -1,0 +1,162 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ic="using:FluentIcons.Avalonia"
+        xmlns:asyncImageLoader="using:AsyncImageLoader"
+        mc:Ignorable="d"
+        x:Class="AvaGodots.Views.AssetDetailWindow"
+        Title="Asset Detail"
+        Width="920" Height="620"
+        MinWidth="640" MinHeight="420"
+        Background="#252B35"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="40">
+
+  <Window.Styles>
+    <!-- 预览缩略图按钮 -->
+    <Style Selector="Button.previewThumb">
+      <Setter Property="Padding" Value="2"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="2"/>
+      <Setter Property="BorderBrush" Value="Transparent"/>
+      <Setter Property="CornerRadius" Value="3"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.previewThumb:pointerover">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+      <Setter Property="Opacity" Value="0.9"/>
+    </Style>
+    <Style Selector="Button.previewThumb.selected">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+    </Style>
+  </Window.Styles>
+
+  <DockPanel>
+
+    <!-- ===== 底部按钮栏 ===== -->
+    <Border DockPanel.Dock="Bottom" Padding="16,10" Background="{DynamicResource DarkColor3}">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <!-- 关闭 -->
+        <Button Grid.Column="0" Classes="action" Click="OnCloseClick">
+          <TextBlock Text="{DynamicResource Common.Close}"/>
+        </Button>
+        <!-- 下载进度（居中） -->
+        <StackPanel Grid.Column="1" x:Name="ProgressPanel" IsVisible="False"
+                    VerticalAlignment="Center" Margin="16,0" Spacing="2">
+          <ProgressBar x:Name="ProgressBar" Maximum="100" Height="4" CornerRadius="2"/>
+          <TextBlock x:Name="ProgressText" FontSize="11" Foreground="{DynamicResource FontDimBrush}"/>
+        </StackPanel>
+        <!-- 下载 -->
+        <Button Grid.Column="2" Classes="accent" x:Name="DownloadButton" Click="OnDownloadClick">
+          <TextBlock Text="{DynamicResource Common.Download}"/>
+        </Button>
+      </Grid>
+    </Border>
+
+    <!-- ===== 加载指示器（全窗口覆盖） ===== -->
+    <Panel x:Name="LoadingPanel">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+        <ProgressBar IsIndeterminate="True" Width="200"/>
+        <TextBlock Text="{DynamicResource AssetLib.Status.Searching}" FontSize="12"
+                   Foreground="{DynamicResource FontDimBrush}" HorizontalAlignment="Center"/>
+      </StackPanel>
+    </Panel>
+
+    <!-- ===== 主内容（双列布局） ===== -->
+    <Grid x:Name="ContentPanel" IsVisible="False" ColumnDefinitions="*,1.2*">
+
+      <!-- ======== 左列：元信息 + 描述 ======== -->
+      <DockPanel Grid.Column="0">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="16,10,8,10">
+          <StackPanel Spacing="10">
+
+            <!-- 素材信息卡片（图标 + 标题/分类/作者/许可证） -->
+            <Grid ColumnDefinitions="Auto,*" Margin="0,0,0,4">
+              <Border Grid.Column="0" Width="64" Height="64" CornerRadius="6" ClipToBounds="True"
+                      Background="{DynamicResource DarkColor3}" Margin="0,0,12,0">
+                <Panel>
+                  <Image x:Name="IconImage" Width="64" Height="64" Stretch="UniformToFill"/>
+                  <ic:SymbolIcon Symbol="PuzzlePiece" IconVariant="Regular" FontSize="28"
+                                 Foreground="{DynamicResource FontDimBrush}"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                                 x:Name="IconPlaceholder"/>
+                </Panel>
+              </Border>
+              <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                <TextBlock x:Name="TitleText" FontSize="15" FontWeight="Bold"
+                           Foreground="{DynamicResource AccentBrush}"
+                           TextWrapping="Wrap" MaxLines="2"/>
+                <TextBlock x:Name="CategoryText" FontSize="12"
+                           Foreground="{DynamicResource FontDimBrush}"/>
+                <TextBlock x:Name="AuthorText" FontSize="12"
+                           Foreground="{DynamicResource FontDimBrush}"/>
+                <TextBlock x:Name="LicenseText" FontSize="12"
+                           Foreground="{DynamicResource FontDimBrush}"/>
+              </StackPanel>
+            </Grid>
+
+            <Border Height="1" Background="{DynamicResource DarkColor3}" Margin="0,2"/>
+
+            <!-- 版本 + 内容链接 -->
+            <StackPanel Spacing="4">
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <TextBlock Text="{DynamicResource AssetLib.Detail.Version}" FontSize="12"
+                           Foreground="{DynamicResource FontBrush}"/>
+                <TextBlock x:Name="VersionText" FontSize="12"
+                           Foreground="{DynamicResource FontDimBrush}"/>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <TextBlock Text="{DynamicResource AssetLib.Detail.Contents}" FontSize="12"
+                           Foreground="{DynamicResource FontBrush}"/>
+                <Button x:Name="ViewFilesButton" Classes="hyperlink" Click="OnViewInBrowserClick"
+                        Padding="0" Margin="0" VerticalAlignment="Center">
+                  <TextBlock Text="{DynamicResource AssetLib.Detail.ViewFiles}" FontSize="12"
+                             Foreground="{DynamicResource AccentBrush}"/>
+                </Button>
+              </StackPanel>
+            </StackPanel>
+
+            <!-- 描述 -->
+            <StackPanel Spacing="4">
+              <TextBlock Text="{DynamicResource AssetLib.Detail.Description}" FontSize="12"
+                         Foreground="{DynamicResource FontBrush}"/>
+              <TextBlock x:Name="DescriptionText" FontSize="12" TextWrapping="Wrap"
+                         Foreground="{DynamicResource FontDimBrush}" LineHeight="20"
+                         Margin="0,4,0,0"/>
+            </StackPanel>
+
+          </StackPanel>
+        </ScrollViewer>
+      </DockPanel>
+
+      <!-- ======== 右列：预览图 ======== -->
+      <DockPanel Grid.Column="1" Margin="0,10,16,10">
+
+        <!-- 缩略图条 -->
+        <ScrollViewer DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Disabled" Margin="0,6,0,0">
+          <StackPanel x:Name="PreviewThumbnails" Orientation="Horizontal" Spacing="6"
+                      HorizontalAlignment="Left"/>
+        </ScrollViewer>
+
+        <!-- 大预览图 -->
+        <Border Background="{DynamicResource DarkColor3}" CornerRadius="6" ClipToBounds="True"
+                Padding="0">
+          <Panel>
+            <Image x:Name="PreviewImage" Stretch="Uniform"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <ic:SymbolIcon x:Name="PreviewPlaceholder" Symbol="Image" IconVariant="Regular"
+                           FontSize="48" Foreground="{DynamicResource FontDimBrush}"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          </Panel>
+        </Border>
+      </DockPanel>
+
+    </Grid>
+
+  </DockPanel>
+</Window>

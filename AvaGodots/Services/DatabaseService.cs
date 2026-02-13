@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using AvaGodots.Interfaces;
 using Microsoft.Data.Sqlite;
 
 namespace AvaGodots.Services;
@@ -8,7 +9,7 @@ namespace AvaGodots.Services;
 /// <summary>
 /// SQLite 数据库服务 — 缓存资源库、远程版本、下载记录等对用户不可见的数据
 /// </summary>
-public sealed class DatabaseService : IDisposable
+public sealed class DatabaseService : IDatabaseService
 {
     private SqliteConnection? _connection;
     private readonly string _dbPath;

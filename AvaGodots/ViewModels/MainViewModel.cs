@@ -21,8 +21,8 @@ public partial class MainViewModel : ViewModelBase
     private readonly IEditorService _editorService;
     private readonly IProjectService _projectService;
     private readonly IVsCodeIntegrationService _vsCodeService;
-    private readonly DatabaseService _db;
-    private readonly DownloadManagerService _downloadManager;
+    private readonly IDatabaseService _db;
+    private readonly IDownloadManagerService _downloadManager;
 
     /// <summary>
     /// 当前选中的标签页索引
@@ -120,12 +120,17 @@ public partial class MainViewModel : ViewModelBase
 
         // 创建页面视图模型
         ProjectsPage = new ProjectsPageViewModel(_projectService, _editorService, _configService);
-        AssetLibPage = new AssetLibPageViewModel(_db, _editorService);
+        AssetLibPage = new AssetLibPageViewModel(_db, _editorService, _projectService, _configService);
         EditorsPage = new EditorsPageViewModel(_editorService, _configService, _downloadManager);
         EditorsPage.SetProjectService(_projectService);
         EditorsPage.SetDatabase(_db);
         SettingsPage = new SettingsPageViewModel(_configService, _vsCodeService);
         SettingsPage.RequestClose += OnSettingsPageRequestClose;
+
+        // 监听子页面数据变更以更新状态栏
+        EditorsPage.EditorsChanged += UpdateStatusText;
+        ProjectsPage.ProjectsChanged += UpdateStatusText;
+        AssetLibPage.AssetInstalled += () => { ProjectsPage.RefreshProjects(); UpdateStatusText(); };
 
         Pages.Add(ProjectsPage);
         Pages.Add(AssetLibPage);
@@ -203,8 +208,7 @@ public partial class MainViewModel : ViewModelBase
             EditorsPage.RefreshEditors();
             SettingsPage.LoadSettings();
 
-            var loadedTemplate = LocalizationService.GetString("App.Status.LoadedSummary", "Loaded {0} projects, {1} editors");
-            StatusText = string.Format(loadedTemplate, _projectService.Projects.Count, _editorService.Editors.Count);
+            UpdateStatusText();
             LoggerService.Instance.Info("App", $"Loaded {_projectService.Projects.Count} projects, {_editorService.Editors.Count} editors");
         }
         catch (Exception ex)
@@ -255,4 +259,13 @@ public partial class MainViewModel : ViewModelBase
     /// </summary>
     [RelayCommand]
     private void NavigateToSettings() => SelectedTabIndex = 3;
+
+    /// <summary>
+    /// 更新状态栏文本（反映当前项目和编辑器数量）
+    /// </summary>
+    public void UpdateStatusText()
+    {
+        var loadedTemplate = LocalizationService.GetString("App.Status.LoadedSummary", "Loaded {0} projects, {1} editors");
+        StatusText = string.Format(loadedTemplate, _projectService.Projects.Count, _editorService.Editors.Count);
+    }
 }
