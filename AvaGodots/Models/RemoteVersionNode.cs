@@ -48,6 +48,11 @@ public partial class RemoteVersionNode : ObservableObject
     public string FileSize { get; set; } = string.Empty;
 
     /// <summary>
+    /// 资产是否已加载（防止重复加载）
+    /// </summary>
+    public bool AssetsLoaded { get; set; }
+
+    /// <summary>
     /// 子节点
     /// </summary>
     public ObservableCollection<RemoteVersionNode> Children { get; } = [];

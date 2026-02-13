@@ -114,9 +114,10 @@ public partial class MainViewModel : ViewModelBase
 
         // 创建页面视图模型
         ProjectsPage = new ProjectsPageViewModel(_projectService, _editorService, _configService);
-        AssetLibPage = new AssetLibPageViewModel(_db);
+        AssetLibPage = new AssetLibPageViewModel(_db, _editorService);
         EditorsPage = new EditorsPageViewModel(_editorService, _configService, _downloadManager);
         EditorsPage.SetProjectService(_projectService);
+        EditorsPage.SetDatabase(_db);
         SettingsPage = new SettingsPageViewModel(_configService, _vsCodeService);
 
         Pages.Add(ProjectsPage);

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AvaGodots.Interfaces;
 using AvaGodots.Models;
 using AvaGodots.Services;
 using Avalonia.Data.Converters;
@@ -39,6 +40,7 @@ public static class PageItemConverters
 public partial class AssetLibPageViewModel : ViewModelBase
 {
     private readonly AssetLibService _assetLibService;
+    private readonly IEditorService? _editorService;
     private CancellationTokenSource? _searchCts;
 
     // ========== 搜索/筛选 ==========
@@ -84,6 +86,9 @@ public partial class AssetLibPageViewModel : ViewModelBase
     private bool _isEmpty;
 
     [ObservableProperty]
+    private bool _noEditorsInstalled;
+
+    [ObservableProperty]
     private string _statusText = string.Empty;
 
     // ========== 数据 ==========
@@ -92,7 +97,7 @@ public partial class AssetLibPageViewModel : ViewModelBase
     public ObservableCollection<string> Categories { get; } = ["All"];
     public ObservableCollection<PageItem> PageNumbers { get; } = [];
 
-    public string[] VersionOptions { get; } = ["", "4.6", "4.5", "4.4", "4.3", "4.2", "4.1", "4.0", "3.5", "3.4"];
+    public ObservableCollection<string> VersionOptions { get; } = [""];
     public string[] SortOptions { get; } = ["Recently Updated", "Least Recently Updated", "Name (A-Z)", "Name (Z-A)", "License (A-Z)", "License (Z-A)"];
     public string[] SiteOptions { get; } = ["godotengine.org (Official)"];
 
@@ -101,9 +106,10 @@ public partial class AssetLibPageViewModel : ViewModelBase
         _assetLibService = new AssetLibService();
     }
 
-    public AssetLibPageViewModel(DatabaseService db)
+    public AssetLibPageViewModel(DatabaseService db, IEditorService? editorService = null)
     {
         _assetLibService = new AssetLibService(db);
+        _editorService = editorService;
     }
 
     /// <summary>
@@ -116,15 +122,46 @@ public partial class AssetLibPageViewModel : ViewModelBase
     [RelayCommand]
     private async Task InitializeAsync()
     {
+        RefreshVersionOptions();
         await LoadCategoriesAsync();
         await SearchAsync();
 
-        // 后台预缓存前几页（不阻塞UI）
         _ = Task.Run(async () =>
         {
             try { await _assetLibService.PreCacheAsync(3); }
-            catch { /* 预缓存失败不影响主流程 */ }
+            catch { }
         });
+    }
+
+    /// <summary>根据已安装的编辑器版本构建筛选选项</summary>
+    public void RefreshVersionOptions()
+    {
+        VersionOptions.Clear();
+        VersionOptions.Add(""); // “所有版本”
+
+        if (_editorService is { Editors.Count: > 0 })
+        {
+            var versions = new HashSet<string>();
+            foreach (var editor in _editorService.Editors)
+            {
+                var ver = ExtractMajorMinor(editor.VersionHint);
+                if (!string.IsNullOrEmpty(ver)) versions.Add(ver);
+            }
+            foreach (var v in versions.OrderByDescending(v => v))
+                VersionOptions.Add(v);
+            NoEditorsInstalled = false;
+        }
+        else
+        {
+            NoEditorsInstalled = true;
+        }
+    }
+
+    private static string ExtractMajorMinor(string versionHint)
+    {
+        var ver = versionHint.TrimStart('v').Split('-')[0];
+        var parts = ver.Split('.');
+        return parts.Length >= 2 ? $"{parts[0]}.{parts[1]}" : ver;
     }
 
     private async Task LoadCategoriesAsync()

@@ -99,6 +99,11 @@ public partial class EditorsPageViewModel : ViewModelBase
     /// </summary>
     public void SetProjectService(IProjectService projectService) => _projectService = projectService;
 
+    /// <summary>
+    /// 注入数据库服务（从 MainViewModel 调用）
+    /// </summary>
+    public void SetDatabase(DatabaseService db) => _remoteEditorService.SetDatabase(db);
+
     // ========================= 属性变更回调 =========================
 
     partial void OnSearchTextChanged(string value) => RefreshEditors();
@@ -393,51 +398,31 @@ public partial class EditorsPageViewModel : ViewModelBase
 
             foreach (var ver in versions)
             {
-                // 版本大类过滤
                 if (!ShouldShowVersion(ver.Name)) continue;
 
-                var node = new RemoteVersionNode
-                {
-                    Name = ver.Name,
-                    IsFolder = true
-                };
+                var node = new RemoteVersionNode { Name = ver.Name, IsFolder = true };
 
-                // 如果 flavor 是 stable，自动添加 stable 作为子节点
+                // 主版本的 flavor（stable / rc1 等）
                 if (ver.Flavor == "stable")
                 {
-                    node.Children.Add(new RemoteVersionNode
-                    {
-                        Name = "stable",
-                        Tag = $"{ver.Name}-stable",
-                        IsFolder = true
-                    });
+                    var stableNode = CreateReleaseNode(ver.Name, "stable", ver.Name);
+                    node.Children.Add(stableNode);
                 }
-                // 如果 flavor 不是 stable (例如 rc1, beta1)，将其作为当前版本的子节点
-                else if (!string.IsNullOrEmpty(ver.Flavor))
+                else if (!string.IsNullOrEmpty(ver.Flavor) && FilterUnstable)
                 {
-                    if (FilterUnstable)
-                    {
-                        node.Children.Add(new RemoteVersionNode
-                        {
-                            Name = ver.Flavor,
-                            Tag = $"{ver.Name}-{ver.Flavor}",
-                            IsFolder = true
-                        });
-                    }
+                    var flavorNode = CreateReleaseNode(ver.Name, ver.Flavor, ver.Name);
+                    node.Children.Add(flavorNode);
                 }
 
-                // 添加 releases 作为子节点 (历史预发布版本)
+                // 历史预发布版本
                 if (FilterUnstable)
                 {
-                    foreach (var release in ver.Releases)
+                    foreach (var rel in ver.Releases)
                     {
-                        if (release == "stable" || release == ver.Flavor) continue; // 避免重复
-                        node.Children.Add(new RemoteVersionNode
-                        {
-                            Name = release,
-                            Tag = $"{ver.Name}-{release}",
-                            IsFolder = true
-                        });
+                        if (rel.Name == "stable" || rel.Name == ver.Flavor) continue;
+                        var tagVer = rel.ReleaseVersion ?? ver.Name;
+                        var relNode = CreateReleaseNode(tagVer, rel.Name, ver.Name);
+                        node.Children.Add(relNode);
                     }
                 }
 
@@ -447,14 +432,28 @@ public partial class EditorsPageViewModel : ViewModelBase
 
             IsRemoteEmpty = RemoteVersions.Count == 0;
         }
-        catch
+        catch { IsRemoteEmpty = true; }
+        finally { IsRemoteLoading = false; }
+    }
+
+    /// <summary>创建发布节点（folder），带占位子节点以显示展开箭头</summary>
+    private RemoteVersionNode CreateReleaseNode(string tagVersion, string releaseName, string parentVersion)
+    {
+        var node = new RemoteVersionNode
         {
-            IsRemoteEmpty = true;
-        }
-        finally
+            Name = releaseName,
+            Tag = $"{tagVersion}-{releaseName}",
+            IsFolder = true
+        };
+        // 添加占位子节点以显示展开箭头
+        node.Children.Add(new RemoteVersionNode { Name = "Loading...", IsFolder = false });
+        // 监听展开事件以触发懒加载
+        node.PropertyChanged += async (_, e) =>
         {
-            IsRemoteLoading = false;
-        }
+            if (e.PropertyName == nameof(RemoteVersionNode.IsExpanded) && node.IsExpanded)
+                await LoadNodeAssetsAsync(node);
+        };
+        return node;
     }
 
     partial void OnFilterMonoChanged(bool value) => _ = LoadRemoteVersionsAsync();
@@ -463,25 +462,22 @@ public partial class EditorsPageViewModel : ViewModelBase
     partial void OnFilter3XChanged(bool value) => _ = LoadRemoteVersionsAsync();
     partial void OnFilterOtherVersionsChanged(bool value) => _ = LoadRemoteVersionsAsync();
 
-    [RelayCommand]
-    private async Task LoadReleaseAssetsAsync(RemoteVersionNode? node)
+    /// <summary>懒加载指定节点的发布资产</summary>
+    private async Task LoadNodeAssetsAsync(RemoteVersionNode node)
     {
-        if (node == null || string.IsNullOrEmpty(node.Tag) || node.Children.Count > 0) return;
+        if (string.IsNullOrEmpty(node.Tag) || node.AssetsLoaded) return;
+
         node.IsLoading = true;
+        node.Children.Clear();
+
         try
         {
             var assets = await _remoteEditorService.GetReleaseAssetsAsync(node.Tag);
-            foreach (var asset in assets.Where(a => a.IsDownloadable))
+            foreach (var asset in assets)
             {
-                // 平台过滤
-                if (!FilterAnyPlatform && !RemoteEditorService.IsForCurrentPlatform(asset.Name))
-                    continue;
-                // Mono 过滤
-                if (!FilterMono && RemoteEditorService.IsMono(asset.Name))
-                    continue;
-                // 64-bit 过滤
-                if (Filter64Bit && asset.Name.Contains("32") && !asset.Name.Contains("64"))
-                    continue;
+                if (!RemoteEditorService.IsDesktopAsset(asset.Name)) continue;
+                if (!FilterAnyPlatform && !RemoteEditorService.IsForCurrentPlatform(asset.Name)) continue;
+                if (!FilterMono && RemoteEditorService.IsMono(asset.Name)) continue;
 
                 node.Children.Add(new RemoteVersionNode
                 {
@@ -491,29 +487,34 @@ public partial class EditorsPageViewModel : ViewModelBase
                     FileSize = FormatFileSize(asset.Size)
                 });
             }
+            node.AssetsLoaded = true;
         }
-        finally
-        {
-            node.IsLoading = false;
-        }
+        finally { node.IsLoading = false; }
     }
 
     [RelayCommand]
-    private void DownloadRemoteEditor(RemoteVersionNode? node)
+    private async Task DownloadRemoteEditorAsync(RemoteVersionNode? node)
     {
-        if (node == null || string.IsNullOrEmpty(node.DownloadUrl)) return;
+        if (node == null) return;
 
+        // 文件夹节点：切换展开
+        if (node.IsFolder)
+        {
+            node.IsExpanded = !node.IsExpanded;
+            return;
+        }
+
+        // 文件节点：下载
+        if (string.IsNullOrEmpty(node.DownloadUrl)) return;
         if (_downloadManager != null)
         {
-            // 判断是导出模板还是编辑器
-            if (node.Name.EndsWith(".tpz", StringComparison.OrdinalIgnoreCase))
+            if (RemoteEditorService.IsExportTemplate(node.Name))
                 _downloadManager.DownloadExportTemplate(node.DownloadUrl, node.Name, node.Name);
             else
                 _downloadManager.DownloadEditor(node.DownloadUrl, node.Name, node.Name);
         }
         else
         {
-            // 回退：在浏览器打开
             try
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
@@ -525,6 +526,34 @@ public partial class EditorsPageViewModel : ViewModelBase
             catch { }
         }
     }
+
+    /// <summary>为本地编辑器下载导出模板</summary>
+    [RelayCommand]
+    private async Task DownloadExportTemplateAsync(GodotEditor? editor)
+    {
+        editor ??= SelectedEditor;
+        if (editor == null || _downloadManager == null) return;
+
+        var tag = ExtractTag(editor.VersionHint);
+        if (string.IsNullOrEmpty(tag)) return;
+
+        var assets = await _remoteEditorService.GetReleaseAssetsAsync(tag);
+        var isMono = editor.VersionHint.Contains("mono", StringComparison.OrdinalIgnoreCase);
+
+        var template = assets.FirstOrDefault(a =>
+            RemoteEditorService.IsExportTemplate(a.Name) &&
+            RemoteEditorService.IsMono(a.Name) == isMono);
+
+        if (template != null)
+            _downloadManager.DownloadExportTemplate(template.BrowserDownloadUrl, template.Name, $"Export Templates ({tag})");
+    }
+
+    private static string ExtractTag(string versionHint)
+    {
+        var tag = versionHint.TrimStart('v').Trim();
+        return string.IsNullOrEmpty(tag) ? "" : tag;
+    }
+
 
     private bool ShouldShowVersion(string name)
     {

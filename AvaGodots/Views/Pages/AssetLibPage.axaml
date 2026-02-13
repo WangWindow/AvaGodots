@@ -35,35 +35,50 @@
 
     <!-- ===== 筛选栏 ===== -->
     <Border DockPanel.Dock="Top" Padding="8,0,8,6">
-      <StackPanel Orientation="Horizontal" Spacing="8">
-        <StackPanel Spacing="2">
+      <Grid ColumnDefinitions="*,*,*,*">
+        <StackPanel Grid.Column="0" Spacing="2" Margin="0,0,4,0">
           <TextBlock Text="{DynamicResource AssetLib.Version}" FontSize="10" Foreground="{DynamicResource FontDimBrush}"/>
-          <ComboBox ItemsSource="{Binding VersionOptions}" SelectedItem="{Binding SelectedVersion}" MinWidth="80" FontSize="12"/>
+          <ComboBox ItemsSource="{Binding VersionOptions}" SelectedItem="{Binding SelectedVersion}"
+                    HorizontalAlignment="Stretch" FontSize="12"/>
         </StackPanel>
-        <StackPanel Spacing="2">
+        <StackPanel Grid.Column="1" Spacing="2" Margin="4,0">
           <TextBlock Text="{DynamicResource AssetLib.Sort}" FontSize="10" Foreground="{DynamicResource FontDimBrush}"/>
-          <ComboBox ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort}" MinWidth="160" FontSize="12"/>
+          <ComboBox ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort}"
+                    HorizontalAlignment="Stretch" FontSize="12"/>
         </StackPanel>
-        <StackPanel Spacing="2">
+        <StackPanel Grid.Column="2" Spacing="2" Margin="4,0">
           <TextBlock Text="{DynamicResource AssetLib.Category}" FontSize="10" Foreground="{DynamicResource FontDimBrush}"/>
-          <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" MinWidth="130" FontSize="12"/>
+          <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}"
+                    HorizontalAlignment="Stretch" FontSize="12"/>
         </StackPanel>
-        <StackPanel Spacing="2">
+        <StackPanel Grid.Column="3" Spacing="2" Margin="4,0,0,0">
           <TextBlock Text="{DynamicResource AssetLib.Site}" FontSize="10" Foreground="{DynamicResource FontDimBrush}"/>
-          <ComboBox ItemsSource="{Binding SiteOptions}" SelectedItem="{Binding SelectedSite}" MinWidth="180" FontSize="12"/>
+          <ComboBox ItemsSource="{Binding SiteOptions}" SelectedItem="{Binding SelectedSite}"
+                    HorizontalAlignment="Stretch" FontSize="12"/>
         </StackPanel>
-      </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- 未安装编辑器提示 -->
+    <Border DockPanel.Dock="Top" Padding="8,0,8,4" IsVisible="{Binding NoEditorsInstalled}">
+      <Border Background="{DynamicResource DarkColor2}" CornerRadius="4" Padding="10,6">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <ic:SymbolIcon Symbol="Info" IconVariant="Regular" FontSize="14" Foreground="{DynamicResource AccentBrush}"/>
+          <TextBlock Text="{DynamicResource AssetLib.NoEditorHint}" FontSize="12"
+                     Foreground="{DynamicResource FontDimBrush}" VerticalAlignment="Center"/>
+        </StackPanel>
+      </Border>
     </Border>
 
     <!-- ===== 顶部分页 ===== -->
     <Border DockPanel.Dock="Top" Padding="8,0,8,4">
-      <DockPanel>
-        <TextBlock DockPanel.Dock="Left" FontSize="12"
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <TextBlock Grid.Column="0" FontSize="12"
                    Foreground="{DynamicResource FontDimBrush}" VerticalAlignment="Center">
           <Run Text="{Binding TotalItems}"/>
           <Run Text="{DynamicResource AssetLib.AssetsFound}"/>
         </TextBlock>
-        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2" HorizontalAlignment="Right">
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" HorizontalAlignment="Center">
           <Button Classes="iconAction" Padding="6,2" FontSize="11"
                   Content="{DynamicResource AssetLib.First}" Command="{Binding FirstPageCommand}"
                   IsEnabled="{Binding CanGoPrevious}"/>
@@ -97,7 +112,7 @@
                   Content="{DynamicResource AssetLib.Last}" Command="{Binding LastPageCommand}"
                   IsEnabled="{Binding CanGoNext}"/>
         </StackPanel>
-      </DockPanel>
+      </Grid>
     </Border>
 
     <!-- ===== 主内容 ===== -->

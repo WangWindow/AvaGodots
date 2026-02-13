@@ -82,16 +82,19 @@ AvaGodots 全局主题样式
     <Setter Property="Padding" Value="16,8"/>
     <Setter Property="FontSize" Value="14"/>
     <Setter Property="FontWeight" Value="SemiBold"/>
-    <Setter Property="CornerRadius" Value="4"/>
-    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="0"/>
+    <Setter Property="BorderThickness" Value="0,0,0,2"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
     <Setter Property="Cursor" Value="Hand"/>
   </Style>
   <Style Selector="ToggleButton.titleTab:pointerover">
-    <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
+    <Setter Property="Background" Value="Transparent"/>
   </Style>
   <Style Selector="ToggleButton.titleTab:checked">
-    <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
-    <Setter Property="Background" Value="{DynamicResource SelectionBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
   </Style>
 
   <!-- ========== 操作按钮样式 ========== -->

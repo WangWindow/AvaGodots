@@ -81,7 +81,7 @@
   <x:String x:Key="Editors.RemoveMissing">移除缺失</x:String>
   <x:String x:Key="Editors.FilterWatermark">筛选编辑器 (tag:xxx)</x:String>
   <x:String x:Key="Editors.Filter.Mono">Mono</x:String>
-
+  <x:String x:Key="Editors.Filter.Unstable">不稳定版</x:String>
   <x:String x:Key="Editors.Filter.AnyPlatform">所有平台</x:String>
   <x:String x:Key="Editors.Filter.64bit">64 位</x:String>
   <x:String x:Key="Editors.Filter.4x">4.x</x:String>
@@ -113,6 +113,7 @@
   <x:String x:Key="Editors.Menu.ViewReferences">查看引用</x:String>
   <x:String x:Key="Editors.Menu.ShowInFileManager">在文件管理器中显示</x:String>
   <x:String x:Key="Editors.Menu.CopyPath">复制路径</x:String>
+  <x:String x:Key="Editors.Menu.DownloadExportTemplate">下载导出模板</x:String>
 
   <!-- ========== Asset Library 页面 ========== -->
   <x:String x:Key="AssetLib.SearchWatermark">搜索资源...</x:String>
@@ -127,6 +128,7 @@
   <x:String x:Key="AssetLib.Last">末页</x:String>
   <x:String x:Key="AssetLib.Empty.Title">未找到资源</x:String>
   <x:String x:Key="AssetLib.Empty.Desc">尝试更改搜索或筛选条件。</x:String>
+  <x:String x:Key="AssetLib.NoEditorHint">未安装任何编辑器。请前往 编辑器 → 远程 下载一个以启用版本筛选。</x:String>
 
   <!-- ========== Settings 页面 ========== -->
   <x:String x:Key="Settings.Folder">设置文件夹</x:String>

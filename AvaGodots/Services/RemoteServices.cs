@@ -163,17 +163,15 @@ public partial class AssetLibService
 }
 
 /// <summary>
-/// 远程编辑器版本源（GitHub）
+/// 远程编辑器版本源 — 从 GitHub 获取 Godot 版本列表和发布资产
 /// </summary>
 public class RemoteEditorService
 {
     private readonly HttpClient _httpClient;
+    private DatabaseService? _db;
     private List<RemoteGodotVersion>? _cachedVersions;
-
-    // 平台文件后缀
-    private static readonly string[] LinuxSuffixes = ["_linux.x86_64.zip", "_linux_x86_64.zip", "_linux.64.zip", "_x11.64.zip", "_linux.x86_32.zip"];
-    private static readonly string[] WindowsSuffixes = ["_win64.exe.zip", "_win32.exe.zip", "_win64.zip", "_win32.zip"];
-    private static readonly string[] MacOsSuffixes = ["_osx.universal.zip", "_macos.universal.zip", "_osx.fat.zip"];
+    private readonly Dictionary<string, List<GithubReleaseAsset>> _assetsCache = new();
+    private static readonly string[] Repos = ["godotengine/godot", "godotengine/godot-builds"];
 
     public RemoteEditorService()
     {
@@ -183,160 +181,185 @@ public class RemoteEditorService
         _httpClient.Timeout = TimeSpan.FromSeconds(30);
     }
 
-    /// <summary>
-    /// 获取所有远程 Godot 版本列表（从 GitHub YAML 解析）
-    /// </summary>
+    /// <summary>注入数据库服务（用于持久化缓存）</summary>
+    public void SetDatabase(DatabaseService db) => _db = db;
+
+    /// <summary>获取所有远程 Godot 版本（优先使用缓存）</summary>
     public async Task<List<RemoteGodotVersion>> GetVersionsAsync(CancellationToken ct = default)
     {
         if (_cachedVersions != null) return _cachedVersions;
 
+        if (_db != null)
+        {
+            var cached = await _db.GetVersionsCacheAsync("versions_yml", TimeSpan.FromHours(24));
+            if (cached != null) { _cachedVersions = ParseVersionsYml(cached); return _cachedVersions; }
+        }
+
         try
         {
-            var url = "https://raw.githubusercontent.com/godotengine/godot-website/master/_data/versions.yml";
+            const string url = "https://raw.githubusercontent.com/godotengine/godot-website/master/_data/versions.yml";
             var yml = await _httpClient.GetStringAsync(url, ct);
+            if (_db != null) await _db.SetVersionsCacheAsync("versions_yml", yml);
             _cachedVersions = ParseVersionsYml(yml);
             return _cachedVersions;
         }
-        catch
-        {
-            return [];
-        }
+        catch { return []; }
     }
 
-    /// <summary>
-    /// 获取指定版本-release 的 assets（如 4.3-stable）
-    /// </summary>
+    /// <summary>获取指定 tag 的发布资产（依次尝试 godotengine/godot 和 godotengine/godot-builds）</summary>
     public async Task<List<GithubReleaseAsset>> GetReleaseAssetsAsync(string tag, CancellationToken ct = default)
     {
-        try
+        if (_assetsCache.TryGetValue(tag, out var mem)) return mem;
+
+        if (_db != null)
         {
-            var url = $"https://api.github.com/repos/godotengine/godot-builds/releases/tags/{tag}";
-            var release = await _httpClient.GetFromJsonAsync<GithubRelease>(url, ct);
-            return release?.Assets ?? [];
+            var hit = await _db.GetHttpCacheAsync($"assets:{tag}", TimeSpan.FromHours(24));
+            if (hit?.body != null)
+            {
+                try
+                {
+                    var list = JsonSerializer.Deserialize<List<GithubReleaseAsset>>(hit.Value.body);
+                    if (list is { Count: > 0 }) { _assetsCache[tag] = list; return list; }
+                }
+                catch { /* corrupt cache */ }
+            }
         }
-        catch
+
+        foreach (var repo in Repos)
         {
-            return [];
+            try
+            {
+                var url = $"https://api.github.com/repos/{repo}/releases/tags/{tag}";
+                var release = await _httpClient.GetFromJsonAsync<GithubRelease>(url, ct);
+                if (release?.Assets is { Count: > 0 })
+                {
+                    _assetsCache[tag] = release.Assets;
+                    if (_db != null)
+                    {
+                        var json = JsonSerializer.SerializeToUtf8Bytes(release.Assets);
+                        await _db.SetHttpCacheAsync($"assets:{tag}", json, "application/json");
+                    }
+                    return release.Assets;
+                }
+            }
+            catch { /* try next repo */ }
         }
+
+        return [];
     }
 
-    /// <summary>
-    /// 检测文件是否适用于当前平台
-    /// </summary>
-    public static bool IsForCurrentPlatform(string fileName)
+    // ========== 平台匹配 ==========
+
+    /// <summary>是否为桌面编辑器或导出模板（排除 Android / 调试符号 / 源码包等）</summary>
+    public static bool IsDesktopAsset(string fileName)
     {
-        var suffixes = GetCurrentPlatformSuffixes();
-        foreach (var suffix in suffixes)
-        {
-            if (fileName.Contains(suffix.Replace(".zip", ""), StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-        return false;
+        var n = fileName.ToLowerInvariant();
+        if (!n.EndsWith(".zip") && !n.EndsWith(".tpz")) return false;
+        if (n.Contains("android")) return false;
+        if (n.Contains("debug_symbol") || n.Contains("native_debug")) return false;
+        if (n.StartsWith("godot-lib")) return false;
+        return true;
     }
 
-    /// <summary>
-    /// 判断文件是否为 Mono 版
-    /// </summary>
+    /// <summary>是否为导出模板</summary>
+    public static bool IsExportTemplate(string fileName) =>
+        fileName.Contains("export_templates", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>是否为 Mono/.NET 版</summary>
     public static bool IsMono(string fileName) =>
         fileName.Contains("mono", StringComparison.OrdinalIgnoreCase);
 
-    private static string[] GetCurrentPlatformSuffixes()
+    /// <summary>是否匹配当前操作系统和 CPU 架构</summary>
+    public static bool IsForCurrentPlatform(string fileName)
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return LinuxSuffixes;
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return WindowsSuffixes;
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return MacOsSuffixes;
-        return LinuxSuffixes;
+        var n = fileName.ToLowerInvariant();
+        if (IsExportTemplate(n)) return true;
+
+        bool osOk;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            osOk = n.Contains("linux") || n.Contains("x11");
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            osOk = n.Contains("win");
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            osOk = n.Contains("macos") || n.Contains("osx");
+        else return false;
+
+        if (!osOk) return false;
+        if (n.Contains("universal") || n.Contains(".fat")) return true;
+
+        return RuntimeInformation.ProcessArchitecture switch
+        {
+            Architecture.X64 => MatchesX64(n),
+            Architecture.Arm64 => n.Contains("arm64") || n.Contains("aarch64"),
+            Architecture.X86 => MatchesX86(n),
+            Architecture.Arm => n.Contains("arm32"),
+            _ => true
+        };
     }
 
-    /// <summary>
-    /// 解析 Godot 版本 YAML
-    /// YAML 结构:
-    /// - name: "4.6"
-    ///   flavor: "stable"
-    ///   releases:
-    ///     - name: "rc2"    ← 嵌套的 release 子项
-    ///       release_date: "..."
-    /// </summary>
+    private static bool MatchesX64(string n) =>
+        !n.Contains("arm") && (n.Contains("x86_64") || n.Contains("win64") || Regex.IsMatch(n, @"[._]64[._]"));
+
+    private static bool MatchesX86(string n) =>
+        !n.Contains("arm") && (n.Contains("x86_32") || n.Contains("win32") || Regex.IsMatch(n, @"[._]32[._]"));
+
+    // ========== YAML 解析 ==========
+
     private static List<RemoteGodotVersion> ParseVersionsYml(string yml)
     {
         var versions = new List<RemoteGodotVersion>();
-        RemoteGodotVersion? current = null;
+        RemoteGodotVersion? cur = null;
+        RemoteGodotRelease? curRel = null;
         var inReleases = false;
 
-        foreach (var rawLine in yml.Split('\n'))
+        foreach (var raw in yml.Split('\n'))
         {
-            // 使用缩进区分顶层版本和嵌套 release
-            var indent = rawLine.Length - rawLine.TrimStart().Length;
-            var line = rawLine.Trim();
+            var indent = raw.Length - raw.TrimStart().Length;
+            var line = raw.Trim();
+            if (string.IsNullOrEmpty(line) || line.StartsWith('#')) continue;
 
-            if (string.IsNullOrEmpty(line) || line.StartsWith('#'))
-                continue;
-
-            // 顶层版本条目 (缩进 0-1)
             if (indent <= 1 && line.StartsWith("- name:"))
             {
-                current = new RemoteGodotVersion
-                {
-                    Name = ExtractYamlValue(line, "- name:")
-                };
-                versions.Add(current);
+                cur = new RemoteGodotVersion { Name = YamlVal(line) };
+                versions.Add(cur);
                 inReleases = false;
+                curRel = null;
             }
-            // flavor 字段
-            else if (line.StartsWith("flavor:") && current != null && indent < 4)
-            {
-                current.Flavor = ExtractYamlValue(line, "flavor:");
-            }
-            // 进入 releases 块
-            else if (line == "releases:" && current != null)
-            {
+            else if (line.StartsWith("flavor:") && cur != null && indent < 4)
+                cur.Flavor = YamlVal(line);
+            else if (line == "releases:" && cur != null)
                 inReleases = true;
-            }
-            // 其他顶层字段 (release_date, release_notes, featured) → 退出 releases
-            else if (indent <= 2 && !line.StartsWith("-") && !inReleases)
-            {
-                // skip other top-level fields
-            }
-            // 嵌套在 releases 下的 - name: "rc1" 条目
             else if (inReleases && indent >= 4 && line.StartsWith("- name:"))
             {
-                var releaseName = ExtractYamlValue(line, "- name:");
-                if (!string.IsNullOrEmpty(releaseName))
-                    current?.Releases.Add(releaseName);
+                curRel = new RemoteGodotRelease { Name = YamlVal(line) };
+                cur?.Releases.Add(curRel);
             }
-            // 嵌套在 releases 下的简单 - "value" 条目 (旧格式)
-            else if (inReleases && indent >= 4 && line.StartsWith("- ") && !line.StartsWith("- name:"))
-            {
-                var release = line[2..].Trim().Trim('"');
-                if (!string.IsNullOrEmpty(release))
-                    current?.Releases.Add(release);
-            }
-            // 嵌套属性跳过 (release_date, release_notes等)
-            else if (inReleases && indent >= 6)
-            {
-                // skip nested properties of release entries
-            }
+            else if (inReleases && indent >= 6 && line.StartsWith("release_version:") && curRel != null)
+                curRel.ReleaseVersion = YamlVal(line);
         }
 
         return versions;
     }
 
-    /// <summary>
-    /// 从 YAML 行提取值: "key: value" → "value" (去掉引号)
-    /// </summary>
-    private static string ExtractYamlValue(string line, string key)
+    private static string YamlVal(string line)
     {
-        var val = line.Replace(key, "").Trim().Trim('"');
-        return val;
+        var idx = line.IndexOf(':');
+        return idx >= 0 ? line[(idx + 1)..].Trim().Trim('"') : line.Trim().Trim('"');
     }
 }
 
-/// <summary>
-/// 远程 Godot 版本信息
-/// </summary>
+/// <summary>版本信息</summary>
 public class RemoteGodotVersion
 {
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = "";
     public string Flavor { get; set; } = "stable";
-    public List<string> Releases { get; set; } = [];
+    public List<RemoteGodotRelease> Releases { get; set; } = [];
+}
+
+/// <summary>版本内的子发布</summary>
+public class RemoteGodotRelease
+{
+    public string Name { get; set; } = "";
+    /// <summary>可选的版本号覆盖（如 3.3 的 rc 实际对应 3.2.4）</summary>
+    public string? ReleaseVersion { get; set; }
 }

@@ -81,7 +81,7 @@
   <x:String x:Key="Editors.RemoveMissing">Remove Missing</x:String>
   <x:String x:Key="Editors.FilterWatermark">Filter Editors (tag:xxx)</x:String>
   <x:String x:Key="Editors.Filter.Mono">Mono</x:String>
-
+  <x:String x:Key="Editors.Filter.Unstable">Unstable</x:String>
   <x:String x:Key="Editors.Filter.AnyPlatform">Any Platform</x:String>
   <x:String x:Key="Editors.Filter.64bit">64-bit</x:String>
   <x:String x:Key="Editors.Filter.4x">4.x</x:String>
@@ -113,6 +113,7 @@
   <x:String x:Key="Editors.Menu.ViewReferences">View References</x:String>
   <x:String x:Key="Editors.Menu.ShowInFileManager">Show in File Manager</x:String>
   <x:String x:Key="Editors.Menu.CopyPath">Copy Path</x:String>
+  <x:String x:Key="Editors.Menu.DownloadExportTemplate">Download Export Template</x:String>
 
   <!-- ========== Asset Library Page ========== -->
   <x:String x:Key="AssetLib.SearchWatermark">Search assets...</x:String>
@@ -127,6 +128,7 @@
   <x:String x:Key="AssetLib.Last">Last</x:String>
   <x:String x:Key="AssetLib.Empty.Title">No assets found</x:String>
   <x:String x:Key="AssetLib.Empty.Desc">Try changing your search or filter options.</x:String>
+  <x:String x:Key="AssetLib.NoEditorHint">No editors installed. Go to Editors → Remote to download one for version filtering.</x:String>
 
   <!-- ========== Settings Page ========== -->
   <x:String x:Key="Settings.Folder">Settings Folder</x:String>
