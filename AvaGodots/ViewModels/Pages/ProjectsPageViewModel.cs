@@ -222,9 +222,14 @@ public partial class ProjectsPageViewModel : ViewModelBase
     [RelayCommand]
     private void ShowNewProjectDialog()
     {
+        // 确保编辑器列表是最新的
+        AvailableEditors.Clear();
+        foreach (var editor in _editorService.Editors)
+            AvailableEditors.Add(editor);
+
         NewProjectName = "New Game Project";
         NewProjectDirectory = _configService.Config.ProjectsPath;
-        NewProjectEditor = _editorService.Editors.FirstOrDefault();
+        NewProjectEditor = AvailableEditors.FirstOrDefault();
         NewProjectGodotVersion = 4;
         CreateFolder = true;
         SelectedRenderer = "Forward+";
@@ -269,8 +274,13 @@ public partial class ProjectsPageViewModel : ViewModelBase
     [RelayCommand]
     private void ShowImportDialog()
     {
+        // 确保编辑器列表是最新的
+        AvailableEditors.Clear();
+        foreach (var editor in _editorService.Editors)
+            AvailableEditors.Add(editor);
+
         ImportProjectPath = string.Empty;
-        ImportProjectEditor = _editorService.Editors.FirstOrDefault();
+        ImportProjectEditor = AvailableEditors.FirstOrDefault();
         IsImportDialogVisible = true;
     }
 
@@ -432,6 +442,12 @@ public partial class ProjectsPageViewModel : ViewModelBase
         project ??= SelectedProject;
         if (project == null) return;
         SelectedProject = project;
+
+        // 确保编辑器列表是最新的
+        AvailableEditors.Clear();
+        foreach (var editor in _editorService.Editors)
+            AvailableEditors.Add(editor);
+
         BindEditor = AvailableEditors.FirstOrDefault(e => e.Path == project.EditorPath) ?? AvailableEditors.FirstOrDefault();
         IsBindEditorDialogVisible = true;
     }

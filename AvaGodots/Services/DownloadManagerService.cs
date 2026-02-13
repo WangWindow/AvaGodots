@@ -87,10 +87,13 @@ public sealed class DownloadManagerService
             Title = displayName ?? fileName,
             Url = url,
             FilePath = filePath,
-            DownloadType = "editor"
+            DownloadType = "editor",
+            IsDownloading = true,
+            StatusText = "Waiting..."
         };
 
         item.Completed += OnEditorDownloaded;
+        LoggerService.Instance.Info("Download", $"Starting editor download: {fileName}", url);
         Downloads.Add(item);
 
         _ = ExecuteDownloadAsync(item);
@@ -143,6 +146,7 @@ public sealed class DownloadManagerService
             item.IsFailed = true;
             await _db.UpdateDownloadStatusAsync(recordId, "cancelled");
             CleanupFile(item.FilePath);
+            LoggerService.Instance.Info("Download", $"Download cancelled: {item.Title}");
         }
         catch (Exception ex)
         {
@@ -152,6 +156,7 @@ public sealed class DownloadManagerService
             item.CanRetry = true;
             await _db.UpdateDownloadStatusAsync(recordId, "failed");
             CleanupFile(item.FilePath);
+            LoggerService.Instance.Error("Download", $"Download failed: {item.Title}", ex);
         }
     }
 
@@ -296,7 +301,9 @@ public sealed class DownloadManagerService
             Title = displayName ?? fileName,
             Url = url,
             FilePath = filePath,
-            DownloadType = "export_template"
+            DownloadType = "export_template",
+            IsDownloading = true,
+            StatusText = "Waiting..."
         };
 
         Downloads.Add(item);
@@ -328,6 +335,7 @@ public sealed class DownloadManagerService
 
             item.StatusText = "Installed successfully";
             item.RaiseCompleted();
+            LoggerService.Instance.Info("Download", $"Editor installed: {editorName}", extractDir);
 
             // 清理 zip 文件
             CleanupFile(item.FilePath);
@@ -337,6 +345,7 @@ public sealed class DownloadManagerService
             item.StatusText = $"Install failed: {ex.Message}";
             item.IsFailed = true;
             item.CanRetry = true;
+            LoggerService.Instance.Error("Download", $"Install failed: {item.Title}", ex);
         }
     }
 

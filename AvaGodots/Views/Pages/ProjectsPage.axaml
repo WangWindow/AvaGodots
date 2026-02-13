@@ -98,36 +98,36 @@
                 </Border.Styles>
 
                 <Border.ContextMenu>
-                  <ContextMenu>
-                    <MenuItem Header="Edit" Command="{Binding $parent[ItemsControl].((vm:ProjectsPageViewModel)DataContext).EditProjectCommand}" CommandParameter="{Binding}">
+                  <ContextMenu Opened="OnProjectContextMenuOpened">
+                    <MenuItem Header="Edit" Tag="EditProject">
                       <MenuItem.Icon><ic:SymbolIcon Symbol="Edit" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="Run" Command="{Binding $parent[ItemsControl].((vm:ProjectsPageViewModel)DataContext).RunProjectCommand}" CommandParameter="{Binding}">
+                    <MenuItem Header="Run" Tag="RunProject">
                       <MenuItem.Icon><ic:SymbolIcon Symbol="Play" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="Bind Editor..." Command="{Binding $parent[ItemsControl].((vm:ProjectsPageViewModel)DataContext).ShowBindEditorDialogCommand}" CommandParameter="{Binding}">
+                    <MenuItem Header="Bind Editor..." Tag="ShowBindEditorDialog">
                       <MenuItem.Icon><ic:SymbolIcon Symbol="Link" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="Manage Tags..." Command="{Binding $parent[ItemsControl].((vm:ProjectsPageViewModel)DataContext).ShowTagDialogCommand}" CommandParameter="{Binding}">
+                    <MenuItem Header="Manage Tags..." Tag="ShowTagDialog">
                       <MenuItem.Icon><ic:SymbolIcon Symbol="Tag" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="Duplicate..." Command="{Binding $parent[ItemsControl].((vm:ProjectsPageViewModel)DataContext).ShowDuplicateDialogCommand}" CommandParameter="{Binding}">
+                    <MenuItem Header="Duplicate..." Tag="ShowDuplicateDialog">
                       <MenuItem.Icon><ic:SymbolIcon Symbol="Copy" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="Rename..." Command="{Binding $parent[ItemsControl].((vm:ProjectsPageViewModel)DataContext).ShowRenameDialogCommand}" CommandParameter="{Binding}">
+                    <MenuItem Header="Rename..." Tag="ShowRenameDialog">
                       <MenuItem.Icon><ic:SymbolIcon Symbol="Rename" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="Show in File Manager" Command="{Binding $parent[ItemsControl].((vm:ProjectsPageViewModel)DataContext).ShowInFileManagerCommand}" CommandParameter="{Binding}">
+                    <MenuItem Header="Show in File Manager" Tag="ShowInFileManager">
                       <MenuItem.Icon><ic:SymbolIcon Symbol="FolderOpen" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="Copy Path" Command="{Binding $parent[ItemsControl].((vm:ProjectsPageViewModel)DataContext).CopyPathCommand}" CommandParameter="{Binding}">
+                    <MenuItem Header="Copy Path" Tag="CopyPath">
                       <MenuItem.Icon><ic:SymbolIcon Symbol="ClipboardPaste" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="Remove" Command="{Binding $parent[ItemsControl].((vm:ProjectsPageViewModel)DataContext).ShowDeleteConfirmCommand}" CommandParameter="{Binding}">
+                    <MenuItem Header="Remove" Tag="ShowDeleteConfirm">
                       <MenuItem.Icon><ic:SymbolIcon Symbol="Delete" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
                   </ContextMenu>

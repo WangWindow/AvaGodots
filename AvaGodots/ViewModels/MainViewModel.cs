@@ -154,6 +154,9 @@ public partial class MainViewModel : ViewModelBase
 
         try
         {
+            await LoggerService.Instance.InitializeAsync();
+            LoggerService.Instance.Info("App", "AvaGodots starting up");
+
             await _db.InitializeAsync();
             await _configService.LoadAsync();
 
@@ -168,10 +171,12 @@ public partial class MainViewModel : ViewModelBase
             SettingsPage.LoadSettings();
 
             StatusText = $"已加载 {_projectService.Projects.Count} 个项目, {_editorService.Editors.Count} 个编辑器";
+            LoggerService.Instance.Info("App", $"Loaded {_projectService.Projects.Count} projects, {_editorService.Editors.Count} editors");
         }
         catch (Exception ex)
         {
             StatusText = $"加载失败: {ex.Message}";
+            LoggerService.Instance.Error("App", "Initialization failed", ex);
         }
         finally
         {

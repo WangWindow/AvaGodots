@@ -184,7 +184,8 @@ public partial class EditorsPageViewModel : ViewModelBase
     private void ShowRenameDialog(GodotEditor? editor)
     {
         editor ??= SelectedEditor;
-        if (editor == null) return;
+        if (editor == null) { LoggerService.Instance.Warning("Editors", "ShowRenameDialog: editor is null"); return; }
+        LoggerService.Instance.Debug("Editors", $"ShowRenameDialog: {editor.Name}");
         SelectedEditor = editor;
         RenameEditorName = editor.Name;
         RenameVersionHint = editor.VersionHint;
@@ -210,6 +211,8 @@ public partial class EditorsPageViewModel : ViewModelBase
     private void ShowExtraArgsDialog(GodotEditor? editor)
     {
         editor ??= SelectedEditor;
+        if (editor == null) { LoggerService.Instance.Warning("Editors", "ShowExtraArgsDialog: editor is null"); return; }
+        LoggerService.Instance.Debug("Editors", $"ShowExtraArgsDialog: {editor.Name}");
         if (editor == null) return;
         SelectedEditor = editor;
         ExtraArgsText = string.Join(" ", editor.ExtraArguments);
@@ -284,7 +287,8 @@ public partial class EditorsPageViewModel : ViewModelBase
     private void ShowDeleteConfirm(GodotEditor? editor)
     {
         editor ??= SelectedEditor;
-        if (editor == null) return;
+        if (editor == null) { LoggerService.Instance.Warning("Editors", "ShowDeleteConfirm: editor is null"); return; }
+        LoggerService.Instance.Debug("Editors", $"ShowDeleteConfirm: {editor.Name}");
         _pendingDeleteEditor = editor;
         DeleteAlsoFromDisk = false;
         DeleteConfirmMessage = $"确定要移除编辑器 \"{editor.Name}\" 吗？";
@@ -391,6 +395,7 @@ public partial class EditorsPageViewModel : ViewModelBase
     private async Task LoadRemoteVersionsAsync()
     {
         IsRemoteLoading = true;
+        LoggerService.Instance.Info("Editors", "Loading remote versions...");
         try
         {
             var versions = await _remoteEditorService.GetVersionsAsync();
@@ -431,8 +436,13 @@ public partial class EditorsPageViewModel : ViewModelBase
             }
 
             IsRemoteEmpty = RemoteVersions.Count == 0;
+            LoggerService.Instance.Info("Editors", $"Loaded {RemoteVersions.Count} remote version groups");
         }
-        catch { IsRemoteEmpty = true; }
+        catch (Exception ex)
+        {
+            IsRemoteEmpty = true;
+            LoggerService.Instance.Error("Editors", "Failed to load remote versions", ex);
+        }
         finally { IsRemoteLoading = false; }
     }
 
@@ -465,10 +475,11 @@ public partial class EditorsPageViewModel : ViewModelBase
     /// <summary>懒加载指定节点的发布资产</summary>
     private async Task LoadNodeAssetsAsync(RemoteVersionNode node)
     {
-        if (string.IsNullOrEmpty(node.Tag) || node.AssetsLoaded) return;
+        if (string.IsNullOrEmpty(node.Tag) || node.AssetsLoaded || node.IsLoading) return;
 
         node.IsLoading = true;
         node.Children.Clear();
+        LoggerService.Instance.Debug("Editors", $"Lazy-loading assets for tag: {node.Tag}");
 
         try
         {
@@ -506,6 +517,17 @@ public partial class EditorsPageViewModel : ViewModelBase
 
         // 文件节点：下载
         if (string.IsNullOrEmpty(node.DownloadUrl)) return;
+
+        // 防止重复下载（相同 URL 已在队列中且仍在下载/等待）
+        if (_downloadManager != null &&
+            _downloadManager.Downloads.Any(d => d.Url == node.DownloadUrl && (d.IsDownloading || (!d.IsCompleted && !d.IsFailed))))
+        {
+            LoggerService.Instance.Debug("Editors", $"Download already in progress: {node.Name}");
+            return;
+        }
+
+        LoggerService.Instance.Info("Editors", $"Starting download: {node.Name}");
+
         if (_downloadManager != null)
         {
             if (RemoteEditorService.IsExportTemplate(node.Name))
@@ -535,23 +557,58 @@ public partial class EditorsPageViewModel : ViewModelBase
         if (editor == null || _downloadManager == null) return;
 
         var tag = ExtractTag(editor.VersionHint);
-        if (string.IsNullOrEmpty(tag)) return;
+        if (string.IsNullOrEmpty(tag))
+        {
+            LoggerService.Instance.Warning("Editors", $"Cannot extract tag from VersionHint: '{editor.VersionHint}'");
+            return;
+        }
 
-        var assets = await _remoteEditorService.GetReleaseAssetsAsync(tag);
-        var isMono = editor.VersionHint.Contains("mono", StringComparison.OrdinalIgnoreCase);
+        LoggerService.Instance.Info("Editors", $"Fetching export template for tag: {tag}");
 
-        var template = assets.FirstOrDefault(a =>
-            RemoteEditorService.IsExportTemplate(a.Name) &&
-            RemoteEditorService.IsMono(a.Name) == isMono);
+        try
+        {
+            var assets = await _remoteEditorService.GetReleaseAssetsAsync(tag);
+            if (assets.Count == 0)
+            {
+                LoggerService.Instance.Warning("Editors", $"No assets found for tag: {tag}");
+                return;
+            }
 
-        if (template != null)
-            _downloadManager.DownloadExportTemplate(template.BrowserDownloadUrl, template.Name, $"Export Templates ({tag})");
+            var isMono = editor.Path.Contains("mono", StringComparison.OrdinalIgnoreCase) ||
+                         editor.VersionHint.Contains("mono", StringComparison.OrdinalIgnoreCase);
+
+            var template = assets.FirstOrDefault(a =>
+                RemoteEditorService.IsExportTemplate(a.Name) &&
+                RemoteEditorService.IsMono(a.Name) == isMono);
+
+            if (template != null)
+            {
+                LoggerService.Instance.Info("Editors", $"Downloading export template: {template.Name}");
+                _downloadManager.DownloadExportTemplate(template.BrowserDownloadUrl, template.Name, $"Export Templates ({tag})");
+            }
+            else
+            {
+                LoggerService.Instance.Warning("Editors", $"No matching export template found (mono={isMono}) in {assets.Count} assets for tag: {tag}");
+            }
+        }
+        catch (Exception ex)
+        {
+            LoggerService.Instance.Error("Editors", "Failed to download export template", ex);
+        }
     }
 
     private static string ExtractTag(string versionHint)
     {
+        if (string.IsNullOrWhiteSpace(versionHint)) return "";
+
         var tag = versionHint.TrimStart('v').Trim();
-        return string.IsNullOrEmpty(tag) ? "" : tag;
+
+        // 如果 tag 不包含 flavor 后缀 (如 "-stable")，尝试添加 "-stable"
+        // GitHub releases 的 tag 格式为 "4.3-stable", "4.2.2-stable", "4.3-rc1" 等
+        if (!tag.Contains('-') && !string.IsNullOrEmpty(tag))
+            tag += "-stable";
+
+        return tag;
     }
 
 

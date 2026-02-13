@@ -120,36 +120,36 @@
                   </Border.Styles>
 
                   <Border.ContextMenu>
-                    <ContextMenu>
-                      <MenuItem Header="Run" Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).RunEditorCommand}" CommandParameter="{Binding}">
+                    <ContextMenu Opened="OnEditorContextMenuOpened">
+                      <MenuItem Header="Run" Tag="RunEditor">
                         <MenuItem.Icon><ic:SymbolIcon Symbol="Play" FontSize="14"/></MenuItem.Icon>
                       </MenuItem>
                       <Separator/>
-                      <MenuItem Header="Rename..." Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).ShowRenameDialogCommand}" CommandParameter="{Binding}">
+                      <MenuItem Header="Rename..." Tag="ShowRenameDialog">
                         <MenuItem.Icon><ic:SymbolIcon Symbol="Rename" FontSize="14"/></MenuItem.Icon>
                       </MenuItem>
-                      <MenuItem Header="Extra Arguments..." Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).ShowExtraArgsDialogCommand}" CommandParameter="{Binding}">
+                      <MenuItem Header="Extra Arguments..." Tag="ShowExtraArgsDialog">
                         <MenuItem.Icon><ic:SymbolIcon Symbol="Code" FontSize="14"/></MenuItem.Icon>
                       </MenuItem>
-                      <MenuItem Header="Manage Tags..." Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).ShowTagDialogCommand}" CommandParameter="{Binding}">
+                      <MenuItem Header="Manage Tags..." Tag="ShowTagDialog">
                         <MenuItem.Icon><ic:SymbolIcon Symbol="Tag" FontSize="14"/></MenuItem.Icon>
                       </MenuItem>
                       <Separator/>
-                      <MenuItem Header="View References" Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).ShowReferencesCommand}" CommandParameter="{Binding}">
+                      <MenuItem Header="View References" Tag="ShowReferences">
                         <MenuItem.Icon><ic:SymbolIcon Symbol="Link" FontSize="14"/></MenuItem.Icon>
                       </MenuItem>
-                      <MenuItem Header="Show in File Manager" Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).ShowInFileManagerCommand}" CommandParameter="{Binding}">
+                      <MenuItem Header="Show in File Manager" Tag="ShowInFileManager">
                         <MenuItem.Icon><ic:SymbolIcon Symbol="FolderOpen" FontSize="14"/></MenuItem.Icon>
                       </MenuItem>
-                      <MenuItem Header="Copy Path" Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).CopyPathCommand}" CommandParameter="{Binding}">
+                      <MenuItem Header="Copy Path" Tag="CopyPath">
                         <MenuItem.Icon><ic:SymbolIcon Symbol="ClipboardPaste" FontSize="14"/></MenuItem.Icon>
                       </MenuItem>
                       <Separator/>
-                      <MenuItem Header="Remove" Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).ShowDeleteConfirmCommand}" CommandParameter="{Binding}">
+                      <MenuItem Header="Remove" Tag="ShowDeleteConfirm">
                         <MenuItem.Icon><ic:SymbolIcon Symbol="Delete" FontSize="14"/></MenuItem.Icon>
                       </MenuItem>
                       <Separator/>
-                      <MenuItem Header="{DynamicResource Editors.Menu.DownloadExportTemplate}" Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).DownloadExportTemplateCommand}" CommandParameter="{Binding}">
+                      <MenuItem Header="{DynamicResource Editors.Menu.DownloadExportTemplate}" Tag="DownloadExportTemplate">
                         <MenuItem.Icon><ic:SymbolIcon Symbol="ArrowDownload" FontSize="14"/></MenuItem.Icon>
                       </MenuItem>
                     </ContextMenu>
