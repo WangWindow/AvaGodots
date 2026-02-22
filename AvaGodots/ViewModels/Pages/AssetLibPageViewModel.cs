@@ -125,6 +125,28 @@ public partial class AssetLibPageViewModel : ViewModelBase
 
     [ObservableProperty] private AssetLibItem? _detailItem;
 
+    // ========== 下载 toast 状态 ==========
+
+    [ObservableProperty] private bool _toastVisible;
+    [ObservableProperty] private string _toastTitle = string.Empty;
+    [ObservableProperty] private string _toastStatus = string.Empty;
+    [ObservableProperty] private double _toastProgress;
+    [ObservableProperty] private bool _toastInstallVisible;
+    [ObservableProperty] private string _toastIconUrl = string.Empty;
+
+    /// <summary>
+    /// 关闭/隐藏 toast 通知
+    /// </summary>
+    [RelayCommand]
+    private void DismissToast() => ToastVisible = false;
+
+    /// <summary>
+    /// 点击安装按钮（目前只是隐藏 toast）
+    /// </summary>
+    [RelayCommand]
+    private void ToastInstall() => ToastVisible = false;
+
+
     // (下载进度由窗口通过 IProgress 回调处理)
 
     public AssetLibPageViewModel()
@@ -500,5 +522,45 @@ public partial class AssetLibPageViewModel : ViewModelBase
         await using var stream = File.OpenRead(filePath);
         var hash = await SHA256.HashDataAsync(stream);
         return Convert.ToHexString(hash).ToLowerInvariant();
+    }
+
+    // ===== toast helper methods =====
+
+    /// <summary>
+    /// Called by detail window VM to show a toast describing a download in progress.
+    /// </summary>
+    public void ShowDownloadToast(AssetLibItem item, IProgress<(double percent, string status)> progress)
+    {
+        ToastTitle = item.Title;
+        ToastStatus = LocalizationService.GetString("AssetLib.Status.Downloading", "Downloading...");
+        ToastProgress = 0;
+        ToastInstallVisible = false;
+        ToastIconUrl = item.IconUrl ?? string.Empty;
+        ToastVisible = true;
+    }
+
+    public void UpdateToastProgress(double percent, string status)
+    {
+        ToastProgress = percent;
+        ToastStatus = status;
+        if (percent >= 100)
+        {
+            ToastInstallVisible = true;
+        }
+    }
+
+    public void ShowToastReadyToInstall()
+    {
+        ToastStatus = LocalizationService.GetString("AssetLib.Toast.ReadyToInstall", "Ready to install");
+        ToastProgress = 100;
+        ToastInstallVisible = true;
+    }
+
+    public async Task ShowToastInstalledAsync()
+    {
+        ToastStatus = LocalizationService.GetString("AssetLib.Status.Installed", "Installed successfully!");
+        ToastInstallVisible = false;
+        await Task.Delay(3000);
+        ToastVisible = false;
     }
 }

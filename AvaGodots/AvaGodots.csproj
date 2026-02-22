@@ -22,7 +22,6 @@
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
-    <PackageReference Include="Markdown.Avalonia" />
     <PackageReference Include="Microsoft.Data.Sqlite" />
     <PackageReference Include="AsyncImageLoader.Avalonia" />
   </ItemGroup>

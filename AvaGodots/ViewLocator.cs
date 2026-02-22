@@ -19,6 +19,7 @@ public class ViewLocator : IDataTemplate
         MainViewModel => new MainView(),
         ProjectsPageViewModel => new ProjectsPage(),
         AssetLibPageViewModel => new AssetLibPage(),
+        AssetDetailViewModel => new AssetDetailWindow(),
         EditorsPageViewModel => new EditorsPage(),
         SettingsPageViewModel => new SettingsPage(),
         _ => new TextBlock { Text = $"View not implemented for: {param.GetType().FullName}" }

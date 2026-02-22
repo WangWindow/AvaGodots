@@ -211,8 +211,8 @@
       </Panel>
     </DockPanel>
 
-    <!-- ===== 下载通知 toast（仿 Godots 底部左下角） ===== -->
-    <Border x:Name="DownloadToast" IsVisible="False"
+    <!-- ===== 下载通知 toast（仿 Godots 底部左左角） ===== -->
+    <Border IsVisible="{Binding ToastVisible}"
             HorizontalAlignment="Left" VerticalAlignment="Bottom"
             Margin="12,0,0,12" MaxWidth="280"
             Background="{DynamicResource DarkColor2}" CornerRadius="6"
@@ -221,26 +221,28 @@
       <DockPanel>
         <!-- 关闭按钮 -->
         <Button DockPanel.Dock="Top" Classes="iconAction" HorizontalAlignment="Right"
-                Margin="-4,-4,-4,0" Padding="4" x:Name="DismissToastButton">
+                Margin="-4,-4,-4,0" Padding="4" Command="{Binding DismissToastCommand}">
           <PathIcon Data="{StaticResource dismiss_regular}" FontSize="12"/>
         </Button>
         <Grid ColumnDefinitions="Auto,*">
           <!-- 小图标 -->
           <Border Grid.Column="0" Width="40" Height="40" CornerRadius="4" ClipToBounds="True"
                   Background="{DynamicResource DarkColor3}" Margin="0,0,10,0">
-            <Image x:Name="ToastIcon" Width="40" Height="40" Stretch="UniformToFill"/>
+            <Image Width="40" Height="40" Stretch="UniformToFill" Source="{Binding ToastIconUrl}"/>
           </Border>
           <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-            <TextBlock x:Name="ToastTitle" FontSize="12" FontWeight="SemiBold"
-                       Foreground="{DynamicResource FontBrush}" TextTrimming="CharacterEllipsis"/>
-            <TextBlock x:Name="ToastStatus" FontSize="11"
-                       Foreground="{DynamicResource FontDimBrush}"/>
-            <ProgressBar x:Name="ToastProgress" Maximum="100" Height="3" CornerRadius="1.5"
-                         Margin="0,2,0,0"/>
+            <TextBlock FontSize="12" FontWeight="SemiBold"
+                       Foreground="{DynamicResource FontBrush}" TextTrimming="CharacterEllipsis"
+                       Text="{Binding ToastTitle}"/>
+            <TextBlock FontSize="11"
+                       Foreground="{DynamicResource FontDimBrush}"
+                       Text="{Binding ToastStatus}"/>
+            <ProgressBar Maximum="100" Height="3" CornerRadius="1.5"
+                         Margin="0,2,0,0" Value="{Binding ToastProgress}"/>
             <!-- 安装按钮（下载完成后显示） -->
-            <Button x:Name="ToastInstallButton" Classes="action" IsVisible="False"
+            <Button Classes="action" IsVisible="{Binding ToastInstallVisible}"
                     Margin="0,4,0,0" Padding="8,3" FontSize="11"
-                    HorizontalAlignment="Left">
+                    HorizontalAlignment="Left" Command="{Binding ToastInstallCommand}">
               <TextBlock Text="{DynamicResource AssetLib.Toast.Install}"/>
             </Button>
           </StackPanel>

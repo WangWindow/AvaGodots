@@ -3,11 +3,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:asyncImageLoader="using:AsyncImageLoader"
-        xmlns:md="using:Markdown.Avalonia"
-        xmlns:ctxt="using:ColorTextBlock.Avalonia"
+        xmlns:vm="using:AvaGodots.ViewModels"
         mc:Ignorable="d"
         x:Class="AvaGodots.Views.AssetDetailWindow"
-        Title="Asset Detail"
+        x:DataType="vm:AssetDetailViewModel"
+        Title="{Binding Title}"
         Width="920" Height="620"
         MinWidth="640" MinHeight="420"
         Background="#252B35"
@@ -33,23 +33,6 @@
     <Style Selector="Button.previewThumb.selected">
       <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
     </Style>
-    <!-- Markdown 样式 -->
-    <Style Selector="ctxt|CTextBlock">
-      <Setter Property="FontSize" Value="12"/>
-      <Setter Property="Foreground" Value="{DynamicResource FontDimBrush}"/>
-    </Style>
-    <Style Selector="ctxt|CTextBlock.Heading1">
-      <Setter Property="FontSize" Value="16"/>
-      <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
-    </Style>
-    <Style Selector="ctxt|CTextBlock.Heading2">
-      <Setter Property="FontSize" Value="14"/>
-      <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
-    </Style>
-    <Style Selector="ctxt|CTextBlock.Heading3">
-      <Setter Property="FontSize" Value="13"/>
-      <Setter Property="Foreground" Value="{DynamicResource FontBrush}"/>
-    </Style>
   </Window.Styles>
 
   <DockPanel>
@@ -58,24 +41,25 @@
     <Border DockPanel.Dock="Bottom" Padding="16,10" Background="{DynamicResource DarkColor3}">
       <Grid ColumnDefinitions="Auto,*,Auto">
         <!-- 关闭 -->
-        <Button Grid.Column="0" Classes="action" Click="OnCloseClick">
+        <Button Grid.Column="0" Classes="action" Command="{Binding CloseCommand}">
           <TextBlock Text="{DynamicResource Common.Close}"/>
         </Button>
         <!-- 下载进度（居中） -->
-        <StackPanel Grid.Column="1" x:Name="ProgressPanel" IsVisible="False"
+        <StackPanel Grid.Column="1" IsVisible="{Binding ProgressVisible}"
                     VerticalAlignment="Center" Margin="16,0" Spacing="2">
-          <ProgressBar x:Name="ProgressBar" Maximum="100" Height="4" CornerRadius="2"/>
-          <TextBlock x:Name="ProgressText" FontSize="11" Foreground="{DynamicResource FontDimBrush}"/>
+          <ProgressBar Maximum="100" Height="4" CornerRadius="2" Value="{Binding ProgressValue}"/>
+          <TextBlock FontSize="11" Foreground="{DynamicResource FontDimBrush}" Text="{Binding ProgressStatus}"/>
         </StackPanel>
         <!-- 下载 -->
-        <Button Grid.Column="2" Classes="accent" x:Name="DownloadButton" Click="OnDownloadClick">
+        <Button Grid.Column="2" Classes="accent" Command="{Binding DownloadCommand}"
+                IsEnabled="{Binding DownloadEnabled}">
           <TextBlock Text="{DynamicResource Common.Download}"/>
         </Button>
       </Grid>
     </Border>
 
     <!-- ===== 加载指示器（全窗口覆盖） ===== -->
-    <Panel x:Name="LoadingPanel">
+    <Panel IsVisible="{Binding IsLoading}">
       <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
         <ProgressBar IsIndeterminate="True" Width="200"/>
         <TextBlock Text="{DynamicResource AssetLib.Status.Searching}" FontSize="12"
@@ -84,7 +68,7 @@
     </Panel>
 
     <!-- ===== 主内容（双列布局） ===== -->
-    <Grid x:Name="ContentPanel" IsVisible="False" ColumnDefinitions="*,1.2*">
+    <Grid IsVisible="{Binding IsContentVisible}" ColumnDefinitions="*,1.2*">
 
       <!-- ======== 左列：元信息 + 描述 ======== -->
       <Grid Grid.Column="0" Margin="16,10,8,10" RowDefinitions="Auto,Auto,Auto,Auto,*">
@@ -94,23 +78,28 @@
           <Border Grid.Column="0" Width="64" Height="64" CornerRadius="6" ClipToBounds="True"
                   Background="{DynamicResource DarkColor3}" Margin="0,0,12,0">
             <Panel>
-              <Image x:Name="IconImage" Width="64" Height="64" Stretch="UniformToFill"/>
+              <Image Width="64" Height="64" Stretch="UniformToFill"
+                     asyncImageLoader:ImageLoader.Source="{Binding IconUrl}"/>
               <PathIcon Data="{StaticResource image_regular}" FontSize="28"
                         Foreground="{DynamicResource FontDimBrush}"
                         HorizontalAlignment="Center" VerticalAlignment="Center"
-                        x:Name="IconPlaceholder"/>
+                        IsVisible="{Binding IconUrlIsNullOrEmpty}"/>
             </Panel>
           </Border>
           <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-            <TextBlock x:Name="TitleText" FontSize="15" FontWeight="Bold"
+            <TextBlock FontSize="15" FontWeight="Bold"
                        Foreground="{DynamicResource AccentBrush}"
-                       TextWrapping="Wrap" MaxLines="2"/>
-            <TextBlock x:Name="CategoryText" FontSize="12"
-                       Foreground="{DynamicResource FontDimBrush}"/>
-            <TextBlock x:Name="AuthorText" FontSize="12"
-                       Foreground="{DynamicResource FontDimBrush}"/>
-            <TextBlock x:Name="LicenseText" FontSize="12"
-                       Foreground="{DynamicResource FontDimBrush}"/>
+                       TextWrapping="Wrap" MaxLines="2"
+                       Text="{Binding Title}"/>
+            <TextBlock FontSize="12"
+                       Foreground="{DynamicResource FontDimBrush}"
+                       Text="{Binding Category}"/>
+            <TextBlock FontSize="12"
+                       Foreground="{DynamicResource FontDimBrush}"
+                       Text="{Binding Author}"/>
+            <TextBlock FontSize="12"
+                       Foreground="{DynamicResource FontDimBrush}"
+                       Text="{Binding License}"/>
           </StackPanel>
         </Grid>
 
@@ -121,13 +110,14 @@
           <StackPanel Orientation="Horizontal" Spacing="4">
             <TextBlock Text="{DynamicResource AssetLib.Detail.Version}" FontSize="12"
                        Foreground="{DynamicResource FontBrush}"/>
-            <TextBlock x:Name="VersionText" FontSize="12"
-                       Foreground="{DynamicResource FontDimBrush}"/>
+            <TextBlock FontSize="12"
+                       Foreground="{DynamicResource FontDimBrush}"
+                       Text="{Binding VersionString}"/>
           </StackPanel>
           <StackPanel Orientation="Horizontal" Spacing="4">
             <TextBlock Text="{DynamicResource AssetLib.Detail.Contents}" FontSize="12"
                        Foreground="{DynamicResource FontBrush}"/>
-            <Button x:Name="ViewFilesButton" Classes="hyperlink" Click="OnViewInBrowserClick"
+            <Button Classes="hyperlink" Command="{Binding ViewInBrowserCommand}"
                     Padding="0" Margin="0" VerticalAlignment="Center">
               <TextBlock Text="{DynamicResource AssetLib.Detail.ViewFiles}" FontSize="12"
                          Foreground="{DynamicResource AccentBrush}"/>
@@ -137,13 +127,16 @@
 
         <Border Grid.Row="3" Height="1" Background="{DynamicResource DarkColor3}" Margin="0,0,0,8"/>
 
-        <!-- 描述（Markdown 渲染） -->
+        <!-- 描述（纯文本） -->
         <Grid Grid.Row="4" RowDefinitions="Auto,*" MinHeight="0">
           <TextBlock Text="{DynamicResource AssetLib.Detail.Description}" FontSize="12"
                      Foreground="{DynamicResource FontBrush}" Grid.Row="0"/>
-          <md:MarkdownScrollViewer x:Name="DescriptionMarkdown" Grid.Row="1" Margin="0,4,0,0"
-                                   ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                   ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+          <ScrollViewer Grid.Row="1" Margin="0,4,0,0"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        ScrollViewer.HorizontalScrollBarVisibility="Auto">
+            <TextBlock TextWrapping="Wrap" FontSize="12"
+                       Foreground="{DynamicResource FontDimBrush}" Text="{Binding Description}"/>
+          </ScrollViewer>
         </Grid>
 
       </Grid>
@@ -154,19 +147,36 @@
         <!-- 缩略图条 -->
         <ScrollViewer DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Disabled" Margin="0,6,0,0">
-          <StackPanel x:Name="PreviewThumbnails" Orientation="Horizontal" Spacing="6"
-                      HorizontalAlignment="Left"/>
+          <ItemsControl ItemsSource="{Binding Previews}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="6"/>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Button Width="100" Height="70" Classes="previewThumb"
+                        Command="{Binding $parent[Window].(vm:AssetDetailViewModel).SelectPreviewCommand}"
+                        CommandParameter="{Binding}">
+                  <Image Width="96" Height="66" Stretch="UniformToFill"
+                         asyncImageLoader:ImageLoader.Source="{Binding Thumbnail}"/>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
         </ScrollViewer>
 
         <!-- 大预览图 -->
         <Border Background="{DynamicResource DarkColor3}" CornerRadius="6" ClipToBounds="True"
                 Padding="0">
           <Panel>
-            <Image x:Name="PreviewImage" Stretch="Uniform"
-                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            <PathIcon x:Name="PreviewPlaceholder" Data="{StaticResource image_regular}"
+            <Image Stretch="Uniform"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   asyncImageLoader:ImageLoader.Source="{Binding SelectedPreviewUrl}"/>
+            <PathIcon Data="{StaticResource image_regular}"
                       FontSize="48" Foreground="{DynamicResource FontDimBrush}"
-                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                      IsVisible="{Binding SelectedPreviewUrlIsNullOrEmpty}"/>
           </Panel>
         </Border>
       </DockPanel>
