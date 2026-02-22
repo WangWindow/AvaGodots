@@ -3,7 +3,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:AvaGodots.ViewModels.Pages"
-             xmlns:ic="using:FluentIcons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="580"
              x:Class="AvaGodots.Views.Pages.SettingsPage"
              x:DataType="vm:SettingsPageViewModel">
@@ -22,7 +21,7 @@
         <Button DockPanel.Dock="Bottom" Classes="action" Margin="8"
                 HorizontalAlignment="Stretch" Command="{Binding OpenConfigDirectoryCommand}">
           <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-            <ic:SymbolIcon Symbol="Folder" IconVariant="Regular" FontSize="14"/>
+            <PathIcon Data="{StaticResource folder_regular}" Width="14" Height="14"/>
             <TextBlock Text="{DynamicResource Settings.Folder}"/>
           </StackPanel>
         </Button>
@@ -74,13 +73,13 @@
         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
           <Button Classes="action" Command="{Binding ResetAllToDefaultCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
-              <ic:SymbolIcon Symbol="ArrowReset" IconVariant="Regular" FontSize="14"/>
+              <PathIcon Data="{StaticResource arrow_right_circle_regular}" Width="14" Height="14"/>
               <TextBlock Text="{DynamicResource Settings.ResetAll}"/>
             </StackPanel>
           </Button>
           <Button Classes="accent" Command="{Binding SaveAndCloseCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
-              <ic:SymbolIcon Symbol="Checkmark" IconVariant="Regular" FontSize="14"/>
+              <PathIcon Data="{StaticResource checkmark_regular}" Width="14" Height="14"/>
               <TextBlock Text="{DynamicResource Settings.SaveAndClose}"/>
             </StackPanel>
           </Button>
@@ -96,13 +95,13 @@
           <Button DockPanel.Dock="Right" Classes="accent" Margin="8,0,0,0"
                   Command="{Binding SaveAndRestartCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
-              <ic:SymbolIcon Symbol="ArrowSync" IconVariant="Regular" FontSize="14"/>
+              <PathIcon Data="{StaticResource arrow_sync_regular}" Width="14" Height="14"/>
               <TextBlock Text="{DynamicResource Settings.SaveAndRestart}"/>
             </StackPanel>
           </Button>
           <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-            <ic:SymbolIcon Symbol="Warning" IconVariant="Filled" FontSize="16"
-                           Foreground="{DynamicResource WarningBrush}"/>
+            <PathIcon Data="{StaticResource warning_regular}" Width="16" Height="16"
+                      Foreground="{DynamicResource WarningBrush}"/>
             <TextBlock Text="{DynamicResource Settings.NeedsRestart}"
                        Foreground="{DynamicResource WarningBrush}" FontSize="13"/>
           </StackPanel>
@@ -147,7 +146,7 @@
                 <TextBox Text="{Binding DefaultProjectsPath}" Classes="searchBox" IsReadOnly="True"/>
                 <Button Grid.Column="1" Classes="iconAction" Margin="4,0,0,0"
                         Command="{Binding BrowseDefaultProjectsPathCommand}" ToolTip.Tip="{DynamicResource Common.Browse}">
-                  <ic:SymbolIcon Symbol="FolderOpen" IconVariant="Regular" FontSize="16"/>
+                  <PathIcon Data="{StaticResource folder_open_regular}" Width="16" Height="16"/>
                 </Button>
               </Grid>
             </Grid>
@@ -239,7 +238,7 @@
                 <TextBox Text="{Binding DownloadsPath}" Classes="searchBox" IsReadOnly="True"/>
                 <Button Grid.Column="1" Classes="iconAction" Margin="4,0,0,0"
                         Command="{Binding BrowseDownloadsPathCommand}" ToolTip.Tip="{DynamicResource Common.Browse}">
-                  <ic:SymbolIcon Symbol="FolderOpen" IconVariant="Regular" FontSize="16"/>
+                  <PathIcon Data="{StaticResource folder_open_regular}" Width="16" Height="16"/>
                 </Button>
               </Grid>
             </Grid>
@@ -251,7 +250,7 @@
                 <TextBox Text="{Binding VersionsPath}" Classes="searchBox" IsReadOnly="True"/>
                 <Button Grid.Column="1" Classes="iconAction" Margin="4,0,0,0"
                         Command="{Binding BrowseVersionsPathCommand}" ToolTip.Tip="{DynamicResource Common.Browse}">
-                  <ic:SymbolIcon Symbol="FolderOpen" IconVariant="Regular" FontSize="16"/>
+                  <PathIcon Data="{StaticResource folder_open_regular}" Width="16" Height="16"/>
                 </Button>
               </Grid>
             </Grid>
@@ -293,7 +292,7 @@
             <Grid ColumnDefinitions="220,*">
               <TextBlock Text="{DynamicResource Settings.Proxy.Host}" VerticalAlignment="Center" Opacity="0.6"/>
               <TextBox Grid.Column="1" Classes="searchBox" Text="{Binding ProxyHost}"
-                       Watermark="{DynamicResource Settings.Proxy.HostWatermark}"/>
+                       PlaceholderText="{DynamicResource Settings.Proxy.HostWatermark}"/>
             </Grid>
 
             <!-- Port -->
@@ -304,10 +303,8 @@
                              HorizontalAlignment="Stretch"/>
             </Grid>
           </StackPanel>
-
         </Panel>
       </ScrollViewer>
     </DockPanel>
   </Grid>
-
 </UserControl>

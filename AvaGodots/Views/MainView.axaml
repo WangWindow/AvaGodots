@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:AvaGodots.ViewModels"
              xmlns:local="using:AvaGodots"
-             xmlns:ic="using:FluentIcons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
              x:Class="AvaGodots.Views.MainView"
              x:DataType="vm:MainViewModel"
@@ -31,7 +30,7 @@
                         IsChecked="{Binding IsProjectsTabSelected, Mode=OneWay}"
                         Command="{Binding NavigateToProjectsCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
-              <ic:SymbolIcon Symbol="DocumentBulletList" IconVariant="Regular" FontSize="16"/>
+              <PathIcon Data="{StaticResource document_edit_regular}" FontSize="16"/>
               <TextBlock Text="{DynamicResource Tab.Projects}" VerticalAlignment="Center"/>
             </StackPanel>
           </ToggleButton>
@@ -40,7 +39,7 @@
                         IsChecked="{Binding IsAssetLibTabSelected, Mode=OneWay}"
                         Command="{Binding NavigateToAssetLibCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
-              <ic:SymbolIcon Symbol="ArrowDownload" IconVariant="Regular" FontSize="16"/>
+              <PathIcon Data="{StaticResource arrow_download_regular}" FontSize="16"/>
               <TextBlock Text="{DynamicResource Tab.AssetLib}" VerticalAlignment="Center"/>
             </StackPanel>
           </ToggleButton>
@@ -49,7 +48,7 @@
                         IsChecked="{Binding IsEditorsTabSelected, Mode=OneWay}"
                         Command="{Binding NavigateToEditorsCommand}">
             <StackPanel Orientation="Horizontal" Spacing="6">
-              <ic:SymbolIcon Symbol="AppGeneric" IconVariant="Regular" FontSize="16"/>
+              <PathIcon Data="{StaticResource app_generic_regular}" FontSize="16"/>
               <TextBlock Text="{DynamicResource Tab.Editors}" VerticalAlignment="Center"/>
             </StackPanel>
           </ToggleButton>
@@ -63,7 +62,7 @@
           <Button Classes="iconAction"
                   Command="{Binding NavigateToSettingsCommand}"
                   ToolTip.Tip="{DynamicResource Main.Tooltip.Settings}">
-            <ic:SymbolIcon Symbol="Settings" IconVariant="Regular" FontSize="18"/>
+            <PathIcon Data="{StaticResource settings_regular}" FontSize="18"/>
           </Button>
         </StackPanel>
 
@@ -102,7 +101,7 @@
                               Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).DismissDownloadCommand}"
                               CommandParameter="{Binding}"
                               ToolTip.Tip="{DynamicResource Common.Dismiss}">
-                        <ic:SymbolIcon Symbol="Dismiss" IconVariant="Regular" FontSize="12"/>
+                        <PathIcon Data="{StaticResource dismiss_regular}" FontSize="12"/>
                       </Button>
                       <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold"
                                  TextTrimming="CharacterEllipsis"/>
@@ -142,6 +141,5 @@
                    HorizontalAlignment="Center"/>
       </StackPanel>
     </Border>
-
   </Grid>
 </UserControl>

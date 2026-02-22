@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AvaGodots.Interfaces;
 using AvaGodots.Models;
 using AvaGodots.Services;
+using Avalonia.Input.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 

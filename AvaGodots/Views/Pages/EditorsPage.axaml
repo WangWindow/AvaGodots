@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:AvaGodots.ViewModels.Pages"
              xmlns:models="using:AvaGodots.Models"
-             xmlns:ic="using:FluentIcons.Avalonia"
              mc:Ignorable="d"
              x:Class="AvaGodots.Views.Pages.EditorsPage"
              x:DataType="vm:EditorsPageViewModel">
@@ -32,18 +31,18 @@
                     IsVisible="{Binding IsLocalView}">
           <Button Classes="action" Command="{Binding ScanDirectoryCommand}">
             <StackPanel Orientation="Horizontal" Spacing="4">
-              <ic:SymbolIcon Symbol="Search" IconVariant="Regular" FontSize="14"/>
+              <PathIcon Data="{StaticResource search_regular}" FontSize="14"/>
               <TextBlock Text="{DynamicResource Editors.Scan}" VerticalAlignment="Center" FontSize="13"/>
             </StackPanel>
           </Button>
           <Button Classes="action" Command="{Binding RemoveMissingEditorsCommand}">
             <StackPanel Orientation="Horizontal" Spacing="4">
-              <ic:SymbolIcon Symbol="Delete" IconVariant="Regular" FontSize="14"/>
+              <PathIcon Data="{StaticResource delete_regular}" FontSize="14"/>
               <TextBlock Text="{DynamicResource Editors.RemoveMissing}" VerticalAlignment="Center" FontSize="13"/>
             </StackPanel>
           </Button>
           <Button Classes="iconAction" Command="{Binding RefreshCommand}" ToolTip.Tip="{DynamicResource Common.Refresh}">
-            <ic:SymbolIcon Symbol="ArrowSync" IconVariant="Regular" FontSize="14"/>
+            <PathIcon Data="{StaticResource arrow_sync_regular}" FontSize="14"/>
           </Button>
         </StackPanel>
 
@@ -57,13 +56,13 @@
           <CheckBox Content="{DynamicResource Editors.Filter.3x}" IsChecked="{Binding Filter3X}" FontSize="12"/>
           <CheckBox Content="{DynamicResource Editors.Filter.Other}" IsChecked="{Binding FilterOtherVersions}" FontSize="12"/>
           <Button Classes="iconAction" Command="{Binding LoadRemoteVersionsCommand}" ToolTip.Tip="{DynamicResource Editors.RefreshRemote}">
-            <ic:SymbolIcon Symbol="ArrowSync" IconVariant="Regular" FontSize="14"/>
+            <PathIcon Data="{StaticResource arrow_sync_regular}" FontSize="14"/>
           </Button>
         </StackPanel>
 
         <!-- 搜索 -->
         <TextBox Grid.Column="2" Classes="searchBox"
-                 Watermark="{DynamicResource Editors.FilterWatermark}"
+                 PlaceholderText="{DynamicResource Editors.FilterWatermark}"
                  Text="{Binding SearchText, Mode=TwoWay}"
                  Margin="8,0"
                  IsVisible="{Binding IsLocalView}"/>
@@ -88,8 +87,8 @@
         <!-- 空状态 -->
         <StackPanel IsVisible="{Binding IsEmpty}"
                     HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
-          <ic:SymbolIcon Symbol="AppGeneric" IconVariant="Regular" FontSize="48"
-                         Foreground="{DynamicResource FontDimBrush}" HorizontalAlignment="Center"/>
+          <PathIcon Data="{StaticResource app_generic_regular}" FontSize="48"
+                    Foreground="{DynamicResource FontDimBrush}" HorizontalAlignment="Center"/>
           <TextBlock Text="{DynamicResource Editors.Empty.Title}" FontSize="16" Foreground="{DynamicResource FontDimBrush}"
                      HorizontalAlignment="Center"/>
           <TextBlock Text="{DynamicResource Editors.Empty.Desc}"
@@ -121,35 +120,35 @@
                 <Border.ContextMenu>
                   <ContextMenu Opened="OnEditorContextMenuOpened">
                     <MenuItem Header="{DynamicResource Common.Run}" Tag="RunEditor">
-                      <MenuItem.Icon><ic:SymbolIcon Symbol="Play" FontSize="14"/></MenuItem.Icon>
+                      <MenuItem.Icon><PathIcon Data="{StaticResource play_regular}" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
                     <MenuItem Header="{DynamicResource Editors.Menu.Rename}" Tag="ShowRenameDialog">
-                      <MenuItem.Icon><ic:SymbolIcon Symbol="Rename" FontSize="14"/></MenuItem.Icon>
+                      <MenuItem.Icon><PathIcon Data="{StaticResource rename_regular}" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
                     <MenuItem Header="{DynamicResource Editors.Menu.ExtraArgs}" Tag="ShowExtraArgsDialog">
-                      <MenuItem.Icon><ic:SymbolIcon Symbol="Code" FontSize="14"/></MenuItem.Icon>
+                      <MenuItem.Icon><PathIcon Data="{StaticResource code_regular}" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
                     <MenuItem Header="{DynamicResource Editors.Menu.ManageTags}" Tag="ShowTagDialog">
-                      <MenuItem.Icon><ic:SymbolIcon Symbol="Tag" FontSize="14"/></MenuItem.Icon>
+                      <MenuItem.Icon><PathIcon Data="{StaticResource tag_regular}" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
                     <MenuItem Header="{DynamicResource Editors.Menu.ViewReferences}" Tag="ShowReferences">
-                      <MenuItem.Icon><ic:SymbolIcon Symbol="Link" FontSize="14"/></MenuItem.Icon>
+                      <MenuItem.Icon><PathIcon Data="{StaticResource link_regular}" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
                     <MenuItem Header="{DynamicResource Editors.Menu.ShowInFileManager}" Tag="ShowInFileManager">
-                      <MenuItem.Icon><ic:SymbolIcon Symbol="FolderOpen" FontSize="14"/></MenuItem.Icon>
+                      <MenuItem.Icon><PathIcon Data="{StaticResource folder_open_regular}" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
                     <MenuItem Header="{DynamicResource Editors.Menu.CopyPath}" Tag="CopyPath">
-                      <MenuItem.Icon><ic:SymbolIcon Symbol="ClipboardPaste" FontSize="14"/></MenuItem.Icon>
+                      <MenuItem.Icon><PathIcon Data="{StaticResource clipboard_paste_regular}" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
                     <MenuItem Header="{DynamicResource Common.Remove}" Tag="ShowDeleteConfirm">
-                      <MenuItem.Icon><ic:SymbolIcon Symbol="Delete" FontSize="14"/></MenuItem.Icon>
+                      <MenuItem.Icon><PathIcon Data="{StaticResource delete_regular}" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
                     <MenuItem Header="{DynamicResource Editors.Menu.DownloadExportTemplate}" Tag="DownloadExportTemplate">
-                      <MenuItem.Icon><ic:SymbolIcon Symbol="ArrowDownload" FontSize="14"/></MenuItem.Icon>
+                      <MenuItem.Icon><PathIcon Data="{StaticResource download_regular}" FontSize="14"/></MenuItem.Icon>
                     </MenuItem>
                   </ContextMenu>
                 </Border.ContextMenu>
@@ -161,18 +160,18 @@
                                 Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).ToggleFavoriteCommand}"
                                 CommandParameter="{Binding}">
                     <Panel>
-                      <ic:SymbolIcon Symbol="Star" IconVariant="Regular" FontSize="16" IsVisible="{Binding !IsFavorite}"/>
-                      <ic:SymbolIcon Symbol="Star" IconVariant="Filled" FontSize="16" IsVisible="{Binding IsFavorite}"
-                                     Foreground="{DynamicResource WarningBrush}"/>
+                      <PathIcon Data="{StaticResource star_add_regular}" FontSize="16" IsVisible="{Binding !IsFavorite}"/>
+                      <PathIcon Data="{StaticResource star_regular}" FontSize="16" IsVisible="{Binding IsFavorite}"
+                                Foreground="{DynamicResource WarningBrush}"/>
                     </Panel>
                   </ToggleButton>
 
                   <!-- 图标 -->
                   <Border Grid.Column="1" Width="40" Height="40" Background="{DynamicResource DarkColor3}"
                           CornerRadius="4" Margin="0,0,10,0" VerticalAlignment="Center">
-                    <ic:SymbolIcon Symbol="AppGeneric" IconVariant="Filled" FontSize="20"
-                                   Foreground="{DynamicResource GodotBlueBrush}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <PathIcon Data="{StaticResource app_generic_regular}" FontSize="20"
+                              Foreground="{DynamicResource GodotBlueBrush}"
+                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
                   </Border>
 
                   <!-- 信息 -->
@@ -199,13 +198,13 @@
                   <!-- hover 操作 -->
                   <StackPanel Grid.Column="3" Orientation="Horizontal" Classes="hoverActions" VerticalAlignment="Center" Spacing="2">
                     <Button Classes="iconAction" ToolTip.Tip="{DynamicResource Common.Run}" Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).RunEditorCommand}" CommandParameter="{Binding}">
-                      <ic:SymbolIcon Symbol="Play" IconVariant="Filled" FontSize="16" Foreground="{DynamicResource SuccessBrush}"/>
+                      <PathIcon Data="{StaticResource play_regular}" FontSize="16" Foreground="{DynamicResource SuccessBrush}"/>
                     </Button>
                     <Button Classes="iconAction" ToolTip.Tip="{DynamicResource Editors.Menu.ShowInFileManager}" Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).ShowInFileManagerCommand}" CommandParameter="{Binding}">
-                      <ic:SymbolIcon Symbol="FolderOpen" IconVariant="Regular" FontSize="16"/>
+                      <PathIcon Data="{StaticResource folder_open_regular}" FontSize="16"/>
                     </Button>
                     <Button Classes="iconAction" ToolTip.Tip="{DynamicResource Common.Remove}" Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).ShowDeleteConfirmCommand}" CommandParameter="{Binding}">
-                      <ic:SymbolIcon Symbol="Dismiss" IconVariant="Regular" FontSize="16"/>
+                      <PathIcon Data="{StaticResource dismiss_regular}" FontSize="16"/>
                     </Button>
                   </StackPanel>
                 </Grid>
@@ -229,8 +228,8 @@
         <!-- 空 -->
         <StackPanel IsVisible="{Binding IsRemoteEmpty}"
                     HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
-          <ic:SymbolIcon Symbol="Cloud" IconVariant="Regular" FontSize="48"
-                         Foreground="{DynamicResource FontDimBrush}" HorizontalAlignment="Center"/>
+          <PathIcon Data="{StaticResource cloud_regular}" FontSize="48"
+                    Foreground="{DynamicResource FontDimBrush}" HorizontalAlignment="Center"/>
           <TextBlock Text="{DynamicResource Editors.Remote.Empty.Title}" FontSize="16"
                      Foreground="{DynamicResource FontDimBrush}" HorizontalAlignment="Center"/>
           <TextBlock Text="{DynamicResource Editors.Remote.Empty.Desc}"
@@ -258,8 +257,8 @@
                 <Grid ColumnDefinitions="Auto,*,Auto,Auto">
                   <!-- 文件夹 / 文件图标 -->
                   <Panel Grid.Column="0" Margin="0,0,6,0" VerticalAlignment="Center">
-                    <ic:SymbolIcon Symbol="Folder" IconVariant="Regular" FontSize="16" IsVisible="{Binding IsFolder}"/>
-                    <ic:SymbolIcon Symbol="Document" IconVariant="Regular" FontSize="16" IsVisible="{Binding !IsFolder}"/>
+                    <PathIcon Data="{StaticResource folder_regular}" FontSize="16" IsVisible="{Binding IsFolder}"/>
+                    <PathIcon Data="{StaticResource document_regular}" FontSize="16" IsVisible="{Binding !IsFolder}"/>
                   </Panel>
                   <!-- 名称 -->
                   <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="13" VerticalAlignment="Center"
@@ -276,8 +275,8 @@
                             ToolTip.Tip="{DynamicResource Common.Download}"
                             Command="{Binding $parent[TreeView].((vm:EditorsPageViewModel)DataContext).DownloadRemoteEditorCommand}"
                             CommandParameter="{Binding}">
-                      <ic:SymbolIcon Symbol="ArrowDownload" IconVariant="Regular" FontSize="14"
-                                     Foreground="{DynamicResource AccentBrush}"/>
+                      <PathIcon Data="{StaticResource arrow_download_regular}" FontSize="14"
+                                Foreground="{DynamicResource AccentBrush}"/>
                     </Button>
                   </StackPanel>
                 </Grid>
@@ -294,8 +293,13 @@
         <Border Classes="dialogContent" MaxWidth="450" HorizontalAlignment="Center" VerticalAlignment="Center">
           <StackPanel Spacing="12" Width="380">
             <TextBlock Text="{DynamicResource Editors.Dialog.RenameTitle}" Classes="title" Margin="0,0,0,8"/>
-            <StackPanel Spacing="4"><TextBlock Text="{DynamicResource Editors.Dialog.Name}" FontSize="12"/><TextBox Text="{Binding RenameEditorName, Mode=TwoWay}"/></StackPanel>
-            <StackPanel Spacing="4"><TextBlock Text="{DynamicResource Editors.Dialog.VersionHint}" FontSize="12"/><TextBox Text="{Binding RenameVersionHint, Mode=TwoWay}" Watermark="e.g. 4.3-stable"/></StackPanel>
+            <StackPanel Spacing="4">
+              <TextBlock Text="{DynamicResource Editors.Dialog.Name}" FontSize="12"/>
+              <TextBox Text="{Binding RenameEditorName, Mode=TwoWay}"/>
+            </StackPanel>
+            <StackPanel Spacing="4"><TextBlock Text="{DynamicResource Editors.Dialog.VersionHint}" FontSize="12"/>
+              <TextBox Text="{Binding RenameVersionHint, Mode=TwoWay}" PlaceholderText="e.g. 4.3-stable"/>
+            </StackPanel>
             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,8,0,0">
               <Button Content="{DynamicResource Common.Cancel}" Classes="action" Command="{Binding CancelRenameCommand}"/>
               <Button Content="{DynamicResource Common.Rename}" Classes="accent" Command="{Binding ConfirmRenameCommand}"/>
@@ -311,7 +315,7 @@
             <TextBlock Text="{DynamicResource Editors.Dialog.ExtraArgsTitle}" Classes="title" Margin="0,0,0,8"/>
             <TextBlock Text="{DynamicResource Editors.Dialog.ExtraArgsDesc}"
                        FontSize="12" Foreground="{DynamicResource FontDimBrush}" TextWrapping="Wrap"/>
-            <TextBox Text="{Binding ExtraArgsText, Mode=TwoWay}" Watermark="--verbose --headless"/>
+            <TextBox Text="{Binding ExtraArgsText, Mode=TwoWay}" PlaceholderText="--verbose --headless"/>
             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,8,0,0">
               <Button Content="{DynamicResource Common.Cancel}" Classes="action" Command="{Binding CancelExtraArgsCommand}"/>
               <Button Content="{DynamicResource Common.Save}" Classes="accent" Command="{Binding ConfirmExtraArgsCommand}"/>
@@ -327,25 +331,43 @@
             <TextBlock Text="{DynamicResource Editors.Dialog.ManageTags}" Classes="title" Margin="0,0,0,4"/>
             <StackPanel Spacing="4"><TextBlock Text="{DynamicResource Projects.Dialog.AssignedTags}" FontSize="12" Foreground="{DynamicResource FontDimBrush}"/>
               <ItemsControl ItemsSource="{Binding AssignedTags}">
-                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal"/>
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate><DataTemplate><Border Background="{DynamicResource AccentBrush}" CornerRadius="3" Padding="6,2" Margin="0,2,4,2">
-                  <StackPanel Orientation="Horizontal" Spacing="4"><TextBlock Text="{Binding}" FontSize="11" Foreground="#1C2129"/>
+                  <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock Text="{Binding}" FontSize="11" Foreground="#1C2129"/>
                     <Button Padding="0" Background="Transparent" BorderThickness="0" MinWidth="14" MinHeight="14" Cursor="Hand"
                             Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).RemoveTagCommand}" CommandParameter="{Binding}">
-                      <ic:SymbolIcon Symbol="Dismiss" FontSize="10" Foreground="#1C2129"/>
-                    </Button></StackPanel></Border></DataTemplate></ItemsControl.ItemTemplate>
+                      <PathIcon Data="{StaticResource dismiss_regular}" FontSize="10" Foreground="#1C2129"/>
+                    </Button>
+                  </StackPanel>
+                </Border>
+                </DataTemplate>
+                </ItemsControl.ItemTemplate>
               </ItemsControl>
             </StackPanel>
             <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
-              <TextBox Grid.Column="0" Text="{Binding NewTagText, Mode=TwoWay}" Watermark="new_tag" Classes="searchBox"/>
+              <TextBox Grid.Column="0" Text="{Binding NewTagText, Mode=TwoWay}" PlaceholderText="new_tag" Classes="searchBox"/>
               <Button Grid.Column="1" Classes="action" Content="{DynamicResource Common.Add}" Margin="4,0,0,0" Command="{Binding AddTagCommand}"/>
             </Grid>
             <StackPanel Spacing="4"><TextBlock Text="{DynamicResource Projects.Dialog.AllTags}" FontSize="12" Foreground="{DynamicResource FontDimBrush}"/>
               <ItemsControl ItemsSource="{Binding AllKnownTags}">
-                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate><DataTemplate><Button Padding="6,2" Margin="0,2,4,2" CornerRadius="3" Cursor="Hand" Background="{DynamicResource TagBrush}" BorderThickness="0"
-                                                                 Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).AssignKnownTagCommand}" CommandParameter="{Binding}">
-                  <TextBlock Text="{Binding}" FontSize="11" Foreground="{DynamicResource FontBrush}"/></Button></DataTemplate></ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal"/>
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Button Padding="6,2" Margin="0,2,4,2" CornerRadius="3" Cursor="Hand" Background="{DynamicResource TagBrush}" BorderThickness="0"
+                            Command="{Binding $parent[ItemsControl].((vm:EditorsPageViewModel)DataContext).AssignKnownTagCommand}" CommandParameter="{Binding}">
+                      <TextBlock Text="{Binding}" FontSize="11" Foreground="{DynamicResource FontBrush}"/>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
               </ItemsControl>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,8,0,0">
@@ -361,7 +383,7 @@
         <Border Classes="dialogContent" MaxWidth="400" HorizontalAlignment="Center" VerticalAlignment="Center">
           <StackPanel Spacing="12" Width="340">
             <StackPanel Orientation="Horizontal" Spacing="8">
-              <ic:SymbolIcon Symbol="Warning" IconVariant="Filled" FontSize="20" Foreground="{DynamicResource WarningBrush}"/>
+              <PathIcon Data="{StaticResource warning_regular}" FontSize="20" Foreground="{DynamicResource WarningBrush}"/>
               <TextBlock Text="{DynamicResource Editors.Dialog.ConfirmRemove}" Classes="title"/>
             </StackPanel>
             <TextBlock Text="{Binding DeleteConfirmMessage}" TextWrapping="Wrap" FontSize="13"/>
@@ -402,7 +424,6 @@
           </StackPanel>
         </Border>
       </Border>
-
     </Panel>
   </DockPanel>
 </UserControl>
