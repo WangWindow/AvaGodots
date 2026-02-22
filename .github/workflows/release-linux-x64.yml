@@ -112,8 +112,15 @@ jobs:
           chmod +x "$APPDIR/AppRun"
 
           APPIMAGE_TOOL=appimagetool-x86_64.AppImage
-          curl -L -o "$APPIMAGE_TOOL" "https://github.com/AppImage/appimagetool/releases/latest/download/appimagetool-x86_64.AppImage"
+          echo "Downloading AppImage tool..."
+          # 优化: 增加可靠性参数
+          curl --fail --location --retry 3 --retry-delay 2 -o "$APPIMAGE_TOOL" "https://github.com/AppImage/appimagetool/releases/latest/download/appimagetool-x86_64.AppImage"
+          if [ $? -ne 0 ]; then
+            echo "Failed to download appimagetool. Aborting."
+            exit 1
+          fi
           chmod +x "$APPIMAGE_TOOL"
+          echo "AppImage tool downloaded and made executable."
 
           APPIMAGE_NAME="AvaGodots-${{ steps.meta.outputs.tag_name }}-${{ env.RUNTIME_ID }}.AppImage"
           ARCH=x86_64 ./$APPIMAGE_TOOL --appimage-extract-and-run "$APPDIR" "$APPIMAGE_NAME"
@@ -157,20 +164,61 @@ jobs:
 
       - name: Generate SHA256
         run: |
-          sha256sum \
-            "${{ steps.pack.outputs.package_name }}" \
-            "${{ steps.appimage.outputs.appimage_name }}" \
-            "${{ steps.deb.outputs.deb_name }}" \
-            "${{ steps.archpkg.outputs.arch_name }}" \
-            > "AvaGodots-${{ steps.meta.outputs.tag_name }}-checksums.sha256"
+          # 优化: 动态查找并生成校验和，更具弹性
+          echo "Generating SHA256 checksums for artifacts..."
+          # 查找当前目录下所有与本次发布相关的包文件（排除 checksum 文件本身）
+          ls -1 AvaGodots-*-${{ steps.meta.outputs.tag_name }}-*.* | grep -v "\.sha256$" | xargs sha256sum > "AvaGodots-${{ steps.meta.outputs.tag_name }}-checksums.sha256"
+          echo "Checksums generated:"
+          cat "AvaGodots-${{ steps.meta.outputs.tag_name }}-checksums.sha256"
 
-      - name: Create GitHub Release and upload assets
+
+      - name: Draft release notes
+        id: release_drafter
+        uses: release-drafter/release-drafter@v6
+        with:
+          publish: false
+          name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate commit log between last tag and current
+        id: commitlog
+        run: |
+          set -e
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          if [ "$LAST_TAG" != "$(git rev-list --max-parents=0 HEAD)" ]; then
+              COMMIT_RANGE="$LAST_TAG..HEAD"
+          else
+              COMMIT_RANGE="$(git rev-list --max-parents=0 HEAD)..HEAD"
+          fi
+          echo "Generating log for commits in range: $COMMIT_RANGE"
+
+          LOG_CONTENT=$(git log $COMMIT_RANGE --pretty=format:'- %h %s (%an <%ae>)')
+
+          # 使用分隔符是处理多行输出到 GITHUB_OUTPUT 的推荐方式
+          {
+            echo "log<<EOF"
+            echo "$LOG_CONTENT"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
+          fail_on_unmatched_files: false
+          body: |
+            ${{ steps.release_drafter.outputs.body }}
+
+            ## Commits
+            ${{ steps.commitlog.outputs.log }}
+
+            <!-- Note: The commit list above includes all commits between the last tag and this release. -->
           files: |
             ${{ steps.pack.outputs.package_name }}
             ${{ steps.appimage.outputs.appimage_name }}
             ${{ steps.deb.outputs.deb_name }}
             ${{ steps.archpkg.outputs.arch_name }}
             AvaGodots-${{ steps.meta.outputs.tag_name }}-checksums.sha256
-          generate_release_notes: true
+          overwrite_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

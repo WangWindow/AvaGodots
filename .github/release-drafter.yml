@@ -1,0 +1,18 @@
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+change-template: |
+  - $TITLE · @$AUTHOR (#$NUMBER)
+    $BODY
+change-title-escapes: "<*_&"
+sort-by: "merged_at"
+sort-direction: "descending"
+version-resolver:
+  default: patch
+template: |
+  ## Changes
+  $CHANGES
+
+  ## Contributors
+  $CONTRIBUTORS
+
+  **Full changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
