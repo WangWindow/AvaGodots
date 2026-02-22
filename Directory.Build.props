@@ -3,8 +3,8 @@
   <PropertyGroup>
     <!-- Bump these to change the app version globally -->
     <VersionMajor>0</VersionMajor>
-    <VersionMinor>1</VersionMinor>
-    <VersionPatch>2</VersionPatch>
+    <VersionMinor>2</VersionMinor>
+    <VersionPatch>0</VersionPatch>
 
     <!-- Optional pre-release label like alpha, beta, rc. Leave empty for stable -->
     <PreReleaseLabel></PreReleaseLabel>
