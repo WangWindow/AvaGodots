@@ -4,7 +4,7 @@
     <!-- Bump these to change the app version globally -->
     <VersionMajor>0</VersionMajor>
     <VersionMinor>1</VersionMinor>
-    <VersionPatch>1</VersionPatch>
+    <VersionPatch>2</VersionPatch>
 
     <!-- Optional pre-release label like alpha, beta, rc. Leave empty for stable -->
     <PreReleaseLabel></PreReleaseLabel>
